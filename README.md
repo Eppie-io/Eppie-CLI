@@ -1,2 +1,1 @@
-# Eppie-CLI
-Eppie CLI
+# Eppie CLI
