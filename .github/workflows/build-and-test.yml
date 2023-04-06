@@ -1,0 +1,47 @@
+# This workflow will build and test the project
+
+name: build and test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+
+    runs-on: windows-latest
+
+    env:
+      Solution_Name: src/Eppie.CLI/Eppie.CLI.sln
+      
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        submodules: recursive
+
+    # Install the .NET Core workload
+    - name: Install .NET Core
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 7.0.x
+
+    # Build the solution
+    - name: Build the solution
+      run: dotnet build $env:Solution_Name --nologo --configuration $env:Configuration 
+      env:
+        Configuration: ${{ matrix.configuration }}
+        
+    # Execute all unit tests
+    - name: Execute unit tests
+      run: dotnet test $env:Solution_Name --nologo --configuration $env:Configuration 
+      env:
+        Configuration: ${{ matrix.configuration }}
