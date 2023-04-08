@@ -16,50 +16,50 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
-using Eppie.CLI.Services;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System.Globalization;
+using Microsoft.Extensions.Localization;
+using System.Diagnostics.CodeAnalysis;
 
-namespace Eppie.CLI
+namespace Eppie.CLI.Services
 {
-    internal sealed class Program
+    [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
+    internal sealed class ResourceLoader
     {
-        public static IHost Host { get; private set; } = null!;
+        internal ProgramStrings Strings { get; init; }
 
-        static async Task Main(string[] args)
+        public ResourceLoader(IStringLocalizer<Resources.Program> localizer)
         {
-            Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
-#if DEBUG
-                .UseEnvironment(Environments.Development)
-#endif
-                .ConfigureServices((context, services) =>
-                {
-                    services.AddLocalization()
-                            .AddTransient<ResourceLoader>()
-                            .AddTransient<ProgramConfiguration>();
-                })
-                .Build();
-
-            InitializeConsole();
-
-            ShowLogo();
-
-            await Host.RunAsync().ConfigureAwait(false);
+            Strings = new ProgramStrings(localizer);
         }
 
-        static void InitializeConsole()
+        internal record ProgramStrings
         {
-            var config = Host.Services.GetRequiredService<ProgramConfiguration>();
+            private IStringLocalizer Localizer { get; init; }
+            internal ProgramStrings(IStringLocalizer localizer)
+            {
+                Localizer = localizer;
+            }
+            internal string LogoText => GetString("Logo.Text");
 
-            Console.OutputEncoding = config.ConsoleEncoding;
-            CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = config.ConsoleCultureInfo;
+            private string GetString(string name)
+            {
+                return ResourceLoader.GetString(Localizer, name);
+            }
         }
 
-        static void ShowLogo()
+        private static string GetString(IStringLocalizer localizer, string name)
         {
-            var resourceLoader = Host.Services.GetRequiredService<ResourceLoader>();
-            Console.WriteLine(resourceLoader.Strings.LogoText);
+            if (localizer is null)
+            {
+                throw new ArgumentNullException(nameof(localizer));
+            }
+
+            if (name is null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
+            LocalizedString stringLocalizer = localizer[name];
+            return stringLocalizer.Value;
         }
     }
 }
