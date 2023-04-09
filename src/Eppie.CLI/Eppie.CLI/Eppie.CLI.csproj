@@ -23,18 +23,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Resources\Program.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Program.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Update="Resources\Program.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Program.Designer.cs</LastGenOutput>
+      <Generator>MSBuild:Compile</Generator>
+      <StronglyTypedFileName>$(IntermediateOutputPath)\Program.Designer.cs</StronglyTypedFileName>
+      <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+      <StronglyTypedNamespace>Eppie.CLI.Resources</StronglyTypedNamespace>
+      <StronglyTypedClassName>Program</StronglyTypedClassName>
     </EmbeddedResource>
   </ItemGroup>
+
+  <PropertyGroup>
+    <CoreCompileDependsOn>PrepareResources;$(CompileDependsOn)</CoreCompileDependsOn>
+  </PropertyGroup>
 
 </Project>
