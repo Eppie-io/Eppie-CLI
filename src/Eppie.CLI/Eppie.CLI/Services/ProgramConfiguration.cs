@@ -24,6 +24,9 @@ using System.Text;
 
 namespace Eppie.CLI.Services
 {
+    /// <summary>
+    ///  Represents a service that provides configuration properties.
+    /// </summary>
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
     internal sealed class ProgramConfiguration
     {
@@ -34,12 +37,20 @@ namespace Eppie.CLI.Services
             Configuration = config;
         }
 
+        /// <summary>
+        /// Gets a configuration value that can be read from the '--Console:CultureInfo' or '/Console:CultureInfo' command-line argument,
+        /// or from the '$.Console.CultureInfo' parameter in the 'appsettings.json' or 'appsettings.[<see cref="IHostEnvironment.EnvironmentName"/>].json' file.
+        /// </summary>
         internal CultureInfo ConsoleCultureInfo => ReadValue(
             key: "Console:CultureInfo",
             defaultValue: CultureInfo.CurrentCulture,
             converter: CultureInfo.GetCultureInfo,
             ignore: (exception) => exception is CultureNotFoundException);
 
+        /// <summary>
+        /// Gets a configuration value that can be read from the '--Console:Encoding' or '/Console:Encoding' command-line argument,
+        /// or from the '$.Console.Encoding' parameter in the 'appsettings.json' or 'appsettings.[<see cref="IHostEnvironment.EnvironmentName"/>].json' file.
+        /// </summary>
         internal Encoding ConsoleEncoding => ReadValue(
             key: "Console:Encoding",
             defaultValue: Encoding.Unicode,

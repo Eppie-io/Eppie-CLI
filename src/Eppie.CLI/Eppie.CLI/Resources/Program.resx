@@ -119,5 +119,6 @@
   </resheader>
   <data name="Logo.Text" xml:space="preserve">
     <value>Hello, I'm Eppie!</value>
+    <comment>The startup banner or the copyright message.</comment>
   </data>
 </root>
