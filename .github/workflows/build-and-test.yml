@@ -14,9 +14,10 @@ jobs:
 
     strategy:
       matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
         configuration: [Debug, Release]
 
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
 
     env:
       Solution_Name: src/Eppie.CLI/Eppie.CLI.sln
@@ -36,12 +37,12 @@ jobs:
 
     # Build the solution
     - name: Build the solution
-      run: dotnet build $env:Solution_Name --nologo --configuration $env:Configuration 
+      run: dotnet build "${{ env.Solution_Name }}" --nologo --configuration "${{ env.Configuration }}"
       env:
         Configuration: ${{ matrix.configuration }}
         
     # Execute all unit tests
     - name: Execute unit tests
-      run: dotnet test $env:Solution_Name --nologo --configuration $env:Configuration 
+      run: dotnet test "${{ env.Solution_Name }}" --nologo --configuration "${{ env.Configuration }}" 
       env:
         Configuration: ${{ matrix.configuration }}
