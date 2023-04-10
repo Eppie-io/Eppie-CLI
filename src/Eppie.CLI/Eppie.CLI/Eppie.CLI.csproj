@@ -28,7 +28,7 @@
       <StronglyTypedFileName>$(IntermediateOutputPath)\$([MSBuild]::ValueOrDefault('%(RelativeDir)', '').Replace('\', '.').Replace('/', '.'))%(Filename).g$(DefaultLanguageSourceExtension)</StronglyTypedFileName>
       <StronglyTypedLanguage>$(Language)</StronglyTypedLanguage>
       <StronglyTypedNamespace Condition="'%(RelativeDir)' == ''">$(RootNamespace)</StronglyTypedNamespace>
-      <StronglyTypedNamespace Condition="'%(RelativeDir)' != ''">$(RootNamespace).$([MSBuild]::ValueOrDefault('%(RelativeDir)', '').Replace('\', '.').Replace('/', '.').TrimEnd('.'))</StronglyTypedNamespace>
+      <StronglyTypedNamespace Condition="'%(RelativeDir)' != ''">$(RootNamespace).$([MSBuild]::ValueOrDefault('%(RelativeDir)', '').Replace('\', '.').Replace('/', '.').Trim('.'))</StronglyTypedNamespace>
       <StronglyTypedClassName>%(Filename)</StronglyTypedClassName>
     </EmbeddedResource>
   </ItemGroup>
