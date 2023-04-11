@@ -16,50 +16,42 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
-using Eppie.CLI.Services;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System.Globalization;
+using Microsoft.Extensions.Localization;
 
-namespace Eppie.CLI
+namespace Eppie.CLI.Exceptions
 {
-    internal sealed class Program
+    internal class ResourceNotFoundException : ArgumentException
     {
-        public static IHost Host { get; private set; } = null!;
-
-        static async Task Main(string[] args)
+        public ResourceNotFoundException()
         {
-            Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
-#if DEBUG
-                .UseEnvironment(Environments.Development)
-#endif
-                .ConfigureServices((context, services) =>
-                {
-                    services.AddLocalization()
-                            .AddTransient<ResourceLoader>()
-                            .AddTransient<ProgramConfiguration>();
-                })
-                .Build();
-
-            InitializeConsole();
-
-            ShowLogo();
-
-            await Host.RunAsync().ConfigureAwait(false);
         }
 
-        static void InitializeConsole()
+        public ResourceNotFoundException(string? message)
+            : base(message)
         {
-            var config = Host.Services.GetRequiredService<ProgramConfiguration>();
-
-            Console.OutputEncoding = config.ConsoleEncoding;
-            CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = config.ConsoleCultureInfo;
         }
 
-        static void ShowLogo()
+        public ResourceNotFoundException(string? message, Exception? innerException)
+            : base(message, innerException)
         {
-            var resourceLoader = Host.Services.GetRequiredService<ResourceLoader>();
-            Console.WriteLine(resourceLoader.Strings.LogoText);
+        }
+
+        public ResourceNotFoundException(string? message, string? paramName, Exception? innerException)
+            : base(message, paramName, innerException)
+        {
+        }
+
+        public ResourceNotFoundException(string? message, string? paramName)
+            : base(message, paramName)
+        {
+        }
+
+        public static void ThrowIfResourceNotFound(LocalizedString stringLocalizer, string? paramName = null)
+        {
+            if (stringLocalizer.ResourceNotFound)
+            {
+                throw new ResourceNotFoundException($"Resource '{stringLocalizer.Name}' not found in location '{stringLocalizer.SearchedLocation}'.", paramName);
+            }
         }
     }
 }
