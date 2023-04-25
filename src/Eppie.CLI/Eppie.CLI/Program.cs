@@ -36,7 +36,7 @@ namespace Eppie.CLI
                 .ConfigureServices((context, services) =>
                 {
                     services.AddLocalization()
-                            .AddTransient<ResourceLoader>()
+                            .AddSingleton<ResourceLoader>()
                             .AddTransient<ProgramConfiguration>();
                 })
                 .Build();
@@ -51,15 +51,17 @@ namespace Eppie.CLI
         static void InitializeConsole()
         {
             var config = Host.Services.GetRequiredService<ProgramConfiguration>();
-
             Console.OutputEncoding = config.ConsoleEncoding;
             CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = config.ConsoleCultureInfo;
+
+            var resourceLoader = Host.Services.GetRequiredService<ResourceLoader>();
+            Console.Title = resourceLoader.AssemblyStrings.Title;
         }
 
         static void ShowLogo()
         {
             var resourceLoader = Host.Services.GetRequiredService<ResourceLoader>();
-            Console.WriteLine(resourceLoader.Strings.LogoText);
+            Console.WriteLine(resourceLoader.Strings.LogoMessage);
         }
     }
 }

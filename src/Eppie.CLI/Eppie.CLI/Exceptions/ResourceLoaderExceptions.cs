@@ -17,40 +17,73 @@
 // ---------------------------------------------------------------------------- //
 
 using Microsoft.Extensions.Localization;
+using System.Runtime.CompilerServices;
 
 namespace Eppie.CLI.Exceptions
 {
-    internal class ResourceNotFoundException : ArgumentException
+    public class ResourceLoaderException : Exception
+    {
+        public ResourceLoaderException()
+        {
+        }
+
+        public ResourceLoaderException(string message) : base(message)
+        {
+        }
+
+        public ResourceLoaderException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
+    }
+
+    public class ResourceNotFoundException : ResourceLoaderException
     {
         public ResourceNotFoundException()
         {
         }
 
-        public ResourceNotFoundException(string? message)
+        public ResourceNotFoundException(string message)
             : base(message)
         {
         }
 
-        public ResourceNotFoundException(string? message, Exception? innerException)
+        public ResourceNotFoundException(string message, Exception innerException)
             : base(message, innerException)
         {
         }
 
-        public ResourceNotFoundException(string? message, string? paramName, Exception? innerException)
-            : base(message, paramName, innerException)
+        public static void ThrowIfNotFound(LocalizedString stringLocalizer)
         {
-        }
+            ArgumentNullException.ThrowIfNull(stringLocalizer);
 
-        public ResourceNotFoundException(string? message, string? paramName)
-            : base(message, paramName)
-        {
-        }
-
-        public static void ThrowIfResourceNotFound(LocalizedString stringLocalizer, string? paramName = null)
-        {
             if (stringLocalizer.ResourceNotFound)
             {
-                throw new ResourceNotFoundException($"Resource '{stringLocalizer.Name}' not found in location '{stringLocalizer.SearchedLocation}'.", paramName);
+                throw new ResourceNotFoundException($"Resource '{stringLocalizer.Name}' not found in location '{stringLocalizer.SearchedLocation}'.");
+            }
+        }
+    }
+
+    public class AssemblyAttributeMissedException : ResourceLoaderException
+    {
+        public AssemblyAttributeMissedException()
+        {
+        }
+
+        public AssemblyAttributeMissedException(string message)
+            : base(message)
+        {
+        }
+
+        public AssemblyAttributeMissedException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+
+        public static void ThrowIfMissed<T>(T? attribute, [CallerArgumentExpression(nameof(attribute))] string? attributeName = null)
+        {
+            if (attribute is null)
+            {
+                throw new AssemblyAttributeMissedException($"Assembly attribute '{attributeName}' can't be read.");
             }
         }
     }

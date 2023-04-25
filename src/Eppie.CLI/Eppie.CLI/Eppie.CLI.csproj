@@ -36,6 +36,8 @@
   <PropertyGroup>
     <!-- For VSCode/Razor compat -->
     <CoreCompileDependsOn>PrepareResources;$(CompileDependsOn)</CoreCompileDependsOn>
+    <AssemblyTitle>Eppie Console</AssemblyTitle>
+    <AssemblyName>eppie-console</AssemblyName>
   </PropertyGroup>
 
 </Project>

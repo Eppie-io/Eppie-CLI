@@ -117,8 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Logo.Text" xml:space="preserve">
-    <value>Hello, I'm Eppie!</value>
-    <comment>The startup banner or the copyright message.</comment>
+  <data name="LogoMessage.FormattedText" xml:space="preserve">
+    <value>Hello, I'm {0} version {1}! </value>
+    <comment>The startup banner or the copyright message.
+Parameter {0} is application title.
+Parameter {1} is application version.</comment>
   </data>
 </root>
