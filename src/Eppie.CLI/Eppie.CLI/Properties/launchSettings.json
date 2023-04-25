@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "Eppie.CLI-Development": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Eppie.CLI-Production": {
+      "commandName": "Project"
+    }
+  }
+}

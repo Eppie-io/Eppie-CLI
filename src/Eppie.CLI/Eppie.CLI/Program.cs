@@ -19,6 +19,7 @@
 using Eppie.CLI.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 using System.Globalization;
 
 namespace Eppie.CLI
@@ -30,22 +31,25 @@ namespace Eppie.CLI
         static async Task Main(string[] args)
         {
             Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
-#if DEBUG
-                .UseEnvironment(Environments.Development)
-#endif
                 .ConfigureServices((context, services) =>
                 {
                     services.AddLocalization()
                             .AddTransient<ResourceLoader>()
                             .AddTransient<ProgramConfiguration>();
                 })
+                .UseSerilog((context, configuration) =>
+                {
+                    configuration.ReadFrom.Configuration(context.Configuration);
+                })
                 .Build();
 
+            Log.Debug("====================================================================");
             InitializeConsole();
-
             ShowLogo();
 
             await Host.RunAsync().ConfigureAwait(false);
+
+            Log.CloseAndFlush();
         }
 
         static void InitializeConsole()
@@ -54,12 +58,14 @@ namespace Eppie.CLI
 
             Console.OutputEncoding = config.ConsoleEncoding;
             CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = config.ConsoleCultureInfo;
+
+            Log.Debug("OutputEncoding is {OutputEncoding}; CurrentCulture is {CurrentCulture}", Console.OutputEncoding, CultureInfo.CurrentCulture);
         }
 
         static void ShowLogo()
         {
             var resourceLoader = Host.Services.GetRequiredService<ResourceLoader>();
-            Console.WriteLine(resourceLoader.Strings.LogoText);
+            Log.Information(resourceLoader.Strings.LogoText);
         }
     }
 }
