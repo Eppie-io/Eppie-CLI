@@ -1,0 +1,13 @@
+[
+  { "os": "windows-latest", "runtime" : "win-x86" },
+  { "os": "windows-latest", "runtime" : "win-x64" },
+  { "os": "windows-latest", "runtime" : "win-arm" },
+  { "os": "windows-latest", "runtime" : "win-arm64" },
+
+  { "os": "ubuntu-latest", "runtime" : "linux-x64" },
+  { "os": "ubuntu-latest", "runtime" : "linux-arm" },
+  { "os": "ubuntu-latest", "runtime" : "linux-arm64" },
+
+  { "os": "macos-latest", "runtime" : "osx-x64" },
+  { "os": "macos-latest", "runtime" : "osx-arm64" }
+]

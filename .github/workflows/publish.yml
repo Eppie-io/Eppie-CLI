@@ -1,0 +1,124 @@
+# This workflow will publish the project
+
+name: Publish
+
+on:
+#  push:
+#    branches: [ "main" ]
+#  pull_request:
+#    branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      target-os:
+        type: choice
+        default: all
+        options:
+        - windows
+        - linux
+        - macos
+        - all
+
+      target-runtime:
+        type: choice
+        default: all
+        options:
+        - x86
+        - x64
+        - arm
+        - arm64
+        - all
+jobs:
+  prepare-publish:
+    runs-on: ubuntu-latest
+
+    outputs:
+      matrix: ${{ steps.set-up-matrix.outputs.matrix }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        submodules: recursive
+
+    - name: Prepare a strategy matrix
+      id: set-up-matrix
+      shell: bash
+      run: |
+        os=${{ github.event.inputs.target-os }}
+        runtime=${{ github.event.inputs.target-runtime }}
+
+        os=$([[ $os == "all" ]] && echo '' || echo $os)
+        os=$([[ $os == "linux" ]] && echo "ubuntu" || echo $os)
+        runtime=$([[ $runtime == "all" ]] && echo '' || echo $runtime)
+
+        filter=$(jq --arg os "$os" --arg runtime "$runtime" 'map( . | select( (.os | contains($os)) and (.runtime | contains($runtime)) ) )' ./publish/config.json)
+
+        echo "matrix: $filter"
+        echo "matrix={\"include\":$(echo $filter)}" >> $GITHUB_OUTPUT
+    
+  publish:
+    needs: prepare-publish
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix: ${{fromJson(needs.prepare-publish.outputs.matrix)}}
+
+    env:
+      project-name: Console.App
+      project-file: src/Console.App/Console.App.csproj
+      output-root: publish
+      configuration: release
+      framework: net7.0
+      runtime: ${{ matrix.runtime }}
+      publish-options: --nologo --self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:PublishReadyToRun=true
+
+      # template: root/configuration/framework/runtime
+      output-template: '{0}/{1}/{2}/{3}'
+      
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        submodules: recursive
+
+    - name: Install .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 7.0.x
+    
+    - name: Calculate version
+      id: build-version
+      uses: ./.github/actions/build-version
+
+    - name: New version
+      run: |
+        echo "Short version: ${{ steps.build-version.outputs.version-short }}"
+        echo "Full version: ${{ steps.build-version.outputs.version-full }}"
+        echo "Major: ${{ steps.build-version.outputs.major }}"
+        echo "Minor: ${{ steps.build-version.outputs.minor }}"
+        echo "Patch: ${{ steps.build-version.outputs.patch }}"
+        echo "Build: ${{ steps.build-version.outputs.build }}"
+        echo "Attempt: ${{ steps.build-version.outputs.attempt }}"
+        echo "Today: ${{ steps.build-version.outputs.today }}"
+        echo "Revision: ${{ steps.build-version.outputs.revision }}"
+        echo "Suffix: ${{ steps.build-version.outputs.suffix }}"
+
+    - name: Publish ${{ env.project-name }}
+      run: |
+        dotnet publish "${{ env.project-file }}" --output "${{ env.output }}" --configuration "${{ env.configuration }}" --framework "${{ env.framework }}" --runtime "${{ env.runtime }}" --property:Version="${{ env.version-full }}" ${{ env.publish-options }}
+      env:
+        output: "${{ format(env.output-template, env.output-root, env.configuration, env.framework, env.runtime) }}"
+        version-full: "${{ steps.build-version.outputs.version-full }}"
+
+    - name: Archive artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ env.artifact-name }}
+        path: |
+          ${{ env.output }}
+          !${{ env.output }}**/*.pdb
+      env:
+        artifact-name: "${{ env.project-name }}"
+        output: "${{ format(env.output-template, env.output-root, env.configuration, env.framework, '') }}"

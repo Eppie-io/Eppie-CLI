@@ -1,0 +1,79 @@
+name: Build version
+
+description: Provides version
+
+outputs:
+  major:
+    value: ${{ steps.tag-version.outputs.major }}
+  minor:
+    value: ${{ steps.tag-version.outputs.minor }}
+  patch:
+    value: ${{ steps.tag-version.outputs.patch }}
+  build:
+    value: ${{ steps.action-context.outputs.build }}
+  attempt:
+    value: ${{ steps.action-context.outputs.attempt }}
+  today:
+    value: ${{ steps.action-context.outputs.today }}
+  revision:
+    value: ${{ steps.commit.outputs.revision }}
+  suffix:
+    value: ${{ steps.tag-version.outputs.suffix }}
+  version-short:
+    value: ${{ steps.format.outputs.short }}
+  version-full:
+    value: ${{ steps.format.outputs.full }}
+
+runs:
+  using: "composite"
+
+  steps:
+    - id: tag-version
+      shell: bash
+      run: |
+        regex="v([0-9]+)\.?([0-9]*)\.?([0-9]*)[^a-zA-Z]?(.*)"
+        version=$(git describe --abbrev=0 --match "v[0-9]*")
+
+        echo "tag: $version"
+
+        if [[ $version =~ $regex ]]; then
+          major=${BASH_REMATCH[1]} >> $GITHUB_OUTPUT
+          minor=${BASH_REMATCH[2]} >> $GITHUB_OUTPUT
+          patch=${BASH_REMATCH[3]} >> $GITHUB_OUTPUT
+          suffix=${BASH_REMATCH[4]} >> $GITHUB_OUTPUT
+        fi
+
+        echo "major=$([[ -z $major ]] && echo 1 || echo $major)" >> $GITHUB_OUTPUT
+        echo "minor=$([[ -z $minor ]] && echo 0 || echo $minor)" >> $GITHUB_OUTPUT
+        echo "patch=$([[ -z $patch ]] && echo 0 || echo $patch)" >> $GITHUB_OUTPUT
+        echo "suffix=$([[ -z $suffix ]] && echo '' || echo $suffix)" >> $GITHUB_OUTPUT
+
+    - id: commit
+      shell: bash
+      run: |
+        echo "revision=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+    - id: action-context
+      shell: bash
+      run: |
+        echo "today=$(date -u "+%y%m%d")" >> $GITHUB_OUTPUT
+        echo "build=${{ github.run_number }}" >> $GITHUB_OUTPUT
+        echo "attempt=${{ github.run_attempt }}" >> $GITHUB_OUTPUT
+
+    - id: format
+      shell: bash
+      run: |
+        suffix=${{ env.suffix }}
+        suffix=$([[ -z $suffix ]] && echo '' || echo "-${suffix##*(-)}")
+
+        echo "short=$(echo ${{ env.major }}.${{ env.minor }}.${{ env.patch }}.${{ env.build }})" >> $GITHUB_OUTPUT
+        echo "full=$(echo ${{ env.major }}.${{ env.minor }}.${{ env.patch }}.${{ env.build }}-${{ env.today }}+${{ env.revision }}$suffix)" >> $GITHUB_OUTPUT
+      env:
+        major: ${{ steps.tag-version.outputs.major }}
+        minor: ${{ steps.tag-version.outputs.minor }}
+        patch: ${{ steps.tag-version.outputs.patch }}
+        build: ${{ steps.action-context.outputs.build }}
+        today: ${{ steps.action-context.outputs.today }}
+        attempt: ${{ steps.action-context.outputs.attempt }}
+        revision: ${{ steps.commit.outputs.revision }}
+        suffix: ${{ steps.tag-version.outputs.suffix }}
