@@ -3,10 +3,6 @@
 name: Publish
 
 on:
-#  push:
-#    branches: [ "main" ]
-#  pull_request:
-#    branches: [ "main" ]
   workflow_dispatch:
     inputs:
       target-os:
@@ -28,11 +24,12 @@ on:
         - arm64
         - all
 jobs:
-  prepare-publish:
+  prepare:
     runs-on: ubuntu-latest
 
     outputs:
       matrix: ${{ steps.set-up-matrix.outputs.matrix }}
+      status: ${{ steps.set-up-matrix.outputs.status }}
 
     steps:
     - name: Checkout
@@ -54,15 +51,25 @@ jobs:
 
         filter=$(jq --arg os "$os" --arg runtime "$runtime" 'map( . | select( (.os | contains($os)) and (.runtime | contains($runtime)) ) )' ./publish/config.json)
 
+        len=$( echo $filter | jq '. | length' )
+        
+        if(( $len > 0 )); then
+          echo "status=success" >> $GITHUB_OUTPUT
+        else
+          echo "status=failure" >> $GITHUB_OUTPUT
+          echo "no suitable configuration found for the selected options"
+        fi
+
         echo "matrix: $filter"
         echo "matrix={\"include\":$(echo $filter)}" >> $GITHUB_OUTPUT
-    
-  publish:
-    needs: prepare-publish
 
+  publish:
+    needs: prepare
+    if: needs.prepare.outputs.status == 'success'
     runs-on: ${{ matrix.os }}
+
     strategy:
-      matrix: ${{fromJson(needs.prepare-publish.outputs.matrix)}}
+      matrix: ${{fromJson(needs.prepare.outputs.matrix)}}
 
     env:
       project-name: Console.App
