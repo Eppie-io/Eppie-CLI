@@ -32,7 +32,7 @@ runs:
       shell: bash
       run: |
         regex="v([0-9]+)\.?([0-9]*)\.?([0-9]*)[^a-zA-Z]?(.*)"
-        version=$(git describe --abbrev=0 --match "v[0-9]*")
+        version=$(git describe --always --abbrev=0 --match "v[0-9]*")
 
         echo "tag: $version"
 
