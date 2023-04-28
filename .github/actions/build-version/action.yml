@@ -32,15 +32,18 @@ runs:
       shell: bash
       run: |
         regex="v([0-9]+)\.?([0-9]*)\.?([0-9]*)[^a-zA-Z]?(.*)"
-        version=$(git describe --always --abbrev=0 --match "v[0-9]*")
+        version=$(git describe --tags --abbrev=0 --match "v[0-9]*" --always)
 
         echo "tag: $version"
 
         if [[ $version =~ $regex ]]; then
-          major=${BASH_REMATCH[1]} >> $GITHUB_OUTPUT
-          minor=${BASH_REMATCH[2]} >> $GITHUB_OUTPUT
-          patch=${BASH_REMATCH[3]} >> $GITHUB_OUTPUT
-          suffix=${BASH_REMATCH[4]} >> $GITHUB_OUTPUT
+          major=${BASH_REMATCH[1]}
+          minor=${BASH_REMATCH[2]}
+          patch=${BASH_REMATCH[3]}
+          suffix=${BASH_REMATCH[4]}
+        else
+          major=0
+          minor=1
         fi
 
         echo "major=$([[ -z $major ]] && echo 1 || echo $major)" >> $GITHUB_OUTPUT
