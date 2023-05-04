@@ -10,7 +10,7 @@
       "runtime": "win-x86",
       "configuration": "release",
       "framework": "net7.0",
-      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:PublishReadyToRun=true"
+      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=false --property:PublishReadyToRun=true"
     },
 
     {
@@ -19,7 +19,7 @@
       "runtime": "win-x64",
       "configuration": "release",
       "framework": "net7.0",
-      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:PublishReadyToRun=true"
+      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=false --property:PublishReadyToRun=true"
     },
 
     {
@@ -28,7 +28,7 @@
       "runtime": "win-arm",
       "configuration": "release",
       "framework": "net7.0",
-      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:PublishReadyToRun=true"
+      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=false --property:PublishReadyToRun=true"
     },
 
     {
@@ -37,7 +37,7 @@
       "runtime": "win-arm64",
       "configuration": "release",
       "framework": "net7.0",
-      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:PublishReadyToRun=true"
+      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=false --property:PublishReadyToRun=true"
     },
 
     {
@@ -46,7 +46,7 @@
       "runtime": "linux-x64",
       "configuration": "release",
       "framework": "net7.0",
-      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:PublishReadyToRun=true"
+      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=false --property:PublishReadyToRun=true"
     },
 
     {
@@ -55,7 +55,7 @@
       "runtime": "linux-arm",
       "configuration": "release",
       "framework": "net7.0",
-      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:PublishReadyToRun=true"
+      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=false --property:PublishReadyToRun=true"
     },
 
     {
@@ -64,7 +64,7 @@
       "runtime": "linux-arm64",
       "configuration": "release",
       "framework": "net7.0",
-      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:PublishReadyToRun=true"
+      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=false --property:PublishReadyToRun=true"
     },
 
     {
@@ -73,7 +73,7 @@
       "runtime": "osx-x64",
       "configuration": "release",
       "framework": "net7.0",
-      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:PublishReadyToRun=true"      
+      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=false --property:PublishReadyToRun=true"      
     },
 
     {
@@ -82,7 +82,7 @@
       "runtime": "osx-arm64",
       "configuration": "release",
       "framework": "net7.0",
-      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:PublishReadyToRun=true"      
+      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=false --property:PublishReadyToRun=true"      
     }
   ]
 }
