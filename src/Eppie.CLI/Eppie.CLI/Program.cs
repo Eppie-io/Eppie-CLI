@@ -34,7 +34,7 @@ namespace Eppie.CLI
                 .ConfigureServices((context, services) =>
                 {
                     services.AddLocalization()
-                            .AddTransient<ResourceLoader>()
+                            .AddSingleton<ResourceLoader>()
                             .AddTransient<ProgramConfiguration>();
                 })
                 .UseSerilog((context, configuration) =>
@@ -55,17 +55,18 @@ namespace Eppie.CLI
         static void InitializeConsole()
         {
             var config = Host.Services.GetRequiredService<ProgramConfiguration>();
-
             Console.OutputEncoding = config.ConsoleEncoding;
             CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = config.ConsoleCultureInfo;
-
             Log.Debug("OutputEncoding is {OutputEncoding}; CurrentCulture is {CurrentCulture}", Console.OutputEncoding, CultureInfo.CurrentCulture);
+
+            var resourceLoader = Host.Services.GetRequiredService<ResourceLoader>();
+            Console.Title = resourceLoader.AssemblyStrings.Title;
         }
 
         static void ShowLogo()
         {
             var resourceLoader = Host.Services.GetRequiredService<ResourceLoader>();
-            Log.Information(resourceLoader.Strings.LogoText);
+            Log.Information(resourceLoader.Strings.LogoMessage);
         }
     }
 }

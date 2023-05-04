@@ -19,6 +19,8 @@
 using Eppie.CLI.Exceptions;
 using Microsoft.Extensions.Localization;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace Eppie.CLI.Services
 {
@@ -31,76 +33,120 @@ namespace Eppie.CLI.Services
         /// <summary>
         /// Gets the resource strings from the 'Program.resx' file.
         /// </summary>
-        internal ProgramStrings Strings { get; init; }
+        internal ProgramStringLoader Strings { get; init; }
+        internal AssemblyStringLoader AssemblyStrings { get; init; }
 
         public ResourceLoader(IStringLocalizer<Resources.Program> localizer)
         {
-            Strings = new ProgramStrings(localizer);
+            AssemblyStrings = new AssemblyStringLoader();
+            Strings = new ProgramStringLoader(localizer, AssemblyStrings);
         }
 
         /// <summary>
         /// Represents a set of resource strings from the 'Program.resx' file.
         /// </summary>
-        internal record ProgramStrings
+        internal class ProgramStringLoader
         {
-            private IStringLocalizer Localizer { get; init; }
-            internal ProgramStrings(IStringLocalizer localizer)
+            private readonly IStringLocalizer _localizer;
+            private readonly AssemblyStringLoader _assemblyStringLoader;
+
+            internal ProgramStringLoader(IStringLocalizer localizer, AssemblyStringLoader assemblyStringLoader)
             {
-                Localizer = localizer;
+                _localizer = localizer;
+                _assemblyStringLoader = assemblyStringLoader;
             }
 
             /// <summary>
-            /// Gets the startup banner or the copyright message
+            /// Gets the startup banner or the copyright message.
             /// </summary>
-            internal string LogoText => GetString("Logo.Text");
-
-            private string GetString(string name)
+            internal string LogoMessage
             {
-                return ResourceLoader.GetString(Localizer, name);
+                get
+                {
+                    return _localizer.LoadFormattedString("LogoMessage.FormattedText", _assemblyStringLoader.Title,
+                                                                                       _assemblyStringLoader.Version);
+                }
             }
         }
 
         /// <summary>
-        /// Gets the string resource with the given name.
-        /// Throws the <see cref="ResourceNotFoundException"/> exception when the resource is not found.
+        /// Represents a set of strings from the executable assembly.
         /// </summary>
-        /// <param name="localizer">Localized strings provider.</param>
+        internal class AssemblyStringLoader
+        {
+            private readonly Assembly _assembly;
+            internal AssemblyStringLoader()
+            {
+                _assembly = Assembly.GetExecutingAssembly();
+            }
+
+            internal string Name => ReadAssemblyValue(GetExecutingAssembly().GetName().Name, "Eppie");
+            internal string Version => ReadAssemblyValue(GetExecutingAssembly().GetName().Version, "1.0");
+            internal string Title => ReadAssemblyValue(GetExecutingAssembly().GetCustomAttribute<AssemblyTitleAttribute>()?.Title, "Eppie");
+
+            private Assembly GetExecutingAssembly()
+            {
+                return _assembly;
+            }
+
+            private static string ReadAssemblyValue<T>(T? attribute, string defaultValue, [CallerArgumentExpression(nameof(attribute))] string? attributeName = null)
+            {
+#if DEBUG
+                AssemblyAttributeMissedException.ThrowIfMissed(attribute, attributeName);
+#endif
+                return attribute?.ToString() ?? defaultValue;
+            }
+        }
+    }
+
+    file static class StringLocalizerExtensions
+    {
+        /// <summary>
+        /// Gets the string resource with the given name.
+        /// Debug throws the <see cref="ResourceNotFoundException"/> exception when the resource is not found.
+        /// </summary>
+        /// <param name="localizer">Localized strings provider <see cref="IStringLocalizer"/>.</param>
         /// <param name="name">The name of the string resource.</param>
         /// <returns>The string resource.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ResourceNotFoundException"></exception>
-        private static string GetString(IStringLocalizer localizer, string name)
+        public static string LoadString(this IStringLocalizer localizer, string name)
         {
             ArgumentNullException.ThrowIfNull(localizer);
             ArgumentNullException.ThrowIfNull(name);
+#if DEBUG
+            LocalizedString localizedString = localizer[name];
+            ResourceNotFoundException.ThrowIfNotFound(localizedString);
 
-            LocalizedString stringLocalizer = localizer[name];
-
-            ResourceNotFoundException.ThrowIfResourceNotFound(stringLocalizer, nameof(name));
-
-            return stringLocalizer.Value;
+            return localizedString.Value;
+#else
+            return localizer.GetString(name);
+#endif
         }
 
         /// <summary>
         /// Gets the string resource with the given name and formatted with the supplied arguments.
-        /// Throws the <see cref="ResourceNotFoundException"/> exception when the resource is not found.
+        /// Debug throws the <see cref="ResourceNotFoundException"/> exception when the resource is not found.
         /// </summary>
-        /// <param name="localizer">Localized strings provider.</param>
+        /// <param name="localizer">Localized strings provider <see cref="IStringLocalizer"/>.</param>
         /// <param name="name">The name of the string resource.</param>
         /// <param name="arguments">The values to format the string with.</param>
         /// <returns>The formatted string resource.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ResourceNotFoundException"></exception>
-        private static string GetFormattedString(IStringLocalizer localizer, string name, params object[] arguments)
+        public static string LoadFormattedString(this IStringLocalizer localizer, string name, params object[] arguments)
         {
             ArgumentNullException.ThrowIfNull(localizer);
             ArgumentNullException.ThrowIfNull(name);
 
-            LocalizedString stringLocalizer = localizer[name, arguments];
+#if DEBUG
+            LocalizedString localizedString = localizer[name, arguments];
+            ResourceNotFoundException.ThrowIfNotFound(localizedString);
 
-            ResourceNotFoundException.ThrowIfResourceNotFound(stringLocalizer, nameof(name));
-
-            return stringLocalizer.Value;
+            return localizedString.Value;
+#else
+            return localizer.GetString(name, arguments);
+#endif
         }
     }
 }
