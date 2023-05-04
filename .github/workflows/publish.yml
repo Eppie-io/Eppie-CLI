@@ -1,0 +1,136 @@
+# This workflow will publish the project
+
+name: Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      config-file:
+        type: string
+        default: "./publish/config.json"
+
+      target-os:
+        type: choice
+        default: all
+        options: 
+        - windows
+        - linux
+        - macos
+        - all
+
+      target-runtime:
+        type: choice
+        default: all
+        options: 
+        - x86
+        - x64
+        - arm
+        - arm64
+        - all
+jobs:
+  prepare:
+    name: Prepare
+    runs-on: ubuntu-latest
+
+    outputs:
+      matrix: ${{ steps.publish-config-parser.outputs.profiles }}
+      status: ${{ steps.checker.outputs.status }}
+      project-file: ${{ steps.publish-config-parser.outputs.project-file }}
+      output-name: ${{ steps.publish-config-parser.outputs.output-name }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        submodules: recursive
+
+    - name: Parse configuration
+      id: publish-config-parser
+      uses: ./.github/actions/publish-config-parser
+      with:
+        config-file: ${{ github.event.inputs.config-file }}
+        tags: "${{ github.event.inputs.target-os }},${{ github.event.inputs.target-runtime }}"
+
+    - name: Check profiles
+      id: checker
+      run: |
+        profiles='${{ steps.publish-config-parser.outputs.profiles }}'
+        length=$( echo $profiles | jq '.include | length' )
+
+        if(( $length > 0 )); then
+           echo "status=success" >> $GITHUB_OUTPUT
+         else
+           echo "status=failure" >> $GITHUB_OUTPUT
+           echo "No suitable publish profile found"
+         fi
+    
+  publish:
+    name: Publish
+    needs: prepare
+    if: needs.prepare.outputs.status == 'success'
+    
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix: ${{fromJson(needs.prepare.outputs.matrix)}}
+
+    env:
+      output-name: ${{ needs.prepare.outputs.output-name }}
+      project-file: ${{ needs.prepare.outputs.project-file }}
+      configuration: ${{ matrix.configuration }}
+      framework: ${{ matrix.framework }}
+      runtime: ${{ matrix.runtime }}
+      publish-options: ${{ matrix.options }}
+      output-root: publish/output
+
+      # template: root/configuration/framework/runtime
+      output-template: '{0}/{1}/{2}/{3}'
+      
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+        submodules: recursive
+
+    - name: Install .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 7.0.x
+    
+    - name: Calculate version
+      id: number-version-information
+      uses: ./.github/actions/number-version-information
+
+    - name: New version
+      run: | 
+        echo "Short version: ${{ steps.number-version-information.outputs.version-short }}"
+        echo "Full version: ${{ steps.number-version-information.outputs.version-full }}"
+        echo "Major: ${{ steps.number-version-information.outputs.major }}"
+        echo "Minor: ${{ steps.number-version-information.outputs.minor }}"
+        echo "Patch: ${{ steps.number-version-information.outputs.patch }}"
+        echo "Build: ${{ steps.number-version-information.outputs.build }}"
+        echo "Attempt: ${{ steps.number-version-information.outputs.attempt }}"
+        echo "Today: ${{ steps.number-version-information.outputs.today }}"
+        echo "Revision: ${{ steps.number-version-information.outputs.revision }}"
+        echo "Suffix: ${{ steps.number-version-information.outputs.suffix }}"
+
+    - name: Publish ${{ env.output-name }} [${{ env.version-short }}]
+      run: |
+        dotnet publish "${{ env.project-file }}" --output "${{ env.output }}" --configuration "${{ env.configuration }}" --framework "${{ env.framework }}" --runtime "${{ env.runtime }}" --property:Version="${{ env.version-full }}" ${{ env.publish-options }} 
+      env:
+        output: "${{ format(env.output-template, env.output-root, env.configuration, env.framework, env.runtime) }}"
+        version-full: "${{ steps.number-version-information.outputs.version-full }}"
+        version-short: "${{ steps.number-version-information.outputs.version-short }}"
+
+    - name: Archive artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: "${{ env.output-name }} [${{ env.version-short }}]"
+        path: |
+          ${{ env.output }}
+          !${{ env.output }}/**/*.pdb
+      env:
+        artifact-name: "${{ env.output-name }}"
+        version-short: "${{ steps.number-version-information.outputs.version-short }}"
+        output: "${{ env.output-root }}"
