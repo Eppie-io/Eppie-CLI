@@ -45,7 +45,7 @@ jobs:
         fetch-depth: 0
         submodules: recursive
 
-    - name: Parse configuration
+    - name: Parse configuration "${{ github.event.inputs.config-file }}"
       id: publish-config-parser
       uses: ./.github/actions/publish-config-parser
       with:
