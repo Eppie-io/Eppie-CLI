@@ -129,7 +129,6 @@ jobs:
         name: "${{ env.output-name }} [${{ env.version-short }}]"
         path: |
           ${{ env.output }}
-          !${{ env.output }}/**/*.pdb
       env:
         artifact-name: "${{ env.output-name }}"
         version-short: "${{ steps.number-version-information.outputs.version-short }}"
