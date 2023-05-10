@@ -30,7 +30,7 @@ namespace Eppie.CLI
 
         static async Task Main(string[] args)
         {
-            Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
+            Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args).UseContentRoot(AppContext.BaseDirectory)
                 .ConfigureServices((context, services) =>
                 {
                     services.AddLocalization()

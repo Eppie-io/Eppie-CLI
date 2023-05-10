@@ -1,6 +1,6 @@
 # This workflow will build and test the project
 
-name: build and test
+name: Build and Test
 
 on:
   push:

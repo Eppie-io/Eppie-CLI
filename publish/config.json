@@ -1,0 +1,88 @@
+{
+  "project-file": "src/Eppie.CLI/Eppie.CLI/Eppie.CLI.csproj",
+  "output-name": "Eppie.CLI",
+
+  "profiles" :
+  [
+    {
+      "tags": ["windows", "x86", "all"],
+      "os": "windows-latest",
+      "runtime": "win-x86",
+      "configuration": "release",
+      "framework": "net7.0",
+      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:DebugType=None"
+    },
+
+    {
+      "tags": ["windows", "x64", "all"],
+      "os": "windows-latest",
+      "runtime": "win-x64",
+      "configuration": "release",
+      "framework": "net7.0",
+      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:DebugType=None"
+    },
+
+    {
+      "tags": ["windows", "arm", "all"],
+      "os": "windows-latest",
+      "runtime": "win-arm",
+      "configuration": "release",
+      "framework": "net7.0",
+      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:DebugType=None"
+    },
+
+    {
+      "tags": ["windows", "arm64", "all"],
+      "os": "windows-latest",
+      "runtime": "win-arm64",
+      "configuration": "release",
+      "framework": "net7.0",
+      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:DebugType=None"
+    },
+
+    {
+      "tags": ["linux", "x64", "all"],
+      "os": "ubuntu-latest",
+      "runtime": "linux-x64",
+      "configuration": "release",
+      "framework": "net7.0",
+      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:DebugType=None"
+    },
+
+    {
+      "tags": ["linux", "arm", "all"],
+      "os": "ubuntu-latest",
+      "runtime": "linux-arm",
+      "configuration": "release",
+      "framework": "net7.0",
+      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:DebugType=None"
+    },
+
+    {
+      "tags": ["linux", "arm64", "all"],
+      "os": "ubuntu-latest",
+      "runtime": "linux-arm64",
+      "configuration": "release",
+      "framework": "net7.0",
+      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:DebugType=None"
+    },
+
+    {
+      "tags": ["macos", "x64", "all"],
+      "os": "macos-latest",
+      "runtime": "osx-x64",
+      "configuration": "release",
+      "framework": "net7.0",
+      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:DebugType=None"      
+    },
+
+    {
+      "tags": ["macos", "arm64", "all"],
+      "os": "macos-latest",
+      "runtime": "osx-arm64",
+      "configuration": "release",
+      "framework": "net7.0",
+      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:DebugType=None"      
+    }
+  ]
+}
