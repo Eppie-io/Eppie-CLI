@@ -1,3 +1,6 @@
 [submodule "gitmodules/TuviCore"]
 	path = gitmodules/TuviCore
 	url = https://github.com/ValeraFinebits/TuviCore.git
+[submodule "gitmodules/TuviPgpLib"]
+	path = gitmodules/TuviPgpLib
+	url = https://github.com/Eppie-io/TuviPgpLib.git
