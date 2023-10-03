@@ -38,6 +38,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\gitmodules\TuviCore\Sources\ComponentBuilder\ComponentBuilder.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <EmbeddedResource Update="@(EmbeddedResource)">
       <Generator>MSBuild:Compile</Generator>
       <StronglyTypedFileName>$(IntermediateOutputPath)\$([MSBuild]::ValueOrDefault('%(RelativeDir)', '').Replace('\', '.').Replace('/', '.'))%(Filename).g$(DefaultLanguageSourceExtension)</StronglyTypedFileName>
