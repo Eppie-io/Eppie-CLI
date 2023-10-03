@@ -16,11 +16,13 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
+using ComponentBuilder;
 using Eppie.CLI.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using System.Globalization;
+using Tuvi.Core;
 
 namespace Eppie.CLI
 {
@@ -46,6 +48,8 @@ namespace Eppie.CLI
             Log.Debug("====================================================================");
             InitializeConsole();
             ShowLogo();
+
+            _ = Components.CreateTuviMailCore("data.db", new ImplementationDetailsProvider("Eppie seed", "Eppie.Package"));
 
             await Host.RunAsync().ConfigureAwait(false);
 
