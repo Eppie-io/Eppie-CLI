@@ -4,3 +4,6 @@
 [submodule "gitmodules/TuviPgpLib"]
 	path = gitmodules/TuviPgpLib
 	url = https://github.com/Eppie-io/TuviPgpLib.git
+[submodule "gitmodules/proton-cs-client"]
+	path = gitmodules/proton-cs-client
+	url = https://github.com/Eppie-io/proton-cs-client.git
