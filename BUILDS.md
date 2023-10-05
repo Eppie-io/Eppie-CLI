@@ -14,7 +14,7 @@ dotnet build .\src\Eppie.CLI\
 
 ### How to build with forked submodules
 
-To build the project with your forked submodules, you have to add the following option to the `.gitconfig` file:
+To build the project with your own forked submodules, you have to add the following option to the `.gitconfig` file:
 
 - When using the SSH protocol
 
