@@ -17,10 +17,11 @@ updates:
     open-pull-requests-limit: 20
     
   # Maintain dependencies for gitsubmodule
-  #- package-ecosystem: "gitsubmodule"
-  #  directory: "/" # Location of package manifests
-  #  schedule:
-  #    interval: "daily"
-  #  reviewers:
-  #    - "al-kau"
-  #    - "ValeraFinebits"
+  - package-ecosystem: "gitsubmodule"
+    directory: "/" # Location of package manifests
+    schedule:
+      interval: "daily"
+    reviewers:
+      - "al-kau"
+      - "ValeraFinebits"
+      - "anatolse"
