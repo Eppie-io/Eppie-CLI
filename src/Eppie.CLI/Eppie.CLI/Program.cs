@@ -30,6 +30,10 @@ namespace Eppie.CLI
     {
         public static IHost Host { get; private set; } = null!;
 
+        public static ProgramConfiguration Configuration => Host.Services.GetRequiredService<ProgramConfiguration>();
+        public static IHostEnvironment Environment => Host.Services.GetRequiredService<IHostEnvironment>();
+        public static ResourceLoader ResourceLoader => Host.Services.GetRequiredService<ResourceLoader>();
+
         static async Task Main(string[] args)
         {
             Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args).UseContentRoot(AppContext.BaseDirectory)
@@ -37,17 +41,19 @@ namespace Eppie.CLI
                 {
                     services.AddLocalization()
                             .AddSingleton<ResourceLoader>()
-                            .AddTransient<ProgramConfiguration>();
+                            .AddTransient<ProgramConfiguration>()
+                            .AddHostedService<Application>();
+
                 })
                 .UseSerilog((context, configuration) =>
                 {
                     configuration.ReadFrom.Configuration(context.Configuration);
                 })
+                .UseConsoleLifetime(options => options.SuppressStatusMessages = true)
                 .Build();
 
             Log.Debug("====================================================================");
             InitializeConsole();
-            ShowLogo();
 
             _ = Components.CreateTuviMailCore("data.db", new ImplementationDetailsProvider("Eppie seed", "Eppie.Package"));
 
@@ -58,19 +64,11 @@ namespace Eppie.CLI
 
         static void InitializeConsole()
         {
-            var config = Host.Services.GetRequiredService<ProgramConfiguration>();
-            Console.OutputEncoding = config.ConsoleEncoding;
-            CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = config.ConsoleCultureInfo;
+            Console.OutputEncoding = Configuration.ConsoleEncoding;
+            CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = Configuration.ConsoleCultureInfo;
             Log.Debug("OutputEncoding is {OutputEncoding}; CurrentCulture is {CurrentCulture}", Console.OutputEncoding, CultureInfo.CurrentCulture);
 
-            var resourceLoader = Host.Services.GetRequiredService<ResourceLoader>();
-            Console.Title = resourceLoader.AssemblyStrings.Title;
-        }
-
-        static void ShowLogo()
-        {
-            var resourceLoader = Host.Services.GetRequiredService<ResourceLoader>();
-            Log.Information(resourceLoader.Strings.LogoMessage);
+            Console.Title = ResourceLoader.AssemblyStrings.Title;
         }
     }
 }
