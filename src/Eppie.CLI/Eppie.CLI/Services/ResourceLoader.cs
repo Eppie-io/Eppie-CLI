@@ -59,13 +59,45 @@ namespace Eppie.CLI.Services
             /// <summary>
             /// Gets the startup banner or the copyright message.
             /// </summary>
-            internal string LogoMessage
+            private string? _logoFormat;
+            internal string LogoFormat
             {
                 get
                 {
-                    return _localizer.LoadFormattedString("LogoMessage.FormattedText", _assemblyStringLoader.Title,
-                                                                                       _assemblyStringLoader.Version);
+                    return _logoFormat ??= _localizer.LoadString(GetStringResourceName(section: "Header"));
                 }
+            }
+
+            private string? _description;
+            internal string Description
+            {
+                get
+                {
+                    return _description ??= _localizer.LoadString(GetStringResourceName(section: "Header"));
+                }
+            }
+
+            private string? _environmentNameFormat;
+            internal string EnvironmentNameFormat
+            {
+                get
+                {
+                    return _environmentNameFormat ??= _localizer.LoadString(GetStringResourceName(section: "Header"));
+                }
+            }
+
+            private string? _contentRootPathFormat;
+            internal string ContentRootPathFormat
+            {
+                get
+                {
+                    return _contentRootPathFormat ??= _localizer.LoadString(GetStringResourceName(section: "Header"));
+                }
+            }
+
+            private static string GetStringResourceName(string? section = null, [CallerMemberName] string name = "", string? category = "Text")
+            {
+                return string.Join('.', new string?[] { section, name, category });
             }
         }
 

@@ -38,6 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\gitmodules\console-toolkit\source\console-toolkit\console-toolkit.csproj" />
     <ProjectReference Include="..\..\..\gitmodules\TuviCore\Sources\ComponentBuilder\ComponentBuilder.csproj" />
   </ItemGroup>
 
