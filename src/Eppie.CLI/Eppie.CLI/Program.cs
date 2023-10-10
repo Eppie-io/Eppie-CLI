@@ -55,7 +55,7 @@ namespace Eppie.CLI
             Log.Debug("====================================================================");
             InitializeConsole();
 
-            _ = Components.CreateTuviMailCore("data.db", new ImplementationDetailsProvider("Eppie seed", "Eppie.Package"));
+            _ = Components.CreateTuviMailCore("data.db", new ImplementationDetailsProvider("Eppie seed", "Eppie.Package", "backup@system.service.eppie.io"));
 
             await Host.RunAsync().ConfigureAwait(false);
 
