@@ -31,7 +31,7 @@ on:
       - release/**
 
 env:
-  project: src/Eppie.CLI/Eppie.CLI.sln
+  project: src/Eppie.CLI/Eppie.CLI/Eppie.CLI.csproj
   test-project: ${{ null }}
   test-report-root: src/Eppie.CLI/TestResults
 
