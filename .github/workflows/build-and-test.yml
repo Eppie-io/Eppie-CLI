@@ -1,48 +1,108 @@
-# This workflow will build and test the project
+################################################################################
+#                                                                              #
+#   Copyright 2023 Eppie (https://eppie.io)                                    #
+#                                                                              #
+#   Licensed under the Apache License, Version 2.0 (the "License");            #
+#   you may not use this file except in compliance with the License.           #
+#   You may obtain a copy of the License at                                    #
+#                                                                              #
+#       http://www.apache.org/licenses/LICENSE-2.0                             #
+#                                                                              #
+#   Unless required by applicable law or agreed to in writing, software        #
+#   distributed under the License is distributed on an "AS IS" BASIS,          #
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.   #
+#   See the License for the specific language governing permissions and        #
+#   limitations under the License.                                             #
+#                                                                              #
+################################################################################
 
 name: Build and Test
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
+      - develop
+      - release/**
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
+      - develop
+      - release/**
+
+env:
+  project: src/Eppie.CLI/Eppie.CLI.sln
+  test-project: ${{ null }}
+  test-report-root: src/Eppie.CLI/TestResults
 
 jobs:
 
-  build:
+  coding-style:
+    runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
-        configuration: [Debug, Release]
-
-    runs-on: ${{ matrix.os }}
-
-    env:
-      Solution_Name: src/Eppie.CLI/Eppie.CLI.sln
-      
     steps:
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
       with:
         fetch-depth: 0
         submodules: recursive
 
-    # Install the .NET Core workload
-    - name: Install .NET Core
-      uses: actions/setup-dotnet@v3
+    - name: Install dotnet
+      uses: actions/setup-dotnet@3447fd6a9f9e57506b15f895c5b76d3b197dc7c2 # v3.2.0
       with:
         dotnet-version: 7.0.x
 
-    # Build the solution
-    - name: Build the solution
-      run: dotnet build "${{ env.Solution_Name }}" --nologo --configuration "${{ env.Configuration }}"
-      env:
-        Configuration: ${{ matrix.configuration }}
+    - name: Check formatting
+      run: dotnet format ${{ env.project }} --verify-no-changes
+
+  build:
+    needs: [coding-style]
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+        os: [windows-latest, macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      configuration: ${{ matrix.configuration }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+      with:
+        fetch-depth: 0
+        submodules: recursive
+
+    - name: Install dotnet
+      uses: actions/setup-dotnet@3447fd6a9f9e57506b15f895c5b76d3b197dc7c2 # v3.2.0
+      with:
+        dotnet-version: 7.0.x
+
+    - name: Build
+      run: dotnet build ${{ env.project }} --configuration ${{ env.configuration }}
         
-    # Execute all unit tests
-    - name: Execute unit tests
-      run: dotnet test "${{ env.Solution_Name }}" --nologo --configuration "${{ env.Configuration }}" 
+    - name: Test
+      if: env.test-project != ''
+      run: dotnet test ${{ env.test-project }} --configuration ${{ env.configuration }} --collect:"XPlat Code Coverage" --results-directory="${{ env.test-report-root }}"
+
+    - name: Get branch name
+      if: ${{ env.test-project != '' && runner.os == 'Linux' }}
+      id: branch
+      run: |
+        branch=$(echo "$GITHUB_REF_NAME")
+        name=$([ -z $branch ] && echo "unknown" || echo "$branch" | sed -r 's/[\/]+/-/g')
+        echo "name=$name" >> $GITHUB_OUTPUT
+
+    - name: Generate test coverage badge
+      if: ${{ env.test-project != '' && runner.os == 'Linux' && env.gist-id != '' && env.gist-auth-token != '' }}
+      uses: finebits/github-actions/badges/coverlet-coverage-badge@v1
+      with:
+        label: "coverage"
+        report-root: "${{ env.test-report-root }}/**/"
+        report-filename: coverage.cobertura.xml
+        gist-filename-format: "${{ github.event.repository.name }}-${{ env.branch-name }}-{0}-test-coverage.json"
+        gist-id: ${{ env.gist-id }}
+        gist-auth-token: ${{ env.gist-auth-token }}
       env:
-        Configuration: ${{ matrix.configuration }}
+        gist-id: ${{ vars.BADGE_COVERLET_COVERAGE_GIST_ID }}
+        gist-auth-token: ${{ secrets.TOKEN_GITHUB_GIST }}
+        branch-name: ${{ steps.branch.outputs.name }}
