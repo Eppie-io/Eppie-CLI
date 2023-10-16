@@ -1,6 +1,6 @@
 ﻿// ---------------------------------------------------------------------------- //
 //                                                                              //
-//   Copyright 2023 Eppie(https://eppie.io)                                     //
+//   Copyright 2023 Eppie (https://eppie.io)                                    //
 //                                                                              //
 //   Licensed under the Apache License, Version 2.0 (the "License"),            //
 //   you may not use this file except in compliance with the License.           //
@@ -16,11 +16,13 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
-using Microsoft.Extensions.Configuration;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Numerics;
 using System.Text;
+
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 
 namespace Eppie.CLI.Services
 {
@@ -55,26 +57,29 @@ namespace Eppie.CLI.Services
             key: "Console:Encoding",
             defaultValue: Encoding.Unicode,
             converter: Encoding.GetEncoding,
-            ignore: (exception) => exception is ArgumentException || exception is NotSupportedException);
+            ignore: (exception) => exception is ArgumentException or NotSupportedException);
 
         private string ReadStringValue(string key, string defaultValue)
         {
-            return TryReadStringValue(key, out var value) ? value : defaultValue;
+            return TryReadStringValue(key, out string value) ? value : defaultValue;
         }
 
+        [SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Reserved for future use")]
         private string ReadStringValue(string key)
         {
             return ReadStringValue(key, string.Empty);
         }
 
+        [SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Reserved for future use")]
         private bool ReadBooleanValue(string key, bool defaultValue = false)
         {
             return ReadValue(
                 key: key,
                 defaultValue: defaultValue,
-                converter: (param) => bool.TryParse(param, out var value) ? value : defaultValue);
+                converter: (param) => bool.TryParse(param, out bool value) ? value : defaultValue);
         }
 
+        [SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Reserved for future use")]
         private T ReadNumberValue<T>(string key, T defaultValue)
             where T : INumber<T>
         {
@@ -84,8 +89,9 @@ namespace Eppie.CLI.Services
                 converter: (param) => T.TryParse(param, ConsoleCultureInfo, out T? value) ? value : defaultValue);
         }
 
+        [SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Reserved for future use")]
         private T ReadEnumValue<T>(string key, T defaultValue, bool ignoreCase = false)
-            where T : struct
+            where T : struct, Enum
         {
             return ReadValue(
                 key: key,
@@ -95,9 +101,11 @@ namespace Eppie.CLI.Services
 
         private T ReadValue<T>(string key, T defaultValue, Func<string, T> converter, Func<Exception, bool>? ignore = null)
         {
+            ArgumentNullException.ThrowIfNull(converter, nameof(converter));
+
             try
             {
-                return TryReadStringValue(key, out var value) ? converter(value) : defaultValue;
+                return TryReadStringValue(key, out string value) ? converter(value) : defaultValue;
             }
             catch (Exception ex) when (ignore?.Invoke(ex) is true)
             {

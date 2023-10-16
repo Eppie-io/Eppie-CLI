@@ -1,6 +1,6 @@
 ﻿// ---------------------------------------------------------------------------- //
 //                                                                              //
-//   Copyright 2023 Eppie(https://eppie.io)                                     //
+//   Copyright 2023 Eppie (https://eppie.io)                                    //
 //                                                                              //
 //   Licensed under the Apache License, Version 2.0 (the "License"),            //
 //   you may not use this file except in compliance with the License.           //
@@ -16,11 +16,13 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
-using Eppie.CLI.Exceptions;
-using Microsoft.Extensions.Localization;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+
+using Eppie.CLI.Exceptions;
+
+using Microsoft.Extensions.Localization;
 
 namespace Eppie.CLI.Services
 {
@@ -39,7 +41,7 @@ namespace Eppie.CLI.Services
         public ResourceLoader(IStringLocalizer<Resources.Program> localizer)
         {
             AssemblyStrings = new AssemblyStringLoader();
-            Strings = new ProgramStringLoader(localizer, AssemblyStrings);
+            Strings = new ProgramStringLoader(localizer);
         }
 
         /// <summary>
@@ -48,52 +50,26 @@ namespace Eppie.CLI.Services
         internal class ProgramStringLoader
         {
             private readonly IStringLocalizer _localizer;
-            private readonly AssemblyStringLoader _assemblyStringLoader;
 
-            internal ProgramStringLoader(IStringLocalizer localizer, AssemblyStringLoader assemblyStringLoader)
+            internal ProgramStringLoader(IStringLocalizer localizer)
             {
                 _localizer = localizer;
-                _assemblyStringLoader = assemblyStringLoader;
             }
 
             /// <summary>
             /// Gets the startup banner or the copyright message.
             /// </summary>
             private string? _logoFormat;
-            internal string LogoFormat
-            {
-                get
-                {
-                    return _logoFormat ??= _localizer.LoadString(GetStringResourceName(section: "Header"));
-                }
-            }
+            internal string LogoFormat => _logoFormat ??= _localizer.LoadString(GetStringResourceName(section: "Header"));
 
             private string? _description;
-            internal string Description
-            {
-                get
-                {
-                    return _description ??= _localizer.LoadString(GetStringResourceName(section: "Header"));
-                }
-            }
+            internal string Description => _description ??= _localizer.LoadString(GetStringResourceName(section: "Header"));
 
             private string? _environmentNameFormat;
-            internal string EnvironmentNameFormat
-            {
-                get
-                {
-                    return _environmentNameFormat ??= _localizer.LoadString(GetStringResourceName(section: "Header"));
-                }
-            }
+            internal string EnvironmentNameFormat => _environmentNameFormat ??= _localizer.LoadString(GetStringResourceName(section: "Header"));
 
             private string? _contentRootPathFormat;
-            internal string ContentRootPathFormat
-            {
-                get
-                {
-                    return _contentRootPathFormat ??= _localizer.LoadString(GetStringResourceName(section: "Header"));
-                }
-            }
+            internal string ContentRootPathFormat => _contentRootPathFormat ??= _localizer.LoadString(GetStringResourceName(section: "Header"));
 
             private static string GetStringResourceName(string? section = null, [CallerMemberName] string name = "", string? category = "Text")
             {
@@ -106,27 +82,29 @@ namespace Eppie.CLI.Services
         /// </summary>
         internal class AssemblyStringLoader
         {
-            private readonly Assembly _assembly;
+            private const string DefaultApplicationTitle = "Eppie";
+            private const string DefaultApplicationVersion = "1.0.0.0";
+
+            private Assembly ExecutingAssembly { get; }
             internal AssemblyStringLoader()
             {
-                _assembly = Assembly.GetExecutingAssembly();
+                ExecutingAssembly = Assembly.GetExecutingAssembly();
             }
 
-            internal string Name => ReadAssemblyValue(GetExecutingAssembly().GetName().Name, "Eppie");
-            internal string Version => ReadAssemblyValue(GetExecutingAssembly().GetName().Version, "1.0");
-            internal string Title => ReadAssemblyValue(GetExecutingAssembly().GetCustomAttribute<AssemblyTitleAttribute>()?.Title, "Eppie");
+            internal string Name => ExecutingAssembly.GetName().Name ?? DefaultApplicationTitle;
+            internal string Version => ExecutingAssembly.GetName().Version?.ToString() ?? DefaultApplicationVersion;
+            internal string Title => ReadAssemblyAttribute<AssemblyTitleAttribute>(ExecutingAssembly)?.Title ?? DefaultApplicationTitle;
+            internal string FileVersion => ReadAssemblyAttribute<AssemblyFileVersionAttribute>(ExecutingAssembly)?.Version ?? DefaultApplicationVersion;
+            internal string InformationalVersion => ReadAssemblyAttribute<AssemblyInformationalVersionAttribute>(ExecutingAssembly)?.InformationalVersion ?? DefaultApplicationVersion;
 
-            private Assembly GetExecutingAssembly()
+            private static TAttribute? ReadAssemblyAttribute<TAttribute>(Assembly assembly)
+                where TAttribute : Attribute
             {
-                return _assembly;
-            }
-
-            private static string ReadAssemblyValue<T>(T? attribute, string defaultValue, [CallerArgumentExpression(nameof(attribute))] string? attributeName = null)
-            {
+                TAttribute? attribute = assembly.GetCustomAttribute<TAttribute>();
 #if DEBUG
-                AssemblyAttributeMissedException.ThrowIfMissed(attribute, attributeName);
+                AssemblyAttributeMissedException.ThrowIfMissed(attribute, typeof(TAttribute).FullName);
 #endif
-                return attribute?.ToString() ?? defaultValue;
+                return attribute;
             }
         }
     }
