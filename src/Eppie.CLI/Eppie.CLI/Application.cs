@@ -1,6 +1,6 @@
 ﻿// ---------------------------------------------------------------------------- //
 //                                                                              //
-//   Copyright 2023 Eppie(https://eppie.io)                                     //
+//   Copyright 2023 Eppie (https://eppie.io)                                    //
 //                                                                              //
 //   Licensed under the Apache License, Version 2.0 (the "License"),            //
 //   you may not use this file except in compliance with the License.           //
@@ -16,10 +16,12 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
+using System.Diagnostics.CodeAnalysis;
+
 using Eppie.CLI.CommandMenu;
+
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Eppie.CLI
 {
@@ -83,14 +85,13 @@ namespace Eppie.CLI
 
             Task.Run(async () =>
             {
-                var mainMenu = new MainMenu(_logger);
+                MainMenu mainMenu = new(_logger);
 
                 while (Continue(stoppingToken))
                 {
-                    var cmd = MainMenu.ReadCommand();
+                    string? cmd = MainMenu.ReadCommand();
                     await mainMenu.InvokeCommandAsync(cmd).ConfigureAwait(false);
                 }
-
             }, stoppingToken);
 
             return Task.CompletedTask;
@@ -147,6 +148,5 @@ namespace Eppie.CLI
         {
             return !(stoppingToken.IsCancellationRequested || _lifetime.ApplicationStopping.IsCancellationRequested);
         }
-
     }
 }

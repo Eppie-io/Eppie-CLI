@@ -1,6 +1,6 @@
 ﻿// ---------------------------------------------------------------------------- //
 //                                                                              //
-//   Copyright 2023 Eppie(https://eppie.io)                                     //
+//   Copyright 2023 Eppie (https://eppie.io)                                    //
 //                                                                              //
 //   Licensed under the Apache License, Version 2.0 (the "License"),            //
 //   you may not use this file except in compliance with the License.           //
@@ -16,12 +16,17 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
+using System.Globalization;
+
 using ComponentBuilder;
+
 using Eppie.CLI.Services;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+
 using Serilog;
-using System.Globalization;
+
 using Tuvi.Core;
 
 namespace Eppie.CLI
@@ -34,21 +39,15 @@ namespace Eppie.CLI
         public static IHostEnvironment Environment => Host.Services.GetRequiredService<IHostEnvironment>();
         public static ResourceLoader ResourceLoader => Host.Services.GetRequiredService<ResourceLoader>();
 
-        static async Task Main(string[] args)
+        private static async Task Main(string[] args)
         {
-            Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args).UseContentRoot(AppContext.BaseDirectory)
-                .ConfigureServices((context, services) =>
-                {
-                    services.AddLocalization()
-                            .AddSingleton<ResourceLoader>()
-                            .AddTransient<ProgramConfiguration>()
-                            .AddHostedService<Application>();
-
-                })
-                .UseSerilog((context, configuration) =>
-                {
-                    configuration.ReadFrom.Configuration(context.Configuration);
-                })
+            Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
+                .UseContentRoot(AppContext.BaseDirectory)
+                .ConfigureServices((context, services) => services.AddLocalization()
+                                                                  .AddSingleton<ResourceLoader>()
+                                                                  .AddTransient<ProgramConfiguration>()
+                                                                  .AddHostedService<Application>())
+                .UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration))
                 .UseConsoleLifetime(options => options.SuppressStatusMessages = true)
                 .Build();
 
@@ -62,7 +61,7 @@ namespace Eppie.CLI
             Log.CloseAndFlush();
         }
 
-        static void InitializeConsole()
+        private static void InitializeConsole()
         {
             Console.OutputEncoding = Configuration.ConsoleEncoding;
             CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = Configuration.ConsoleCultureInfo;

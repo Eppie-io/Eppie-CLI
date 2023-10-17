@@ -8,6 +8,8 @@
     <AnalysisLevel>6.0-all</AnalysisLevel>
     <NeutralLanguage>en</NeutralLanguage>
     <TrimMode>partial</TrimMode>
+    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

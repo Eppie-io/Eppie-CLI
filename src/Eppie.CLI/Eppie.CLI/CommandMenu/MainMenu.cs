@@ -1,6 +1,6 @@
 ﻿// ---------------------------------------------------------------------------- //
 //                                                                              //
-//   Copyright 2023 Eppie(https://eppie.io)                                     //
+//   Copyright 2023 Eppie (https://eppie.io)                                    //
 //                                                                              //
 //   Licensed under the Apache License, Version 2.0 (the "License"),            //
 //   you may not use this file except in compliance with the License.           //
@@ -19,6 +19,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+
 using Tuvi.Toolkit.Cli;
 using Tuvi.Toolkit.Cli.CommandLine;
 
@@ -66,10 +67,9 @@ namespace Eppie.CLI.CommandMenu
             }
         }
 
-
         private IAsyncParser Create()
         {
-            var parser = BaseParser.Default();
+            IAsyncParser parser = BaseParser.Default();
 
             ICommand root = parser.CreateRoot(
                 subcommands: new[]
