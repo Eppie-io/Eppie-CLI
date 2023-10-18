@@ -35,18 +35,11 @@ namespace Eppie.CLI
     {
         public static IHost Host { get; private set; } = null!;
 
-        public static ProgramConfiguration Configuration => Host.Services.GetRequiredService<ProgramConfiguration>();
-        public static IHostEnvironment Environment => Host.Services.GetRequiredService<IHostEnvironment>();
-        public static ResourceLoader ResourceLoader => Host.Services.GetRequiredService<ResourceLoader>();
-
         private static async Task Main(string[] args)
         {
             Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
                 .UseContentRoot(AppContext.BaseDirectory)
-                .ConfigureServices((context, services) => services.AddLocalization()
-                                                                  .AddSingleton<ResourceLoader>()
-                                                                  .AddTransient<ProgramConfiguration>()
-                                                                  .AddHostedService<Application>())
+                .ConfigureServices(ConfigureServices)
                 .UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration))
                 .UseConsoleLifetime(options => options.SuppressStatusMessages = true)
                 .Build();
@@ -63,11 +56,22 @@ namespace Eppie.CLI
 
         private static void InitializeConsole()
         {
-            Console.OutputEncoding = Configuration.ConsoleEncoding;
-            CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = Configuration.ConsoleCultureInfo;
+            ProgramConfiguration configuration = Host.Services.GetRequiredService<ProgramConfiguration>();
+            ResourceLoader resourceLoader = Host.Services.GetRequiredService<ResourceLoader>();
+
+            Console.OutputEncoding = configuration.ConsoleEncoding;
+            CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = configuration.ConsoleCultureInfo;
             Log.Debug("OutputEncoding is {OutputEncoding}; CurrentCulture is {CurrentCulture}", Console.OutputEncoding, CultureInfo.CurrentCulture);
 
-            Console.Title = ResourceLoader.AssemblyStrings.Title;
+            Console.Title = resourceLoader.AssemblyStrings.Title;
+        }
+
+        private static void ConfigureServices(HostBuilderContext _, IServiceCollection services)
+        {
+            services.AddLocalization()
+                    .AddTransient<ProgramConfiguration>()
+                    .AddSingleton<ResourceLoader>()
+                    .AddHostedService<Application>();
         }
     }
 }

@@ -60,20 +60,23 @@ namespace Eppie.CLI.Services
             /// Gets the startup banner or the copyright message.
             /// </summary>
             private string? _logoFormat;
-            internal string LogoFormat => _logoFormat ??= _localizer.LoadString(GetStringResourceName(section: "Header"));
+            internal string LogoFormat => _logoFormat ??= _localizer.LoadString(GetStringResourceName(category: "Header"));
 
             private string? _description;
-            internal string Description => _description ??= _localizer.LoadString(GetStringResourceName(section: "Header"));
+            internal string Description => _description ??= _localizer.LoadString(GetStringResourceName(category: "Header"));
 
             private string? _environmentNameFormat;
-            internal string EnvironmentNameFormat => _environmentNameFormat ??= _localizer.LoadString(GetStringResourceName(section: "Header"));
+            internal string EnvironmentNameFormat => _environmentNameFormat ??= _localizer.LoadString(GetStringResourceName(category: "Header"));
 
             private string? _contentRootPathFormat;
-            internal string ContentRootPathFormat => _contentRootPathFormat ??= _localizer.LoadString(GetStringResourceName(section: "Header"));
+            internal string ContentRootPathFormat => _contentRootPathFormat ??= _localizer.LoadString(GetStringResourceName(category: "Header"));
 
-            private static string GetStringResourceName(string? section = null, [CallerMemberName] string name = "", string? category = "Text")
+            private string? _goodbye;
+            internal string Goodbye => _goodbye ??= _localizer.LoadString(GetStringResourceName());
+
+            private static string GetStringResourceName(string category = "Message", [CallerMemberName] string name = "")
             {
-                return string.Join('.', new string?[] { section, name, category });
+                return string.Join('.', new string?[] { category, name });
             }
         }
 
@@ -91,11 +94,20 @@ namespace Eppie.CLI.Services
                 ExecutingAssembly = Assembly.GetExecutingAssembly();
             }
 
-            internal string Name => ExecutingAssembly.GetName().Name ?? DefaultApplicationTitle;
-            internal string Version => ExecutingAssembly.GetName().Version?.ToString() ?? DefaultApplicationVersion;
-            internal string Title => ReadAssemblyAttribute<AssemblyTitleAttribute>(ExecutingAssembly)?.Title ?? DefaultApplicationTitle;
-            internal string FileVersion => ReadAssemblyAttribute<AssemblyFileVersionAttribute>(ExecutingAssembly)?.Version ?? DefaultApplicationVersion;
-            internal string InformationalVersion => ReadAssemblyAttribute<AssemblyInformationalVersionAttribute>(ExecutingAssembly)?.InformationalVersion ?? DefaultApplicationVersion;
+            private string? _name;
+            internal string Name => _name ??= ExecutingAssembly.GetName().Name ?? DefaultApplicationTitle;
+
+            private string? _version;
+            internal string Version => _version ??= ExecutingAssembly.GetName().Version?.ToString() ?? DefaultApplicationVersion;
+
+            private string? _title;
+            internal string Title => _title ??= ReadAssemblyAttribute<AssemblyTitleAttribute>(ExecutingAssembly)?.Title ?? DefaultApplicationTitle;
+
+            private string? _fileVersion;
+            internal string FileVersion => _fileVersion ??= ReadAssemblyAttribute<AssemblyFileVersionAttribute>(ExecutingAssembly)?.Version ?? DefaultApplicationVersion;
+
+            private string? _informationalVersion;
+            internal string InformationalVersion => _informationalVersion ??= ReadAssemblyAttribute<AssemblyInformationalVersionAttribute>(ExecutingAssembly)?.InformationalVersion ?? DefaultApplicationVersion;
 
             private static TAttribute? ReadAssemblyAttribute<TAttribute>(Assembly assembly)
                 where TAttribute : Attribute

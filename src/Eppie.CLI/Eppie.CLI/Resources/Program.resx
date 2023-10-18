@@ -117,24 +117,28 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Header.ContentRootPathFormat.Text" xml:space="preserve">
+  <data name="Header.ContentRootPathFormat" xml:space="preserve">
     <value>Content root path: {ContentRoot}</value>
     <comment>The console output text with the absolute path to the directory that contains the application content files.
 {ContentRoot} is the directory path parameter.</comment>
   </data>
-  <data name="Header.Description.Text" xml:space="preserve">
+  <data name="Header.Description" xml:space="preserve">
     <value>Application started. Press Ctrl+C to shut down.</value>
     <comment>Application description and additional information.</comment>
   </data>
-  <data name="Header.EnvironmentNameFormat.Text" xml:space="preserve">
+  <data name="Header.EnvironmentNameFormat" xml:space="preserve">
     <value>Hosting environment: {EnvName}</value>
     <comment>The console output text with the name of the environment from which the application was launched.
 {EnvName} is the application environment name parameter.</comment>
   </data>
-  <data name="Header.LogoFormat.Text" xml:space="preserve">
+  <data name="Header.LogoFormat" xml:space="preserve">
     <value>Hello, I'm {AppName} (version {AppVer})</value>
     <comment>The startup banner or the copyright message.
 {AppName} is a parameter containing the title of the application;
 {AppVer} is a parameter containing the version of the application.</comment>
+  </data>
+  <data name="Message.Goobye" xml:space="preserve">
+    <value>Application is shutting down...</value>
+    <comment>Application farewell message.</comment>
   </data>
 </root>
