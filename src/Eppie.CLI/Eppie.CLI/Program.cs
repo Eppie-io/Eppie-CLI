@@ -21,6 +21,7 @@ using System.Globalization;
 using ComponentBuilder;
 
 using Eppie.CLI.Services;
+using Eppie.CLI.UserInteraction;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -47,8 +48,6 @@ namespace Eppie.CLI
             Log.Debug("====================================================================");
             InitializeConsole();
 
-            _ = Components.CreateTuviMailCore("data.db", new ImplementationDetailsProvider("Eppie seed", "Eppie.Package", "backup@system.service.eppie.io"));
-
             await Host.RunAsync().ConfigureAwait(false);
 
             Log.CloseAndFlush();
@@ -71,7 +70,13 @@ namespace Eppie.CLI
             services.AddLocalization()
                     .AddTransient<ProgramConfiguration>()
                     .AddSingleton<ResourceLoader>()
-                    .AddHostedService<Application>();
+                    .AddTransient((services) => Components.CreateTuviMailCore("data.db", new ImplementationDetailsProvider("Eppie seed", "Eppie.Package", "backup@system.service.eppie.io")))
+
+                    .AddHostedService<Application>()
+                    .AddSingleton<CoreProvider>()
+
+                    .AddTransient<MenuCommand>()
+                    .AddHostedService<MainMenu>();
         }
     }
 }

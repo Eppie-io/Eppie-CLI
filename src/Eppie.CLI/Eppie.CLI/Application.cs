@@ -18,9 +18,9 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-using Eppie.CLI.CommandMenu;
 using Eppie.CLI.Services;
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -35,17 +35,20 @@ namespace Eppie.CLI
 
         private readonly ILogger _logger;
         private readonly IHostApplicationLifetime _lifetime;
+        private readonly IServiceProvider _serviceProvider;
 
         private readonly CancellationTokenSource _waitProcess = new();
 
         public Application(
             ILogger<Application> logger,
+            IServiceProvider serviceProvider,
             IHostApplicationLifetime lifetime,
             IHostEnvironment environment,
             ProgramConfiguration programConfiguration,
             ResourceLoader resourceLoader)
         {
             _logger = logger;
+            _serviceProvider = serviceProvider;
             _lifetime = lifetime;
             Configuration = programConfiguration;
             Environment = environment;
@@ -54,7 +57,7 @@ namespace Eppie.CLI
 
         public override Task StartAsync(CancellationToken cancellationToken)
         {
-            _logger.LogTrace("ApplicationLifetimeService.StartAsync has been called.");
+            _logger.LogTrace("Application.StartAsync has been called.");
 
             _lifetime.ApplicationStarted.Register(OnStarted);
             _lifetime.ApplicationStopping.Register(OnStopping);
@@ -72,7 +75,7 @@ namespace Eppie.CLI
 
         public override Task StopAsync(CancellationToken cancellationToken)
         {
-            _logger.LogTrace("ApplicationLifetimeService.StopAsync has been called.");
+            _logger.LogTrace("Application.StopAsync has been called.");
             return base.StopAsync(cancellationToken);
         }
 
@@ -80,43 +83,61 @@ namespace Eppie.CLI
         {
             await Task.Yield();
 
-            await WaitAsync(stoppingToken).ConfigureAwait(false);
+            await WaitAsync(_waitProcess.Token, stoppingToken).ConfigureAwait(false);
+            await LaunchWorkServiceAsync(stoppingToken).ConfigureAwait(false);
             await ProcessAsync(stoppingToken).ConfigureAwait(false);
         }
 
-        private Task ProcessAsync(CancellationToken stoppingToken)
+        private Task ProcessAsync(CancellationToken _)
         {
-            _logger.LogTrace("ApplicationLifetimeService.ProcessAsync has been called.");
-
-            if (stoppingToken.IsCancellationRequested)
-            {
-                return Task.CompletedTask;
-            }
-
-            Task.Run(async () =>
-            {
-                MainMenu mainMenu = new(_logger);
-
-                using CancellationTokenSource linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, _lifetime.ApplicationStopping);
-
-                while (!linkedTokenSource.IsCancellationRequested)
-                {
-                    string? cmd = MainMenu.ReadCommand();
-                    await mainMenu.InvokeCommandAsync(cmd).ConfigureAwait(false);
-                }
-            }, stoppingToken);
+            _logger.LogTrace("Application.ProcessAsync has been called.");
 
             return Task.CompletedTask;
         }
 
-        private async Task WaitAsync(CancellationToken stoppingToken)
+        private Task LaunchWorkServiceAsync(CancellationToken stoppingToken)
         {
-            _logger.LogTrace("ApplicationLifetimeService.WaitAsync has been called.");
+            _logger.LogTrace("Application.LaunchWorkServiceAsync has been called.");
+            List<CancellationToken> tokens = new();
+
+            IEnumerable<WorkService> services = _serviceProvider.GetServices<IHostedService>().Where(service => service is WorkService).Cast<WorkService>();
+
+            foreach (WorkService service in services)
+            {
+                tokens.Add(service.Ready);
+                service.Initialize();
+            }
+
+            if (tokens.Any())
+            {
+                IEnumerable<Task> tasks = tokens.Select(async (token) =>
+                {
+                    try
+                    {
+                        await Task.Delay(Timeout.Infinite, token).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    { }
+                });
+
+                Task.WaitAll(tasks.ToArray(), cancellationToken: stoppingToken);
+            }
+
+            foreach (WorkService service in services)
+            {
+                service.Launch();
+            }
+
+            return Task.CompletedTask;
+        }
+
+        private async Task WaitAsync(CancellationToken waitToken, CancellationToken stoppingToken)
+        {
+            _logger.LogTrace("Application.WaitAsync has been called.");
 
             try
             {
-                using CancellationTokenSource linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, _waitProcess.Token);
-
+                using CancellationTokenSource linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(waitToken, stoppingToken);
                 await Task.Delay(Timeout.Infinite, linkedTokenSource.Token).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
@@ -130,7 +151,7 @@ namespace Eppie.CLI
 
         private void OnStopping()
         {
-            _logger.LogInformation("Application is shutting down...");
+            _logger.LogInformation(ResourceLoader.Strings.Goodbye);
         }
 
         private void OnStarted()
