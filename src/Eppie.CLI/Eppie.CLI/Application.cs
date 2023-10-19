@@ -19,6 +19,7 @@
 using System.Diagnostics.CodeAnalysis;
 
 using Eppie.CLI.CommandMenu;
+using Eppie.CLI.Services;
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -28,16 +29,27 @@ namespace Eppie.CLI
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
     internal class Application : BackgroundService
     {
+        public ProgramConfiguration Configuration { get; }
+        public IHostEnvironment Environment { get; }
+        public ResourceLoader ResourceLoader { get; }
+
         private readonly ILogger _logger;
         private readonly IHostApplicationLifetime _lifetime;
-        private CancellationTokenSource _startProcess = new();
+
+        private readonly CancellationTokenSource _waitProcess = new();
 
         public Application(
             ILogger<Application> logger,
-            IHostApplicationLifetime lifetime)
+            IHostApplicationLifetime lifetime,
+            IHostEnvironment environment,
+            ProgramConfiguration programConfiguration,
+            ResourceLoader resourceLoader)
         {
             _logger = logger;
             _lifetime = lifetime;
+            Configuration = programConfiguration;
+            Environment = environment;
+            ResourceLoader = resourceLoader;
         }
 
         public override Task StartAsync(CancellationToken cancellationToken)
@@ -55,9 +67,7 @@ namespace Eppie.CLI
         {
             base.Dispose();
 
-            _startProcess.Cancel();
-            _startProcess.Dispose();
-            _startProcess = null!;
+            _waitProcess.Dispose();
         }
 
         public override Task StopAsync(CancellationToken cancellationToken)
@@ -87,7 +97,9 @@ namespace Eppie.CLI
             {
                 MainMenu mainMenu = new(_logger);
 
-                while (Continue(stoppingToken))
+                using CancellationTokenSource linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, _lifetime.ApplicationStopping);
+
+                while (!linkedTokenSource.IsCancellationRequested)
                 {
                     string? cmd = MainMenu.ReadCommand();
                     await mainMenu.InvokeCommandAsync(cmd).ConfigureAwait(false);
@@ -103,7 +115,7 @@ namespace Eppie.CLI
 
             try
             {
-                using CancellationTokenSource linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, _startProcess.Token);
+                using CancellationTokenSource linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, _waitProcess.Token);
 
                 await Task.Delay(Timeout.Infinite, linkedTokenSource.Token).ConfigureAwait(false);
             }
@@ -129,24 +141,19 @@ namespace Eppie.CLI
 
         private void WriteApplicationHeader()
         {
-            _logger.LogTrace("ApplicationLifetimeService.WriteApplicationHeader has been called.");
+            _logger.LogTrace("Application.WriteApplicationHeader has been called.");
 
-            _logger.LogInformation(Program.ResourceLoader.Strings.LogoFormat,
-                                   Program.ResourceLoader.AssemblyStrings.Title,
-                                   Program.ResourceLoader.AssemblyStrings.Version);
-            _logger.LogInformation(Program.ResourceLoader.Strings.Description);
-            _logger.LogInformation(Program.ResourceLoader.Strings.EnvironmentNameFormat, Program.Environment.EnvironmentName);
-            _logger.LogInformation(Program.ResourceLoader.Strings.ContentRootPathFormat, Program.Environment.ContentRootPath);
+            _logger.LogInformation(ResourceLoader.Strings.LogoFormat,
+                                   ResourceLoader.AssemblyStrings.Title,
+                                   ResourceLoader.AssemblyStrings.Version);
+            _logger.LogInformation(ResourceLoader.Strings.Description);
+            _logger.LogInformation(ResourceLoader.Strings.EnvironmentNameFormat, Environment.EnvironmentName);
+            _logger.LogInformation(ResourceLoader.Strings.ContentRootPathFormat, Environment.ContentRootPath);
         }
 
         private void ExecuteApplicationProcess()
         {
-            _startProcess.Cancel();
-        }
-
-        private bool Continue(CancellationToken stoppingToken)
-        {
-            return !(stoppingToken.IsCancellationRequested || _lifetime.ApplicationStopping.IsCancellationRequested);
+            _waitProcess.Cancel();
         }
     }
 }
