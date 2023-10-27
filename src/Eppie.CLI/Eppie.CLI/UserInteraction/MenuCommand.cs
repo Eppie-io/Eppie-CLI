@@ -16,17 +16,13 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 using Eppie.CLI.Services;
 
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using Tuvi.Core;
-using Tuvi.Toolkit.Cli.CommandLine;
 
 namespace Eppie.CLI.UserInteraction
 {
@@ -34,90 +30,28 @@ namespace Eppie.CLI.UserInteraction
     internal class MenuCommand
     {
         private readonly ILogger<MenuCommand> _logger;
-        private readonly IServiceProvider _serviceProvider;
+        //private readonly IHostApplicationLifetime _hostApplicationLifetime;
         private readonly CoreProvider _coreProvider;
-        private readonly ResourceLoader _resourceLoader;
 
         public MenuCommand(
             ILogger<MenuCommand> logger,
-            IServiceProvider serviceProvider,
-            CoreProvider coreProvider,
-            ResourceLoader resourceLoader)
+            CoreProvider coreProvider)
         {
             _logger = logger;
-            _serviceProvider = serviceProvider;
+            //_hostApplicationLifetime = hostApplicationLifetime;
             _coreProvider = coreProvider;
-            _resourceLoader = resourceLoader;
         }
 
-        public ICommand CreateExitCommand(IAsyncParser parser)
-        {
-            return CreateCommand(parser, "exit", _resourceLoader.Strings.ExitDescription, action: (cmd) => ExitAction());
-        }
-
-        public ICommand CreateInitCommand(IAsyncParser parser)
-        {
-            return CreateAsyncCommand(parser, "init", _resourceLoader.Strings.InitDescription, action: (cmd) => InitActionAsync());
-        }
-
-        public ICommand CreateResetCommand(IAsyncParser parser)
-        {
-            return CreateAsyncCommand(parser, "reset", _resourceLoader.Strings.ResetDescription, action: (cmd) => ResetActionAsync());
-        }
-
-        public ICommand CreateOpenCommand(IAsyncParser parser)
-        {
-            return CreateAsyncCommand(parser, "open", _resourceLoader.Strings.OpenDescription, action: (cmd) => OpenActionAsync());
-        }
-
-        public ICommand CreateListAccountsCommand(IAsyncParser parser)
-        {
-            return CreateCommand(parser, "list-accounts", string.Empty, action: (cmd) => ListAccountsAction());
-        }
-
-        public ICommand CreateAddAccountCommand(IAsyncParser parser)
-        {
-            return CreateCommand(parser, "add-account", string.Empty, action: (cmd) => AddAccountAction());
-        }
-
-        public ICommand CreateRestoreCommand(IAsyncParser parser)
-        {
-            return CreateCommand(parser, "restore", string.Empty, action: (cmd) => RestoreAction());
-        }
-
-        public ICommand CreateSendCommand(IAsyncParser parser)
-        {
-            return CreateCommand(parser, "send", string.Empty, action: (cmd) => SendAction());
-        }
-
-        public ICommand CreateListContactsCommand(IAsyncParser parser)
-        {
-            return CreateCommand(parser, "list-contacts", string.Empty, action: (cmd) => ListContactsAction());
-        }
-
-        public ICommand CreateShowMessageCommand(IAsyncParser parser)
-        {
-            return CreateCommand(parser, "show-message", string.Empty, action: (cmd) => ShowMessageAction());
-        }
-
-        public ICommand CreateShowMessagesCommand(IAsyncParser parser)
-        {
-            return CreateCommand(parser, "show-messages", string.Empty, action: (cmd) => ShowMessagesAction());
-        }
-
-        public ICommand CreateImportCommand(IAsyncParser parser)
-        {
-            return CreateCommand(parser, "import", string.Empty, action: (cmd) => ImportAction());
-        }
-
-        public void ExitAction()
+        internal void ExitAction()
         {
             _logger.LogDebug("MenuCommand.ExitAction has been called.");
-            _serviceProvider.GetRequiredService<IHostApplicationLifetime>().StopApplication();
+            _logger.LogInformation("Exit.");
+            //_hostApplicationLifetime.StopApplication();
         }
 
-        [SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>")]
-        private async Task InitActionAsync()
+        // ToDo: CA1303:Do not pass literals as localized parameters - The output strings must be placed into resources.
+        [SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "This is temporary. It should be placed in resources.")]
+        internal async Task InitActionAsync()
         {
             _logger.LogTrace("MenuCommand.InitActionAsync has been called.");
 
@@ -155,7 +89,7 @@ namespace Eppie.CLI.UserInteraction
             }
         }
 
-        private async Task ResetActionAsync()
+        internal async Task ResetActionAsync()
         {
             _logger.LogTrace("MenuCommand.ResetActionAsync has been called.");
 
@@ -173,7 +107,7 @@ namespace Eppie.CLI.UserInteraction
             _logger.LogInformation("Eppie was reset.");
         }
 
-        private async Task OpenActionAsync()
+        internal async Task OpenActionAsync()
         {
             _logger.LogTrace("MenuCommand.OpenActionAsync has been called.");
 
@@ -199,56 +133,44 @@ namespace Eppie.CLI.UserInteraction
             }
         }
 
-        private void ListAccountsAction()
+        internal void ListAccountsAction()
         {
             _logger.LogTrace("MenuCommand.ListAccountsAction has been called.");
         }
 
-        private void AddAccountAction()
+        internal void AddAccountAction()
         {
             _logger.LogTrace("MenuCommand.AddAccountAction has been called.");
         }
 
-        private void RestoreAction()
+        internal void RestoreAction()
         {
             _logger.LogTrace("MenuCommand.RestoreAction has been called.");
         }
 
-        private void SendAction()
+        internal void SendAction()
         {
             _logger.LogTrace("MenuCommand.SendAction has been called.");
         }
 
-        private void ListContactsAction()
+        internal void ListContactsAction()
         {
             _logger.LogTrace("MenuCommand.ListContactsAction has been called.");
         }
 
-        private void ShowMessageAction()
+        internal void ShowMessageAction()
         {
             _logger.LogTrace("MenuCommand.ShowMessageAction has been called.");
         }
 
-        private void ShowMessagesAction()
+        internal void ShowMessagesAction()
         {
             _logger.LogTrace("MenuCommand.ShowMessagesAction has been called.");
         }
 
-        private void ImportAction()
+        internal void ImportAction()
         {
             _logger.LogTrace("MenuCommand.ImportAction has been called.");
-        }
-
-        private static ICommand CreateCommand(IAsyncParser parser, string name, string description, Action<ICommand>? action)
-        {
-            Debug.Assert(parser is not null);
-            return parser.CreateCommand(name, description, action: action);
-        }
-
-        private static ICommand CreateAsyncCommand(IAsyncParser parser, string name, string description, Func<IAsyncCommand, Task>? action)
-        {
-            Debug.Assert(parser is not null);
-            return parser.CreateAsyncCommand(name, description, action: action);
         }
     }
 }

@@ -16,50 +16,28 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
-using Eppie.CLI.Options;
-using Eppie.CLI.Services;
-using Eppie.CLI.UserInteraction;
-
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-
-using Serilog;
-
-namespace Eppie.CLI
+namespace Eppie.CLI.Options
 {
-    internal sealed class Program
+    internal static class OptionConverter
     {
-        public static IHost Host { get; private set; } = null!;
-
-        private static void Main(string[] args)
+        public static T ConvertEnumValue<T>(string value, T defaultValue, bool ignoreCase = false)
+            where T : struct, Enum
         {
-            Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
-                .UseContentRoot(AppContext.BaseDirectory)
-                .ConfigureServices(ConfigureServices)
-                .UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration))
-                .UseConsoleLifetime(options => options.SuppressStatusMessages = true)
-                .Build();
-
-            Host.Run();
-
-            Log.CloseAndFlush();
+            return Enum.TryParse(value, ignoreCase, out T result) ? result : defaultValue;
         }
 
-        private static void ConfigureServices(HostBuilderContext ctx, IServiceCollection services)
+        public static T ConvertValue<T>(string? value, T defaultValue, Func<string, T?> converter, Func<Exception, bool>? ignore = null)
         {
-            ArgumentNullException.ThrowIfNull(ctx);
+            ArgumentNullException.ThrowIfNull(converter, nameof(converter));
 
-            services.Configure<ConsoleOptions>(ctx.Configuration, new BinderOptions { BindNonPublicProperties = true });
-
-            services.AddLocalization()
-                    .AddSingleton<ResourceLoader>()
-                    .AddSingleton<CoreProvider>()
-
-                    //.AddTransient<MenuCommand>()
-                    .AddSingleton<MainMenu>()
-
-                    .AddHostedService<Application>();
+            try
+            {
+                return converter(value ?? string.Empty) ?? defaultValue;
+            }
+            catch (Exception ex) when (ignore?.Invoke(ex) is true)
+            {
+                return defaultValue;
+            }
         }
     }
 }

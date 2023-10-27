@@ -16,132 +16,78 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 
+using Eppie.CLI.Options;
 using Eppie.CLI.Services;
+using Eppie.CLI.UserInteraction;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Eppie.CLI
 {
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
     internal class Application : BackgroundService
     {
-        public ProgramConfiguration Configuration { get; }
-        public IHostEnvironment Environment { get; }
-        public ResourceLoader ResourceLoader { get; }
-
-        private readonly ILogger _logger;
+        private readonly ILogger<Application> _logger;
+        private readonly ILoggerFactory _loggerFactory;
         private readonly IHostApplicationLifetime _lifetime;
-        private readonly IServiceProvider _serviceProvider;
-
-        private readonly CancellationTokenSource _waitProcess = new();
-
+        private readonly IHostEnvironment _environment;
+        private readonly ResourceLoader _resourceLoader;
+        private readonly ConsoleOptions _consoleOptions;
         public Application(
-            ILogger<Application> logger,
-            IServiceProvider serviceProvider,
+            ILoggerFactory loggerFactory,
             IHostApplicationLifetime lifetime,
             IHostEnvironment environment,
-            ProgramConfiguration programConfiguration,
-            ResourceLoader resourceLoader)
+            ResourceLoader resourceLoader,
+            IOptions<ConsoleOptions> consoleOptions)
         {
-            _logger = logger;
-            _serviceProvider = serviceProvider;
+            Debug.Assert(consoleOptions is not null);
+
+            _loggerFactory = loggerFactory;
+            _logger = loggerFactory.CreateLogger<Application>();
+            _environment = environment;
+            _resourceLoader = resourceLoader;
+
+            _consoleOptions = consoleOptions.Value;
+
             _lifetime = lifetime;
-            Configuration = programConfiguration;
-            Environment = environment;
-            ResourceLoader = resourceLoader;
+            _lifetime.ApplicationStarted.Register(OnStarted);
+            _lifetime.ApplicationStopping.Register(OnStopping);
+            _lifetime.ApplicationStopped.Register(OnStopped);
         }
 
         public override Task StartAsync(CancellationToken cancellationToken)
         {
-            _logger.LogTrace("Application.StartAsync has been called.");
-
-            _lifetime.ApplicationStarted.Register(OnStarted);
-            _lifetime.ApplicationStopping.Register(OnStopping);
-            _lifetime.ApplicationStopped.Register(OnStopped);
+            InitializeConsole();
+            WriteApplicationHeader();
 
             return base.StartAsync(cancellationToken);
-        }
-
-        public override void Dispose()
-        {
-            base.Dispose();
-
-            _waitProcess.Dispose();
-        }
-
-        public override Task StopAsync(CancellationToken cancellationToken)
-        {
-            _logger.LogTrace("Application.StopAsync has been called.");
-            return base.StopAsync(cancellationToken);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             await Task.Yield();
 
-            await WaitAsync(_waitProcess.Token, stoppingToken).ConfigureAwait(false);
-            await LaunchWorkServiceAsync(stoppingToken).ConfigureAwait(false);
-            await ProcessAsync(stoppingToken).ConfigureAwait(false);
+            if (!stoppingToken.IsCancellationRequested)
+            {
+                await ProcessAsync(stoppingToken).ConfigureAwait(false);
+            }
         }
 
-        private Task ProcessAsync(CancellationToken _)
+        private Task ProcessAsync(CancellationToken stoppingToken)
         {
             _logger.LogTrace("Application.ProcessAsync has been called.");
 
-            return Task.CompletedTask;
-        }
+            using CancellationTokenSource cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, _lifetime.ApplicationStopping);
+            MainMenu mainMenu = new(_loggerFactory, Program.Host.Services.GetRequiredService<CoreProvider>(), _resourceLoader);
 
-        private Task LaunchWorkServiceAsync(CancellationToken stoppingToken)
-        {
-            _logger.LogTrace("Application.LaunchWorkServiceAsync has been called.");
-            List<CancellationToken> tokens = new();
-
-            IEnumerable<WorkService> services = _serviceProvider.GetServices<IHostedService>().Where(service => service is WorkService).Cast<WorkService>();
-
-            foreach (WorkService service in services)
-            {
-                tokens.Add(service.Ready);
-                service.Initialize();
-            }
-
-            if (tokens.Any())
-            {
-                IEnumerable<Task> tasks = tokens.Select(async (token) =>
-                {
-                    try
-                    {
-                        await Task.Delay(Timeout.Infinite, token).ConfigureAwait(false);
-                    }
-                    catch (OperationCanceledException)
-                    { }
-                });
-
-                Task.WaitAll(tasks.ToArray(), cancellationToken: stoppingToken);
-            }
-
-            foreach (WorkService service in services)
-            {
-                service.Launch();
-            }
-
-            return Task.CompletedTask;
-        }
-
-        private async Task WaitAsync(CancellationToken waitToken, CancellationToken stoppingToken)
-        {
-            _logger.LogTrace("Application.WaitAsync has been called.");
-
-            try
-            {
-                using CancellationTokenSource linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(waitToken, stoppingToken);
-                await Task.Delay(Timeout.Infinite, linkedTokenSource.Token).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException)
-            { }
+            return mainMenu.LoopAsync(cancellationTokenSource.Token);
         }
 
         private void OnStopped()
@@ -151,30 +97,33 @@ namespace Eppie.CLI
 
         private void OnStopping()
         {
-            _logger.LogInformation(ResourceLoader.Strings.Goodbye);
+            _logger.LogInformation(_resourceLoader.Strings.Goodbye);
         }
 
         private void OnStarted()
         {
-            WriteApplicationHeader();
-            ExecuteApplicationProcess();
+            _logger.LogDebug("Application has been started.");
         }
 
         private void WriteApplicationHeader()
         {
             _logger.LogTrace("Application.WriteApplicationHeader has been called.");
 
-            _logger.LogInformation(ResourceLoader.Strings.LogoFormat,
-                                   ResourceLoader.AssemblyStrings.Title,
-                                   ResourceLoader.AssemblyStrings.Version);
-            _logger.LogInformation(ResourceLoader.Strings.Description);
-            _logger.LogInformation(ResourceLoader.Strings.EnvironmentNameFormat, Environment.EnvironmentName);
-            _logger.LogInformation(ResourceLoader.Strings.ContentRootPathFormat, Environment.ContentRootPath);
+            _logger.LogInformation(_resourceLoader.Strings.LogoFormat,
+                                   _resourceLoader.AssemblyStrings.Title,
+                                   _resourceLoader.AssemblyStrings.Version);
+            _logger.LogInformation(_resourceLoader.Strings.Description);
+            _logger.LogInformation(_resourceLoader.Strings.EnvironmentNameFormat, _environment.EnvironmentName);
+            _logger.LogInformation(_resourceLoader.Strings.ContentRootPathFormat, _environment.ContentRootPath);
         }
 
-        private void ExecuteApplicationProcess()
+        private void InitializeConsole()
         {
-            _waitProcess.Cancel();
+            Console.OutputEncoding = _consoleOptions.Encoding;
+            CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = _consoleOptions.CultureInfo;
+            _logger.LogDebug("OutputEncoding is {OutputEncoding}; CurrentCulture is {CurrentCulture}", Console.OutputEncoding, CultureInfo.CurrentCulture);
+
+            Console.Title = _resourceLoader.AssemblyStrings.Title;
         }
     }
 }

@@ -18,7 +18,8 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-using Microsoft.Extensions.DependencyInjection;
+using ComponentBuilder;
+
 using Microsoft.Extensions.Logging;
 
 using Tuvi.Core;
@@ -29,16 +30,13 @@ namespace Eppie.CLI.Services
     internal class CoreProvider
     {
         private readonly ILogger<CoreProvider> _logger;
-        private readonly IServiceProvider _serviceProvider;
 
         private ITuviMail? _tuviMailCore;
-
         public ITuviMail TuviMailCore => _tuviMailCore ??= CreateTuviMail();
 
-        public CoreProvider(ILogger<CoreProvider> logger, IServiceProvider serviceProvider)
+        public CoreProvider(ILogger<CoreProvider> logger)
         {
             _logger = logger;
-            _serviceProvider = serviceProvider;
         }
 
         public async Task<(bool isPasswordMatched, bool isInitSuccess, string[] seed)> InitializeAsync(Func<string> passwordReader, Func<string> confirmPasswordReader)
@@ -78,9 +76,9 @@ namespace Eppie.CLI.Services
             _tuviMailCore = null;
         }
 
-        private ITuviMail CreateTuviMail()
+        private static ITuviMail CreateTuviMail()
         {
-            return _serviceProvider.GetRequiredService<ITuviMail>();
+            return Components.CreateTuviMailCore("data.db", new ImplementationDetailsProvider("Eppie seed", "Eppie.Package", "backup@system.service.eppie.io"));
         }
     }
 }

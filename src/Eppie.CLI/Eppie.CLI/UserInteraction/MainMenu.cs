@@ -16,11 +16,11 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 using Eppie.CLI.Services;
 
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using Tuvi.Toolkit.Cli;
@@ -29,49 +29,80 @@ using Tuvi.Toolkit.Cli.CommandLine;
 namespace Eppie.CLI.UserInteraction
 {
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal class MainMenu : WorkService
+    internal class MainMenu
     {
+        private const string CommandMark = ">>>";
+
+        private static class MenuCommandName
+        {
+            public const string Exit = "exit";
+            public const string Initialize = "init";
+            public const string Open = "open";
+            public const string Reset = "reset";
+            public const string Restore = "restore";
+            public const string Send = "send";
+            public const string Import = "import";
+            public const string ListAccounts = "list-accounts";
+            public const string ListContacts = "list-contacts";
+            public const string AddContact = "add-contact";
+            public const string ShowMessage = "show-message";
+            public const string ShowMessages = "show-messages";
+        }
+
+        private readonly ILogger<MainMenu> _logger;
         private readonly MenuCommand _menuCommand;
-        private readonly IHostApplicationLifetime _hostApplicationLifetime;
+        private readonly ResourceLoader _resourceLoader;
 
-        private readonly CancellationTokenSource _cancellationTokenSource = new();
-
-        public MainMenu(ILogger<MainMenu> logger, MenuCommand menuCommand, IHostApplicationLifetime hostApplicationLifetime)
-            : base(logger)
+        public MainMenu(
+            ILoggerFactory loggerFactory,
+            CoreProvider coreProvider,
+            ResourceLoader resourceLoader)
         {
-            _menuCommand = menuCommand;
-            _hostApplicationLifetime = hostApplicationLifetime;
+            _logger = loggerFactory.CreateLogger<MainMenu>();
+            _resourceLoader = resourceLoader;
+            _menuCommand = new MenuCommand(loggerFactory.CreateLogger<MenuCommand>(), coreProvider);
         }
 
-        protected override Task DoWorkAsync(CancellationToken stoppingToken)
+        public async Task LoopAsync(CancellationToken stoppingToken)
         {
-            _cancellationTokenSource.Cancel();
+            IAsyncParser commandParser = Create();
 
-            Task.Run(async () =>
+            while (!stoppingToken.IsCancellationRequested)
             {
-                using CancellationTokenSource cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, _hostApplicationLifetime.ApplicationStopping);
+                await InvokeCommandAsync(commandParser, ReadCommand()).ConfigureAwait(false);
+            }
+        }
 
-                IAsyncParser commandParser = Create();
+        private IAsyncParser Create()
+        {
+            IAsyncParser parser = BaseParser.Default();
 
-                while (!cancellationTokenSource.IsCancellationRequested)
+            ICommand root = parser.CreateRoot(
+                subcommands: new[]
                 {
-                    await InvokeCommandAsync(commandParser, ReadCommand()).ConfigureAwait(false);
+                    CreateCommand(parser, MenuCommandName.Exit, _resourceLoader.Strings.ExitDescription, action: (cmd) => _menuCommand.ExitAction()),
+                    CreateAsyncCommand(parser, MenuCommandName.Initialize, _resourceLoader.Strings.InitDescription, action: (cmd) => _menuCommand.InitActionAsync()),
+                    CreateAsyncCommand(parser, MenuCommandName.Reset, _resourceLoader.Strings.ResetDescription, action: (cmd) => _menuCommand.ResetActionAsync()),
+                    CreateAsyncCommand(parser, MenuCommandName.Open, _resourceLoader.Strings.OpenDescription, action: (cmd) => _menuCommand.OpenActionAsync()),
+                    CreateCommand(parser, MenuCommandName.ListAccounts, string.Empty, action: (cmd) => _menuCommand.ListAccountsAction()),
+                    CreateCommand(parser, MenuCommandName.AddContact, string.Empty, action: (cmd) => _menuCommand.AddAccountAction()),
+                    CreateCommand(parser, MenuCommandName.Restore, string.Empty, action: (cmd) => _menuCommand.RestoreAction()),
+                    CreateCommand(parser, MenuCommandName.Send, string.Empty, action: (cmd) => _menuCommand.SendAction()),
+                    CreateCommand(parser, MenuCommandName.ListContacts, string.Empty, action: (cmd) => _menuCommand.ListContactsAction()),
+                    CreateCommand(parser, MenuCommandName.ShowMessage, string.Empty, action: (cmd) => _menuCommand.ShowMessageAction()),
+                    CreateCommand(parser, MenuCommandName.ShowMessages, string.Empty, action: (cmd) => _menuCommand.ShowMessagesAction()),
+                    CreateCommand(parser, MenuCommandName.Import, string.Empty, action: (cmd) => _menuCommand.ImportAction()),
                 }
-            }, stoppingToken);
+            );
 
-            return Task.CompletedTask;
+            parser.Bind(root);
+
+            return parser;
         }
 
-        public override void Dispose()
+        private static string? ReadCommand()
         {
-            base.Dispose();
-
-            _cancellationTokenSource.Dispose();
-        }
-
-        public static string? ReadCommand()
-        {
-            string? cmd = ConsoleElement.ReadValue(">>> ");
+            string? cmd = ConsoleElement.ReadValue($"{CommandMark} ");
 
             if (cmd is null)
             {
@@ -81,7 +112,7 @@ namespace Eppie.CLI.UserInteraction
             return cmd;
         }
 
-        public async Task InvokeCommandAsync(IAsyncParser commandParser, string? cmd)
+        private async Task InvokeCommandAsync(IAsyncParser commandParser, string? cmd)
         {
             ArgumentNullException.ThrowIfNull(commandParser);
 
@@ -95,7 +126,7 @@ namespace Eppie.CLI.UserInteraction
 
                 int result = await commandParser.InvokeAsync(cmd).ConfigureAwait(false);
 
-                Logger.LogTrace("Command {cmd} is completed with code: {result}", cmd, result);
+                _logger.LogTrace("Command {cmd} is completed with code: {result}", cmd, result);
             }
             catch (InvalidOperationException ex)
             {
@@ -103,31 +134,16 @@ namespace Eppie.CLI.UserInteraction
             }
         }
 
-        private IAsyncParser Create()
+        private static ICommand CreateCommand(IAsyncParser parser, string name, string description, Action<ICommand>? action)
         {
-            IAsyncParser parser = BaseParser.Default();
+            Debug.Assert(parser is not null);
+            return parser.CreateCommand(name, description, action: action);
+        }
 
-            ICommand root = parser.CreateRoot(
-                subcommands: new[]
-                {
-                    _menuCommand.CreateExitCommand(parser),
-                    _menuCommand.CreateInitCommand(parser),
-                    _menuCommand.CreateResetCommand(parser),
-                    _menuCommand.CreateOpenCommand(parser),
-                    _menuCommand.CreateListAccountsCommand(parser),
-                    _menuCommand.CreateAddAccountCommand(parser),
-                    _menuCommand.CreateRestoreCommand(parser),
-                    _menuCommand.CreateSendCommand(parser),
-                    _menuCommand.CreateListContactsCommand(parser),
-                    _menuCommand.CreateShowMessageCommand(parser),
-                    _menuCommand.CreateShowMessagesCommand(parser),
-                    _menuCommand.CreateImportCommand(parser),
-                }
-            );
-
-            parser.Bind(root);
-
-            return parser;
+        private static ICommand CreateAsyncCommand(IAsyncParser parser, string name, string description, Func<IAsyncCommand, Task>? action)
+        {
+            Debug.Assert(parser is not null);
+            return parser.CreateAsyncCommand(name, description, action: action);
         }
     }
 }

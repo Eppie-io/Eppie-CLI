@@ -16,50 +16,34 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
-using Eppie.CLI.Options;
-using Eppie.CLI.Services;
-using Eppie.CLI.UserInteraction;
-
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
-using Serilog;
-
-namespace Eppie.CLI
+namespace Eppie.CLI.Options
 {
-    internal sealed class Program
+    internal interface IConfigurationSectionOptions
     {
-        public static IHost Host { get; private set; } = null!;
+        string SectionName { get; }
+    }
 
-        private static void Main(string[] args)
+    internal static class ConfigurationSectionOptionsExtension
+    {
+        public static void Configure<TOptions>(this IServiceCollection services, IConfiguration configuration)
+            where TOptions : class, IConfigurationSectionOptions
         {
-            Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
-                .UseContentRoot(AppContext.BaseDirectory)
-                .ConfigureServices(ConfigureServices)
-                .UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration))
-                .UseConsoleLifetime(options => options.SuppressStatusMessages = true)
-                .Build();
-
-            Host.Run();
-
-            Log.CloseAndFlush();
+            services.Configure<TOptions>(configureOptions => configuration.GetSection(configureOptions.SectionName));
         }
 
-        private static void ConfigureServices(HostBuilderContext ctx, IServiceCollection services)
+        public static void Configure<TOptions>(this IServiceCollection services, IConfiguration configuration, BinderOptions binderOptions)
+            where TOptions : class, IConfigurationSectionOptions
         {
-            ArgumentNullException.ThrowIfNull(ctx);
+            static void Clone(BinderOptions options, BinderOptions other)
+            {
+                options.ErrorOnUnknownConfiguration = other.ErrorOnUnknownConfiguration;
+                options.BindNonPublicProperties = other.BindNonPublicProperties;
+            }
 
-            services.Configure<ConsoleOptions>(ctx.Configuration, new BinderOptions { BindNonPublicProperties = true });
-
-            services.AddLocalization()
-                    .AddSingleton<ResourceLoader>()
-                    .AddSingleton<CoreProvider>()
-
-                    //.AddTransient<MenuCommand>()
-                    .AddSingleton<MainMenu>()
-
-                    .AddHostedService<Application>();
+            services.Configure<TOptions>(options => configuration.GetSection(options.SectionName).Bind(options, opt => Clone(opt, binderOptions)));
         }
     }
 }
