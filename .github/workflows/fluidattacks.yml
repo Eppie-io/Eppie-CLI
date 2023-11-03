@@ -1,11 +1,23 @@
    name: Makes fluidattacks checks
-   on: [push, pull_request]
+   
+   on:
+     push:
+       branches:
+         - main
+         - develop
+         - release/**
+     pull_request:
+       branches:
+         - main
+         - develop
+         - release/**
+      
    jobs:
-      machineStandalone:
+      fluidattacks_checks:
          runs-on: ubuntu-latest
          steps:
+            - name: machineStandalone
             - uses: actions/checkout@f095bcc56b7c2baf48f3ac70d6d6782f4f553222
-            - uses: docker://ghcr.io/fluidattacks/makes/amd64:23.06
-         name: machineStandalone
-           with:
-           args: m gitlab:fluidattacks/universe@trunk /skims scan /path/config
+            - uses: docker://ghcr.io/fluidattacks/makes/amd64:23.06            
+              with:
+                 args: m gitlab:fluidattacks/universe@trunk /skims scan /path/config
