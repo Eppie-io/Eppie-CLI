@@ -1,4 +1,4 @@
-   name: Makes fluidattacks checks
+   name: Fluidattacks checks
    
    on:
      push:
@@ -25,4 +25,4 @@
          - name: fluidattacks           
            uses: docker://ghcr.io/fluidattacks/makes/amd64:23.06            
            with:
-            args: m gitlab:fluidattacks/universe@trunk /skims scan /path/config
+            args: m gitlab:fluidattacks/universe@trunk /skims scan /fluidattacks/config.yaml
