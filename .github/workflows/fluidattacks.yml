@@ -16,8 +16,13 @@
       fluidattacks_checks:
          runs-on: ubuntu-latest
          steps:
-            - name: machineStandalone
-            - uses: actions/checkout@f095bcc56b7c2baf48f3ac70d6d6782f4f553222
-            - uses: docker://ghcr.io/fluidattacks/makes/amd64:23.06            
-              with:
-                 args: m gitlab:fluidattacks/universe@trunk /skims scan /path/config
+         - name: Checkout
+           uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+           with:
+            fetch-depth: 0
+            submodules: recursive
+        
+         - name: fluidattacks           
+           uses: docker://ghcr.io/fluidattacks/makes/amd64:23.06            
+           with:
+            args: m gitlab:fluidattacks/universe@trunk /skims scan /path/config
