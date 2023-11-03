@@ -1,13 +1,12 @@
-namespace: OWASP
+namespace: Eppie
 output:
   file_path: ./Fluid-Attacks-Results.csv
   format: CSV
 working_dir: .
 sast:
   include:
-    - .
+    - src/Eppie.CLI/
 sca:
   include:
     - .
-
 language: EN
