@@ -25,4 +25,4 @@
          - name: fluidattacks           
            uses: docker://ghcr.io/fluidattacks/makes/amd64:23.06            
            with:
-            args: m gitlab:fluidattacks/universe@trunk /skims scan ./fluidattacks_config.yaml
+            args: m gitlab:fluidattacks/universe@trunk /skims scan ./.github/workflows/fluidattacks_config.yaml
