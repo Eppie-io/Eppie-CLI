@@ -16,7 +16,7 @@ output:
 # Description:
 #   Working directory, normally used as the path to the repository.
 # Example:
-working_dir: .
+working_dir: ../../Eppie-CLI/src/Eppie.CLI/
 
 # Description:
 #   SAST for source code.
