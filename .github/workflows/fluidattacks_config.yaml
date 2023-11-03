@@ -16,7 +16,7 @@ output:
 # Description:
 #   Working directory, normally used as the path to the repository.
 # Example:
-working_dir: ../../Eppie-CLI/src/Eppie.CLI/
+working_dir: /home/runner/work/Eppie-CLI/
 
 # Description:
 #   SAST for source code.
@@ -27,7 +27,7 @@ path:
   # Example:
   include:
     # Absolute path
-    - .
+    - /home/runner/work/Eppie-CLI/Eppie-CLI/src/Eppie.CLI/
     # Relative path to `working_dir`
     - .
 
