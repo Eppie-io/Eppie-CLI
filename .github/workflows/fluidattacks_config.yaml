@@ -39,10 +39,10 @@ path:
   # Example:
   # include:
     # Absolute paths
-    - /app/app-arm-debug-Android5.apk
-    - /app/app-arm-debug.apk
-    - /app/app-x86-debug-Android5.apk
-    - /app/app-x86-debug.apk
+    #- /app/app-arm-debug-Android5.apk
+    #- /app/app-arm-debug.apk
+    #- /app/app-x86-debug-Android5.apk
+    #- /app/app-x86-debug.apk
 
 
 # Description:
