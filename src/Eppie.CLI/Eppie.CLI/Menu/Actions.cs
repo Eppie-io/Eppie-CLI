@@ -24,33 +24,31 @@ using Microsoft.Extensions.Logging;
 
 using Tuvi.Core;
 
-namespace Eppie.CLI.UserInteraction
+namespace Eppie.CLI.Menu
 {
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal class MenuCommand
+    internal class Actions
     {
-        private readonly ILogger<MenuCommand> _logger;
-        //private readonly IHostApplicationLifetime _hostApplicationLifetime;
+        private readonly ILogger<Actions> _logger;
+        private readonly Application _application;
         private readonly CoreProvider _coreProvider;
 
-        public MenuCommand(
-            ILogger<MenuCommand> logger,
+        public Actions(
+            ILogger<Actions> logger,
+            Application application,
             CoreProvider coreProvider)
         {
             _logger = logger;
-            //_hostApplicationLifetime = hostApplicationLifetime;
+            _application = application;
             _coreProvider = coreProvider;
         }
 
         internal void ExitAction()
         {
-            _logger.LogDebug("MenuCommand.ExitAction has been called.");
-            _logger.LogInformation("Exit.");
-            //_hostApplicationLifetime.StopApplication();
+            _logger.LogTrace("Actions.ExitAction has been called.");
+            _application.StopApplication();
         }
 
-        // ToDo: CA1303:Do not pass literals as localized parameters - The output strings must be placed into resources.
-        [SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "This is temporary. It should be placed in resources.")]
         internal async Task InitActionAsync()
         {
             _logger.LogTrace("MenuCommand.InitActionAsync has been called.");
@@ -65,9 +63,9 @@ namespace Eppie.CLI.UserInteraction
 
             ISecurityManager sm = _coreProvider.TuviMailCore.GetSecurityManager();
             string[] seedPhrase = await sm.CreateSeedPhraseAsync().ConfigureAwait(false);
-            string password = ConsoleElement.ReadSecretValue("Password: ") ?? string.Empty;
+            string password = _application.ReadSecretValue("Password: ") ?? string.Empty;
 
-            if (password.Length == 0 || password != ConsoleElement.ReadSecretValue("Confirm password: "))
+            if (password.Length == 0 || password != _application.ReadSecretValue("Confirm password: "))
             {
                 _logger.LogWarning("Invalid password.");
             }
@@ -77,11 +75,7 @@ namespace Eppie.CLI.UserInteraction
             if (success)
             {
                 _logger.LogInformation("Eppie is initialized.");
-                Console.WriteLine("Your seed phrase is \n");
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"{string.Join(' ', seedPhrase)}\n");
-                Console.ResetColor();
-                Console.WriteLine("IMPORTANT, copy and keep it in secret");
+                _application.WriteSeedPhrase(seedPhrase);
             }
             else
             {
@@ -119,7 +113,7 @@ namespace Eppie.CLI.UserInteraction
                 return;
             }
 
-            string password = ConsoleElement.ReadSecretValue("Password: ") ?? string.Empty;
+            string password = _application.ReadSecretValue("Password: ") ?? string.Empty;
 
             bool success = await _coreProvider.TuviMailCore.InitializeApplicationAsync(password).ConfigureAwait(false);
 

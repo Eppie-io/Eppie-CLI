@@ -16,9 +16,9 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
+using Eppie.CLI.Menu;
 using Eppie.CLI.Options;
 using Eppie.CLI.Services;
-using Eppie.CLI.UserInteraction;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -55,11 +55,10 @@ namespace Eppie.CLI
             services.AddLocalization()
                     .AddSingleton<ResourceLoader>()
                     .AddSingleton<CoreProvider>()
-
-                    //.AddTransient<MenuCommand>()
                     .AddSingleton<MainMenu>()
+                    .AddSingleton<Application>()
 
-                    .AddHostedService<Application>();
+                    .AddHostedService<ApplicationLoop>();
         }
     }
 }

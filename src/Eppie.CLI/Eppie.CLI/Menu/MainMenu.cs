@@ -23,10 +23,9 @@ using Eppie.CLI.Services;
 
 using Microsoft.Extensions.Logging;
 
-using Tuvi.Toolkit.Cli;
 using Tuvi.Toolkit.Cli.CommandLine;
 
-namespace Eppie.CLI.UserInteraction
+namespace Eppie.CLI.Menu
 {
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
     internal class MainMenu
@@ -50,17 +49,20 @@ namespace Eppie.CLI.UserInteraction
         }
 
         private readonly ILogger<MainMenu> _logger;
-        private readonly MenuCommand _menuCommand;
+        private readonly Actions _actions;
+        private readonly Application _application;
         private readonly ResourceLoader _resourceLoader;
 
         public MainMenu(
             ILoggerFactory loggerFactory,
+            Application application,
             CoreProvider coreProvider,
             ResourceLoader resourceLoader)
         {
             _logger = loggerFactory.CreateLogger<MainMenu>();
+            _application = application;
             _resourceLoader = resourceLoader;
-            _menuCommand = new MenuCommand(loggerFactory.CreateLogger<MenuCommand>(), coreProvider);
+            _actions = new Actions(loggerFactory.CreateLogger<Actions>(), _application, coreProvider);
         }
 
         public async Task LoopAsync(CancellationToken stoppingToken)
@@ -69,7 +71,7 @@ namespace Eppie.CLI.UserInteraction
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                await InvokeCommandAsync(commandParser, ReadCommand()).ConfigureAwait(false);
+                await InvokeCommandAsync(commandParser, _application.ReadCommandMenu(CommandMark)).ConfigureAwait(false);
             }
         }
 
@@ -80,36 +82,24 @@ namespace Eppie.CLI.UserInteraction
             ICommand root = parser.CreateRoot(
                 subcommands: new[]
                 {
-                    CreateCommand(parser, MenuCommandName.Exit, _resourceLoader.Strings.ExitDescription, action: (cmd) => _menuCommand.ExitAction()),
-                    CreateAsyncCommand(parser, MenuCommandName.Initialize, _resourceLoader.Strings.InitDescription, action: (cmd) => _menuCommand.InitActionAsync()),
-                    CreateAsyncCommand(parser, MenuCommandName.Reset, _resourceLoader.Strings.ResetDescription, action: (cmd) => _menuCommand.ResetActionAsync()),
-                    CreateAsyncCommand(parser, MenuCommandName.Open, _resourceLoader.Strings.OpenDescription, action: (cmd) => _menuCommand.OpenActionAsync()),
-                    CreateCommand(parser, MenuCommandName.ListAccounts, string.Empty, action: (cmd) => _menuCommand.ListAccountsAction()),
-                    CreateCommand(parser, MenuCommandName.AddContact, string.Empty, action: (cmd) => _menuCommand.AddAccountAction()),
-                    CreateCommand(parser, MenuCommandName.Restore, string.Empty, action: (cmd) => _menuCommand.RestoreAction()),
-                    CreateCommand(parser, MenuCommandName.Send, string.Empty, action: (cmd) => _menuCommand.SendAction()),
-                    CreateCommand(parser, MenuCommandName.ListContacts, string.Empty, action: (cmd) => _menuCommand.ListContactsAction()),
-                    CreateCommand(parser, MenuCommandName.ShowMessage, string.Empty, action: (cmd) => _menuCommand.ShowMessageAction()),
-                    CreateCommand(parser, MenuCommandName.ShowMessages, string.Empty, action: (cmd) => _menuCommand.ShowMessagesAction()),
-                    CreateCommand(parser, MenuCommandName.Import, string.Empty, action: (cmd) => _menuCommand.ImportAction()),
+                    CreateCommand(parser, MenuCommandName.Exit, _resourceLoader.Strings.ExitDescription, action: (cmd) => _actions.ExitAction()),
+                    CreateAsyncCommand(parser, MenuCommandName.Initialize, _resourceLoader.Strings.InitDescription, action: (cmd) => _actions.InitActionAsync()),
+                    CreateAsyncCommand(parser, MenuCommandName.Reset, _resourceLoader.Strings.ResetDescription, action: (cmd) => _actions.ResetActionAsync()),
+                    CreateAsyncCommand(parser, MenuCommandName.Open, _resourceLoader.Strings.OpenDescription, action: (cmd) => _actions.OpenActionAsync()),
+                    CreateCommand(parser, MenuCommandName.ListAccounts, string.Empty, action: (cmd) => _actions.ListAccountsAction()),
+                    CreateCommand(parser, MenuCommandName.AddContact, string.Empty, action: (cmd) => _actions.AddAccountAction()),
+                    CreateCommand(parser, MenuCommandName.Restore, string.Empty, action: (cmd) => _actions.RestoreAction()),
+                    CreateCommand(parser, MenuCommandName.Send, string.Empty, action: (cmd) => _actions.SendAction()),
+                    CreateCommand(parser, MenuCommandName.ListContacts, string.Empty, action: (cmd) => _actions.ListContactsAction()),
+                    CreateCommand(parser, MenuCommandName.ShowMessage, string.Empty, action: (cmd) => _actions.ShowMessageAction()),
+                    CreateCommand(parser, MenuCommandName.ShowMessages, string.Empty, action: (cmd) => _actions.ShowMessagesAction()),
+                    CreateCommand(parser, MenuCommandName.Import, string.Empty, action: (cmd) => _actions.ImportAction()),
                 }
             );
 
             parser.Bind(root);
 
             return parser;
-        }
-
-        private static string? ReadCommand()
-        {
-            string? cmd = ConsoleElement.ReadValue($"{CommandMark} ");
-
-            if (cmd is null)
-            {
-                Console.WriteLine();
-            }
-
-            return cmd;
         }
 
         private async Task InvokeCommandAsync(IAsyncParser commandParser, string? cmd)
@@ -120,7 +110,7 @@ namespace Eppie.CLI.UserInteraction
             {
                 if (cmd is null)
                 {
-                    _menuCommand.ExitAction();
+                    _actions.ExitAction();
                     return;
                 }
 
@@ -130,7 +120,7 @@ namespace Eppie.CLI.UserInteraction
             }
             catch (InvalidOperationException ex)
             {
-                ConsoleExtension.WriteLine(ex.ToString(), ConsoleColor.Red);
+                _application.Error(ex);
             }
         }
 
