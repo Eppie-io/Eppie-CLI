@@ -67,6 +67,7 @@ namespace Eppie.CLI.Menu
 
         public async Task LoopAsync(CancellationToken stoppingToken)
         {
+            _logger.LogTrace("MainMenu.LoopAsync has been called.");
             IAsyncParser commandParser = Create();
 
             while (!stoppingToken.IsCancellationRequested)
@@ -77,6 +78,8 @@ namespace Eppie.CLI.Menu
 
         private IAsyncParser Create()
         {
+            _logger.LogTrace("MainMenu.Create has been called.");
+
             IAsyncParser parser = BaseParser.Default();
 
             ICommand root = parser.CreateRoot(
@@ -116,7 +119,7 @@ namespace Eppie.CLI.Menu
 
                 int result = await commandParser.InvokeAsync(cmd).ConfigureAwait(false);
 
-                _logger.LogTrace("Command {cmd} is completed with code: {result}", cmd, result);
+                _logger.LogDebug("Command {cmd} is completed with code: {result}", cmd, result);
             }
             catch (InvalidOperationException ex)
             {
@@ -124,16 +127,47 @@ namespace Eppie.CLI.Menu
             }
         }
 
-        private static ICommand CreateCommand(IAsyncParser parser, string name, string description, Action<ICommand>? action)
+        private ICommand CreateCommand(IAsyncParser parser, string name, string description, Action<ICommand>? action)
         {
             Debug.Assert(parser is not null);
-            return parser.CreateCommand(name, description, action: action);
+
+            [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "to log exceptions")]
+            void HandleException(ICommand cmd)
+            {
+                try
+                {
+                    action?.Invoke(cmd);
+                }
+                catch (Exception ex)
+                {
+                    _application.Error(ex);
+                }
+            }
+
+            return parser.CreateCommand(name, description, action: HandleException);
         }
 
-        private static ICommand CreateAsyncCommand(IAsyncParser parser, string name, string description, Func<IAsyncCommand, Task>? action)
+        private ICommand CreateAsyncCommand(IAsyncParser parser, string name, string description, Func<IAsyncCommand, Task>? action)
         {
             Debug.Assert(parser is not null);
-            return parser.CreateAsyncCommand(name, description, action: action);
+
+            [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "to log exceptions")]
+            async Task HandleException(IAsyncCommand cmd)
+            {
+                try
+                {
+                    if (action is not null)
+                    {
+                        await action.Invoke(cmd).ConfigureAwait(false);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _application.Error(ex);
+                }
+            }
+
+            return parser.CreateAsyncCommand(name, description, action: HandleException);
         }
     }
 }

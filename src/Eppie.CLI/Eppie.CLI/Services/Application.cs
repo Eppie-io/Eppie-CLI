@@ -49,6 +49,7 @@ namespace Eppie.CLI.Services
             Debug.Assert(consoleOptions is not null);
 
             _logger = logger;
+
             _lifetime = lifetime;
             _environment = environment;
             _resourceLoader = resourceLoader;
@@ -56,28 +57,29 @@ namespace Eppie.CLI.Services
             _consoleOptions = consoleOptions.Value;
         }
 
-        public void StopApplication()
+        internal void InitializeConsole()
+        {
+            Console.OutputEncoding = _consoleOptions.Encoding;
+            CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = _consoleOptions.CultureInfo;
+            Console.Title = _resourceLoader.AssemblyStrings.Title;
+
+            _logger.LogDebug(
+                "OutputEncoding is {OutputEncoding}; CurrentCulture is {CurrentCulture}",
+                Console.OutputEncoding,
+                CultureInfo.CurrentCulture);
+        }
+
+        internal void StopApplication()
         {
             _logger.LogDebug("Application.StopApplication has been called.");
             _lifetime.StopApplication();
 
-            WriteGoodbye();
+            WriteGoodbyeMessage();
         }
 
-        public string? ReadValue(string message, ConsoleColor foreground = ConsoleColor.Gray)
+        internal string? ReadCommandMenu(string commandMark)
         {
-            _logger.LogTrace("Application ReadValue has been called.");
-            return ConsoleExtension.ReadValue(message, (message) => ConsoleExtension.Write(message, foreground), Console.ReadLine);
-        }
-
-        public string? ReadSecretValue(string message, ConsoleColor foreground = ConsoleColor.Gray)
-        {
-            _logger.LogTrace("Application ReadSecretValue has been called.");
-            return ConsoleExtension.ReadValue(message, (message) => ConsoleExtension.Write(message, foreground), () => ConsoleExtension.ReadSecretLine());
-        }
-
-        public string? ReadCommandMenu(string commandMark)
-        {
+            _logger.LogTrace("Application ReadCommandMenu has been called.");
             string? cmd = ReadValue($"{commandMark} ");
 
             if (cmd is null)
@@ -88,54 +90,138 @@ namespace Eppie.CLI.Services
             return cmd;
         }
 
-        public void InitializeConsole()
+        internal string AskPassword()
         {
-            Console.OutputEncoding = _consoleOptions.Encoding;
-            CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = _consoleOptions.CultureInfo;
-            Console.Title = _resourceLoader.AssemblyStrings.Title;
+            _logger.LogTrace("Application.ReadPassword has been called.");
 
-            _logger.LogDebug("OutputEncoding is {OutputEncoding}; CurrentCulture is {CurrentCulture}",
-                Console.OutputEncoding,
-                CultureInfo.CurrentCulture);
+            return ReadSecretValue(_resourceLoader.Strings.AskPassword) ?? string.Empty;
         }
 
-        public void WriteGreeting()
+        internal string ConfirmPassword()
+        {
+            _logger.LogTrace("Application.ReadPassword has been called.");
+
+            return ReadSecretValue(_resourceLoader.Strings.ConfirmPassword) ?? string.Empty;
+        }
+
+        internal void WriteGreetingMessage()
         {
             _logger.LogTrace("Application.WriteApplicationHeader has been called.");
 
-            _logger.LogInformation(_resourceLoader.Strings.LogoFormat,
-                                   _resourceLoader.AssemblyStrings.Title,
-                                   _resourceLoader.AssemblyStrings.Version);
-            _logger.LogInformation(_resourceLoader.Strings.Description);
-            _logger.LogInformation(_resourceLoader.Strings.EnvironmentNameFormat, _environment.EnvironmentName);
-            _logger.LogInformation(_resourceLoader.Strings.ContentRootPathFormat, _environment.ContentRootPath);
+            _logger.LogDebug("Application title is '{Title}'; version is {version}",
+                            _resourceLoader.AssemblyStrings.Title,
+                            _resourceLoader.AssemblyStrings.Version);
+            Console.WriteLine(_resourceLoader.Strings.GetLogo(_resourceLoader.AssemblyStrings.Title,
+                                                              _resourceLoader.AssemblyStrings.Version));
+
+            using IDisposable? consoleLogScope = ConsoleLogScope();
+            {
+                _logger.LogInformation("Hosting environment: {Environment}", _environment.EnvironmentName);
+                _logger.LogInformation("Content root path: {RootPath}", _environment.ContentRootPath);
+            }
+
+            Console.WriteLine(_resourceLoader.Strings.Description);
         }
 
-        public void WriteGoodbye()
+        internal void WriteGoodbyeMessage()
         {
-            _logger.LogInformation(_resourceLoader.Strings.Goodbye);
+            _logger.LogTrace("Application.WriteGoodbye has been called.");
+            Console.WriteLine(_resourceLoader.Strings.Goodbye);
         }
 
-        // ToDo: CA1303:Do not pass literals as localized parameters - The output strings must be placed into resources.
-        [SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "This is temporary. It should be placed in resources.")]
-        public void WriteSeedPhrase(string[] seedPhrase)
+        internal void WriteApplicationInitializationMessage(string[] seedPhrase)
         {
-            _logger.LogTrace("Application.WriteSeedPhrase has been called.");
+            _logger.LogDebug("The application has been initialized.");
 
-            Console.WriteLine("Your seed phrase is \n");
+            Console.WriteLine();
+            Console.WriteLine(_resourceLoader.Strings.SeedPhraseHeader);
+            Console.WriteLine();
+
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"{string.Join(' ', seedPhrase)}\n");
+            Console.WriteLine($"{string.Join(' ', seedPhrase)}");
             Console.ResetColor();
-            Console.WriteLine("IMPORTANT, copy and keep it in secret");
+
+            Console.WriteLine();
+            Console.WriteLine(_resourceLoader.Strings.SeedPhraseFooter);
         }
 
-        public void Error(Exception ex)
+        internal void WriteApplicationResetMessage()
         {
-            Debug.Assert(ex is not null);
-            _logger.LogTrace("Application.Error has been called.");
+            _logger.LogDebug("The application has been reset.");
+            Console.WriteLine(_resourceLoader.Strings.AppReset);
+        }
+
+        internal void WriteApplicationOpenedMessage()
+        {
+            _logger.LogDebug("The application was opened.");
+            Console.WriteLine(_resourceLoader.Strings.AppOpened);
+        }
+
+        internal void WriteInvalidPasswordWarning()
+        {
+            LogCommandWarning("Invalid Password");
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(_resourceLoader.Strings.InvalidPassword);
+            Console.ResetColor();
+        }
+
+        internal void WriteSecondInitializationWarning()
+        {
+            LogCommandWarning("The application has already been initialized.");
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(_resourceLoader.Strings.SecondInitialization);
+            Console.ResetColor();
+        }
+
+        internal void WriteUninitializedAppWarning()
+        {
+            LogCommandWarning("The application hasn't been initialized yet.");
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(_resourceLoader.Strings.Uninitialized);
+            Console.ResetColor();
+        }
+
+        internal void WriteImpossibleInitializationError()
+        {
+            _logger.LogError("The application could not be initialized.");
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(_resourceLoader.Strings.ImpossibleInitialization);
+            Console.ResetColor();
+        }
+
+        internal void Error(Exception ex)
+        {
             _logger.LogError("An error has occurred {Exception}", ex);
 
-            ConsoleExtension.WriteLine(ex.ToString(), ConsoleColor.Red);
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(_resourceLoader.Strings.GetUnhandledException(ex));
+            Console.ResetColor();
+        }
+
+        private string? ReadValue(string message, ConsoleColor foreground = ConsoleColor.Gray)
+        {
+            _logger.LogTrace("Application.ReadValue has been called.");
+            return ConsoleExtension.ReadValue(message, (message) => ConsoleExtension.Write(message, foreground), Console.ReadLine);
+        }
+
+        private string? ReadSecretValue(string message, ConsoleColor foreground = ConsoleColor.Gray)
+        {
+            _logger.LogTrace("Application.ReadSecretValue has been called.");
+            return ConsoleExtension.ReadValue(message, (message) => ConsoleExtension.Write(message, foreground), () => ConsoleExtension.ReadSecretLine());
+        }
+
+        private void LogCommandWarning(string reason)
+        {
+            _logger.LogWarning("The command failed. (Reason: {reason}).", reason);
+        }
+
+        private IDisposable? ConsoleLogScope()
+        {
+            return _logger.BeginScope(new Dictionary<string, object> { { "scope", "console" } });
         }
     }
 }

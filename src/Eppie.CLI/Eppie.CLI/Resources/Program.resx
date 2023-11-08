@@ -117,25 +117,15 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Header.ContentRootPathFormat" xml:space="preserve">
-    <value>Content root path: {ContentRoot}</value>
-    <comment>The console output text with the absolute path to the directory that contains the application content files.
-{ContentRoot} is the directory path parameter.</comment>
-  </data>
   <data name="Header.Description" xml:space="preserve">
     <value>Application started. Press Ctrl+C to shut down.</value>
     <comment>Application description and additional information.</comment>
   </data>
-  <data name="Header.EnvironmentNameFormat" xml:space="preserve">
-    <value>Hosting environment: {EnvName}</value>
-    <comment>The console output text with the name of the environment from which the application was launched.
-{EnvName} is the application environment name parameter.</comment>
-  </data>
   <data name="Header.LogoFormat" xml:space="preserve">
-    <value>Hello, I'm {AppName} (version {AppVer})</value>
+    <value>Hello, I'm {0} (version {1})</value>
     <comment>The startup banner or the copyright message.
-{AppName} is a parameter containing the title of the application;
-{AppVer} is a parameter containing the version of the application.</comment>
+{0} is a parameter containing the title of the application;
+{1} is a parameter containing the version of the application.</comment>
   </data>
   <data name="Message.Goodbye" xml:space="preserve">
     <value>Application is shutting down...</value>
@@ -156,5 +146,41 @@
   <data name="Menu.ResetDescription" xml:space="preserve">
     <value>Reset the application and erase all of its data.</value>
     <comment>Description of the 'reset' command in the help.</comment>
+  </data>
+  <data name="Error.UnhandledException" xml:space="preserve">
+    <value>An error has occurred: 
+{0}</value>
+    <comment>{0} contains error information.</comment>
+  </data>
+  <data name="Message.SeedPhraseFooter" xml:space="preserve">
+    <value>IMPORTANT, copy and keep it in secret.</value>
+  </data>
+  <data name="Message.SeedPhraseHeader" xml:space="preserve">
+    <value>The application has been initialized. Your seed phrase is</value>
+  </data>
+  <data name="Warning.InvalidPassword" xml:space="preserve">
+    <value>Warning: Invalid password.</value>
+    <comment>Invalid password message.</comment>
+  </data>
+  <data name="Warning.SecondInitialization" xml:space="preserve">
+    <value>Warning: The application has already been initialized.</value>
+  </data>
+  <data name="Error.ImpossibleInitialization" xml:space="preserve">
+    <value>Error: The application could not be initialized.</value>
+  </data>
+  <data name="Message.AppOpened" xml:space="preserve">
+    <value>The application was opened successfully.</value>
+  </data>
+  <data name="Message.AppReset" xml:space="preserve">
+    <value>The application has just been reset.</value>
+  </data>
+  <data name="Message.AskPassword" xml:space="preserve">
+    <value>Password: </value>
+  </data>
+  <data name="Message.ConfirmPassword" xml:space="preserve">
+    <value>Confirm password: </value>
+  </data>
+  <data name="Warning.Uninitialized" xml:space="preserve">
+    <value>Warning: The application hasn't been initialized yet.</value>
   </data>
 </root>

@@ -57,29 +57,29 @@ namespace Eppie.CLI.Menu
 
             if (!isFirstTime)
             {
-                _logger.LogWarning("Eppie is already initialized.");
+                _application.WriteSecondInitializationWarning();
                 return;
             }
 
             ISecurityManager sm = _coreProvider.TuviMailCore.GetSecurityManager();
             string[] seedPhrase = await sm.CreateSeedPhraseAsync().ConfigureAwait(false);
-            string password = _application.ReadSecretValue("Password: ") ?? string.Empty;
+            string password = _application.AskPassword();
 
-            if (password.Length == 0 || password != _application.ReadSecretValue("Confirm password: "))
+            if (password.Length == 0 || password != _application.ConfirmPassword())
             {
-                _logger.LogWarning("Invalid password.");
+                _application.WriteInvalidPasswordWarning();
+                return;
             }
 
             bool success = await _coreProvider.TuviMailCore.InitializeApplicationAsync(password).ConfigureAwait(false);
 
             if (success)
             {
-                _logger.LogInformation("Eppie is initialized.");
-                _application.WriteSeedPhrase(seedPhrase);
+                _application.WriteApplicationInitializationMessage(seedPhrase);
             }
             else
             {
-                _logger.LogError("Eppie could not be initialized.");
+                _application.WriteImpossibleInitializationError();
             }
         }
 
@@ -87,18 +87,8 @@ namespace Eppie.CLI.Menu
         {
             _logger.LogTrace("MenuCommand.ResetActionAsync has been called.");
 
-            try
-            {
-                await _coreProvider.ResetAsync().ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.ToString());
-
-                throw;
-            }
-
-            _logger.LogInformation("Eppie was reset.");
+            await _coreProvider.ResetAsync().ConfigureAwait(false);
+            _application.WriteApplicationResetMessage();
         }
 
         internal async Task OpenActionAsync()
@@ -109,62 +99,68 @@ namespace Eppie.CLI.Menu
 
             if (isFirstTime)
             {
-                _logger.LogWarning("Eppie hasn't been initialized yet.");
+                _application.WriteUninitializedAppWarning();
                 return;
             }
 
-            string password = _application.ReadSecretValue("Password: ") ?? string.Empty;
-
-            bool success = await _coreProvider.TuviMailCore.InitializeApplicationAsync(password).ConfigureAwait(false);
+            bool success = await _coreProvider.TuviMailCore.InitializeApplicationAsync(_application.AskPassword()).ConfigureAwait(false);
 
             if (success)
             {
-                _logger.LogInformation("The instance was opened successfully.");
+                _application.WriteApplicationOpenedMessage();
             }
             else
             {
-                _logger.LogWarning("Invalid password.");
+                _application.WriteInvalidPasswordWarning();
             }
         }
 
         internal void ListAccountsAction()
         {
             _logger.LogTrace("MenuCommand.ListAccountsAction has been called.");
+            throw new NotImplementedException();
         }
 
         internal void AddAccountAction()
         {
             _logger.LogTrace("MenuCommand.AddAccountAction has been called.");
+            throw new NotImplementedException();
         }
 
         internal void RestoreAction()
         {
             _logger.LogTrace("MenuCommand.RestoreAction has been called.");
+            throw new NotImplementedException();
         }
 
         internal void SendAction()
         {
             _logger.LogTrace("MenuCommand.SendAction has been called.");
+            throw new NotImplementedException();
         }
 
         internal void ListContactsAction()
         {
             _logger.LogTrace("MenuCommand.ListContactsAction has been called.");
+            throw new NotImplementedException();
         }
 
         internal void ShowMessageAction()
         {
             _logger.LogTrace("MenuCommand.ShowMessageAction has been called.");
+            throw new NotImplementedException();
         }
 
         internal void ShowMessagesAction()
         {
             _logger.LogTrace("MenuCommand.ShowMessagesAction has been called.");
+            throw new NotImplementedException();
         }
 
         internal void ImportAction()
         {
             _logger.LogTrace("MenuCommand.ImportAction has been called.");
+            throw new NotImplementedException();
         }
     }
 }
