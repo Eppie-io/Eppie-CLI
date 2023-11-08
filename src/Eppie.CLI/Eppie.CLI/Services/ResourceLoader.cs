@@ -74,6 +74,18 @@ namespace Eppie.CLI.Services
             private string? _goodbye;
             internal string Goodbye => _goodbye ??= _localizer.LoadString(GetStringResourceName());
 
+            private string? _exitDescription;
+            internal string ExitDescription => _exitDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+
+            private string? _initDescription;
+            internal string InitDescription => _initDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+
+            private string? _openDescription;
+            internal string OpenDescription => _openDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+
+            private string? _resetDescription;
+            internal string ResetDescription => _resetDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+
             private static string GetStringResourceName(string category = "Message", [CallerMemberName] string name = "")
             {
                 return string.Join('.', new string?[] { category, name });

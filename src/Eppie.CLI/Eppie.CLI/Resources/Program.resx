@@ -137,8 +137,24 @@
 {AppName} is a parameter containing the title of the application;
 {AppVer} is a parameter containing the version of the application.</comment>
   </data>
-  <data name="Message.Goobye" xml:space="preserve">
+  <data name="Message.Goodbye" xml:space="preserve">
     <value>Application is shutting down...</value>
     <comment>Application farewell message.</comment>
+  </data>
+  <data name="Menu.ExitDescription" xml:space="preserve">
+    <value>Exit the application.</value>
+    <comment>Description of the 'exit' command in the help.</comment>
+  </data>
+  <data name="Menu.InitDescription" xml:space="preserve">
+    <value>Initialize the application and create a new account.</value>
+    <comment>Description of the 'init' command in the help.</comment>
+  </data>
+  <data name="Menu.OpenDescription" xml:space="preserve">
+    <value>Open an existing account.</value>
+    <comment>Description of the 'open' command in the help.</comment>
+  </data>
+  <data name="Menu.ResetDescription" xml:space="preserve">
+    <value>Reset the application and erase all of its data.</value>
+    <comment>Description of the 'reset' command in the help.</comment>
   </data>
 </root>
