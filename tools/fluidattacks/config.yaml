@@ -1,6 +1,6 @@
 namespace: Eppie
 output:
-  file_path: ./output/fluidattacks/results.csv
+  file_path: ./tools/fluidattacks/output/results.csv
   format: CSV
 working_dir: .
 sast:
