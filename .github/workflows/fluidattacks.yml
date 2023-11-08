@@ -1,0 +1,28 @@
+   name: Fluidattacks checks
+   
+   on:
+     push:
+       branches:
+         - main
+         - develop
+         - release/**
+     pull_request:
+       branches:
+         - main
+         - develop
+         - release/**
+      
+   jobs:
+      fluidattacks_checks:
+         runs-on: ubuntu-latest
+         steps:
+         - name: Checkout
+           uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # v3.5.3
+           with:
+            fetch-depth: 0
+            submodules: recursive
+        
+         - name: fluidattacks           
+           uses: docker://ghcr.io/fluidattacks/makes/amd64:23.06            
+           with:
+            args: m gitlab:fluidattacks/universe@trunk /skims scan ./.github/workflows/fluidattacks_config.yaml
