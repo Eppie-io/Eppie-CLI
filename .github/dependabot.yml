@@ -25,3 +25,7 @@ updates:
       - "al-kau"
       - "ValeraFinebits"
       - "anatolse"
+    groups:
+      submodules:
+        patterns:
+          - "*"
