@@ -1,11 +1,11 @@
 namespace: Eppie
 output:
-  file_path: ./Fluid-Attacks-Results.csv
+  file_path: ./tools/fluidattacks/output/results.csv
   format: CSV
 working_dir: .
 sast:
   include:
-    - src/Eppie.CLI/
+    - ./src/Eppie.CLI/
 sca:
   include:
     - .
