@@ -82,6 +82,24 @@ namespace Eppie.CLI.Services
             private string? _confirmPassword;
             internal string ConfirmPassword => _confirmPassword ??= _localizer.LoadString(GetStringResourceName());
 
+            private string? _askAccountAddress;
+            internal string AskAccountAddress => _askAccountAddress ??= _localizer.LoadString(GetStringResourceName());
+
+            private string? _askAccountPassword;
+            internal string AskAccountPassword => _askAccountPassword ??= _localizer.LoadString(GetStringResourceName());
+
+            private string? _askIMAPServer;
+            internal string AskIMAPServer => _askIMAPServer ??= _localizer.LoadString(GetStringResourceName());
+
+            private string? _askSMTPServer;
+            internal string AskSMTPServer => _askSMTPServer ??= _localizer.LoadString(GetStringResourceName());
+
+            private string? _headerAccountList;
+            internal string HeaderAccountList => _headerAccountList ??= _localizer.LoadString(GetStringResourceName());
+
+            private string? _emptyAccountList;
+            internal string EmptyAccountList => _emptyAccountList ??= _localizer.LoadString(GetStringResourceName());
+
             private string? _appReset;
             internal string AppReset => _appReset ??= _localizer.LoadString(GetStringResourceName());
 
@@ -116,6 +134,12 @@ namespace Eppie.CLI.Services
 
             private string? _resetDescription;
             internal string ResetDescription => _resetDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+
+            private string? _addAccountDescription;
+            internal string AddAccountDescription => _addAccountDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+
+            private string? _listAccountsDescription;
+            internal string ListAccountsDescription => _listAccountsDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
 
             private static string GetStringResourceName(string category = "Message", [CallerMemberName] string name = "")
             {

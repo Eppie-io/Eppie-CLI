@@ -136,11 +136,11 @@
     <comment>Description of the 'exit' command in the help.</comment>
   </data>
   <data name="Menu.InitDescription" xml:space="preserve">
-    <value>Initialize the application and create a new account.</value>
+    <value>Initialize the application and create a master account.</value>
     <comment>Description of the 'init' command in the help.</comment>
   </data>
   <data name="Menu.OpenDescription" xml:space="preserve">
-    <value>Open an existing account.</value>
+    <value>Open an existing master account.</value>
     <comment>Description of the 'open' command in the help.</comment>
   </data>
   <data name="Menu.ResetDescription" xml:space="preserve">
@@ -160,27 +160,66 @@
   </data>
   <data name="Warning.InvalidPassword" xml:space="preserve">
     <value>Warning: Invalid password.</value>
-    <comment>Invalid password message.</comment>
+    <comment>This message warns the user that the password is incorrect.</comment>
   </data>
   <data name="Warning.SecondInitialization" xml:space="preserve">
     <value>Warning: The application has already been initialized.</value>
+    <comment>This message warns the user that a second initialization is being attempted.</comment>
   </data>
   <data name="Error.ImpossibleInitialization" xml:space="preserve">
     <value>Error: The application could not be initialized.</value>
+    <comment>This message alerts the user that the application cannot be initialized.</comment>
   </data>
   <data name="Message.AppOpened" xml:space="preserve">
     <value>The application was opened successfully.</value>
+    <comment>This message indicates to the user that the application has opened.</comment>
   </data>
   <data name="Message.AppReset" xml:space="preserve">
     <value>The application has just been reset.</value>
+    <comment>This message indicates to the user that the application has been reset to default settings and privacy data has been removed.</comment>
   </data>
   <data name="Message.AskPassword" xml:space="preserve">
     <value>Password: </value>
+    <comment>This message prompts the user to enter a password.</comment>
   </data>
   <data name="Message.ConfirmPassword" xml:space="preserve">
     <value>Confirm password: </value>
+    <comment>This message prompts the user to confirm a password.</comment>
   </data>
   <data name="Warning.Uninitialized" xml:space="preserve">
     <value>Warning: The application hasn't been initialized yet.</value>
+    <comment>This message warns the user that the application hasn't been initialized yet.</comment>
+  </data>
+  <data name="Message.AskAccountAddress" xml:space="preserve">
+    <value>Enter account address: </value>
+    <comment>This message prompts the user to enter the service account address.</comment>
+  </data>
+  <data name="Message.AskAccountPassword" xml:space="preserve">
+    <value>Enter account password: </value>
+    <comment>This message prompts the user to enter the service account password.</comment>
+  </data>
+  <data name="Message.AskIMAPServer" xml:space="preserve">
+    <value>Enter IMAP server: </value>
+    <comment>This message prompts the user to enter the IMAP server address.</comment>
+  </data>
+  <data name="Message.AskSMTPServer" xml:space="preserve">
+    <value>Enter SMTP server: </value>
+    <comment>This message prompts the user to enter the SMTP server address.</comment>
+  </data>
+  <data name="Menu.AddAccountDescription" xml:space="preserve">
+    <value>Add a service account.</value>
+    <comment>Description of the 'add-account' command in the help.</comment>
+  </data>
+  <data name="Menu.ListAccountsDescription" xml:space="preserve">
+    <value>Display a list of accounts.</value>
+    <comment>Description of the 'list-accounts' command in the help.</comment>
+  </data>
+  <data name="Message.EmptyAccountList" xml:space="preserve">
+    <value>There are no accounts yet.</value>
+    <comment>This message informs the user that no service accounts were added.</comment>
+  </data>
+  <data name="Message.HeaderAccountList" xml:space="preserve">
+    <value>Accounts:</value>
+    <comment>This is the header for the list of accounts.</comment>
   </data>
 </root>
