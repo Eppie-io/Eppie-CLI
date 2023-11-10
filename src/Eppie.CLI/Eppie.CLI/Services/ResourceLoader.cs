@@ -59,20 +59,51 @@ namespace Eppie.CLI.Services
             /// <summary>
             /// Gets the startup banner or the copyright message.
             /// </summary>
-            private string? _logoFormat;
-            internal string LogoFormat => _logoFormat ??= _localizer.LoadString(GetStringResourceName(category: "Header"));
+            internal string GetLogo(string name, string version)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Header", name: "LogoFormat"), name, version);
+            }
 
             private string? _description;
             internal string Description => _description ??= _localizer.LoadString(GetStringResourceName(category: "Header"));
 
-            private string? _environmentNameFormat;
-            internal string EnvironmentNameFormat => _environmentNameFormat ??= _localizer.LoadString(GetStringResourceName(category: "Header"));
-
-            private string? _contentRootPathFormat;
-            internal string ContentRootPathFormat => _contentRootPathFormat ??= _localizer.LoadString(GetStringResourceName(category: "Header"));
-
             private string? _goodbye;
             internal string Goodbye => _goodbye ??= _localizer.LoadString(GetStringResourceName());
+
+            private string? _seedPhraseHeader;
+            internal string SeedPhraseHeader => _seedPhraseHeader ??= _localizer.LoadString(GetStringResourceName());
+
+            private string? _seedPhraseFooter;
+            internal string SeedPhraseFooter => _seedPhraseFooter ??= _localizer.LoadString(GetStringResourceName());
+
+            private string? _askPassword;
+            internal string AskPassword => _askPassword ??= _localizer.LoadString(GetStringResourceName());
+
+            private string? _confirmPassword;
+            internal string ConfirmPassword => _confirmPassword ??= _localizer.LoadString(GetStringResourceName());
+
+            private string? _appReset;
+            internal string AppReset => _appReset ??= _localizer.LoadString(GetStringResourceName());
+
+            private string? _appOpened;
+            internal string AppOpened => _appOpened ??= _localizer.LoadString(GetStringResourceName());
+
+            private string? _invalidPassword;
+            internal string InvalidPassword => _invalidPassword ??= _localizer.LoadString(GetStringResourceName(category: "Warning"));
+
+            private string? _secondInitialization;
+            internal string SecondInitialization => _secondInitialization ??= _localizer.LoadString(GetStringResourceName(category: "Warning"));
+
+            private string? _uninitialized;
+            internal string Uninitialized => _uninitialized ??= _localizer.LoadString(GetStringResourceName(category: "Warning"));
+
+            private string? _impossibleInitialization;
+            internal string ImpossibleInitialization => _impossibleInitialization ??= _localizer.LoadString(GetStringResourceName(category: "Error"));
+
+            internal string GetUnhandledException(Exception exception)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Error", name: "UnhandledException"), exception);
+            }
 
             private string? _exitDescription;
             internal string ExitDescription => _exitDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));

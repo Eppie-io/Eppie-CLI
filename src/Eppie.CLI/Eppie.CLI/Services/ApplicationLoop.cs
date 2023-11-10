@@ -51,14 +51,16 @@ namespace Eppie.CLI.Services
 
         public override Task StartAsync(CancellationToken cancellationToken)
         {
+            _logger.LogTrace("ApplicationLoop.StartAsync has been called.");
             _application.InitializeConsole();
-            _application.WriteGreeting();
+            _application.WriteGreetingMessage();
 
             return base.StartAsync(cancellationToken);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            _logger.LogTrace("ApplicationLoop.ExecuteAsync has been called.");
             await Task.Yield();
 
             if (!stoppingToken.IsCancellationRequested)

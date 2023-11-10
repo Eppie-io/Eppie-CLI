@@ -39,45 +39,18 @@ namespace Eppie.CLI.Services
             _logger = logger;
         }
 
-        public async Task<(bool isPasswordMatched, bool isInitSuccess, string[] seed)> InitializeAsync(Func<string> passwordReader, Func<string> confirmPasswordReader)
-        {
-            _logger.LogTrace("CoreProvider.InitializeAsync has been called.");
-
-            ArgumentNullException.ThrowIfNull(passwordReader);
-            ArgumentNullException.ThrowIfNull(confirmPasswordReader);
-
-            _logger.LogInformation($"Initializing new instance");
-
-            ISecurityManager sm = TuviMailCore.GetSecurityManager();
-            string[] seedPhrase = await sm.CreateSeedPhraseAsync().ConfigureAwait(false);
-            string password = passwordReader();
-
-            if (password.Length == 0 || password != confirmPasswordReader())
-            {
-                return (false, false, Array.Empty<string>());
-            }
-
-            bool success = await TuviMailCore.InitializeApplicationAsync(password).ConfigureAwait(false);
-            return (true, success, seedPhrase);
-        }
-
-        public Task<bool> OpenAsync(Func<string> passwordReader)
-        {
-            _logger.LogTrace("CoreProvider.OpenAsync has been called.");
-
-            ArgumentNullException.ThrowIfNull(passwordReader);
-
-            return TuviMailCore.InitializeApplicationAsync(passwordReader());
-        }
-
         public async Task ResetAsync()
         {
+            _logger.LogTrace("CoreProvider.ResetAsync has been called.");
+
             await TuviMailCore.ResetApplicationAsync().ConfigureAwait(false);
             _tuviMailCore = null;
         }
 
-        private static ITuviMail CreateTuviMail()
+        private ITuviMail CreateTuviMail()
         {
+            _logger.LogTrace("CoreProvider.CreateTuviMail has been called.");
+
             return Components.CreateTuviMailCore("data.db", new ImplementationDetailsProvider("Eppie seed", "Eppie.Package", "backup@system.service.eppie.io"));
         }
     }
