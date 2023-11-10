@@ -19,6 +19,7 @@
 using System.Diagnostics.CodeAnalysis;
 
 using Eppie.CLI.Services;
+using Eppie.CLI.Tools;
 
 using Microsoft.Extensions.Logging;
 
@@ -45,13 +46,13 @@ namespace Eppie.CLI.Menu
 
         internal void ExitAction()
         {
-            _logger.LogTrace("Actions.ExitAction has been called.");
+            _logger.LogMethodCall();
             _application.StopApplication();
         }
 
         internal async Task InitActionAsync()
         {
-            _logger.LogTrace("MenuCommand.InitActionAsync has been called.");
+            _logger.LogMethodCall();
 
             bool isFirstTime = await _coreProvider.TuviMailCore.IsFirstApplicationStartAsync().ConfigureAwait(false);
 
@@ -85,7 +86,7 @@ namespace Eppie.CLI.Menu
 
         internal async Task ResetActionAsync()
         {
-            _logger.LogTrace("MenuCommand.ResetActionAsync has been called.");
+            _logger.LogMethodCall();
 
             await _coreProvider.ResetAsync().ConfigureAwait(false);
             _application.WriteApplicationResetMessage();
@@ -93,7 +94,7 @@ namespace Eppie.CLI.Menu
 
         internal async Task OpenActionAsync()
         {
-            _logger.LogTrace("MenuCommand.OpenActionAsync has been called.");
+            _logger.LogMethodCall();
 
             bool isFirstTime = await _coreProvider.TuviMailCore.IsFirstApplicationStartAsync().ConfigureAwait(false);
 
@@ -117,49 +118,49 @@ namespace Eppie.CLI.Menu
 
         internal void ListAccountsAction()
         {
-            _logger.LogTrace("MenuCommand.ListAccountsAction has been called.");
+            _logger.LogMethodCall();
             throw new NotImplementedException();
         }
 
         internal void AddAccountAction()
         {
-            _logger.LogTrace("MenuCommand.AddAccountAction has been called.");
+            _logger.LogMethodCall();
             throw new NotImplementedException();
         }
 
         internal void RestoreAction()
         {
-            _logger.LogTrace("MenuCommand.RestoreAction has been called.");
+            _logger.LogMethodCall();
             throw new NotImplementedException();
         }
 
         internal void SendAction()
         {
-            _logger.LogTrace("MenuCommand.SendAction has been called.");
+            _logger.LogMethodCall();
             throw new NotImplementedException();
         }
 
         internal void ListContactsAction()
         {
-            _logger.LogTrace("MenuCommand.ListContactsAction has been called.");
+            _logger.LogMethodCall();
             throw new NotImplementedException();
         }
 
         internal void ShowMessageAction()
         {
-            _logger.LogTrace("MenuCommand.ShowMessageAction has been called.");
+            _logger.LogMethodCall();
             throw new NotImplementedException();
         }
 
         internal void ShowMessagesAction()
         {
-            _logger.LogTrace("MenuCommand.ShowMessagesAction has been called.");
+            _logger.LogMethodCall();
             throw new NotImplementedException();
         }
 
         internal void ImportAction()
         {
-            _logger.LogTrace("MenuCommand.ImportAction has been called.");
+            _logger.LogMethodCall();
             throw new NotImplementedException();
         }
     }

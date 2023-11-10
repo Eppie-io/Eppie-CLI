@@ -21,6 +21,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
 using Eppie.CLI.Options;
+using Eppie.CLI.Tools;
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -71,7 +72,7 @@ namespace Eppie.CLI.Services
 
         internal void StopApplication()
         {
-            _logger.LogDebug("Application.StopApplication has been called.");
+            _logger.LogMethodCall();
             _lifetime.StopApplication();
 
             WriteGoodbyeMessage();
@@ -79,7 +80,7 @@ namespace Eppie.CLI.Services
 
         internal string? ReadCommandMenu(string commandMark)
         {
-            _logger.LogTrace("Application ReadCommandMenu has been called.");
+            _logger.LogMethodCall();
             string? cmd = ReadValue($"{commandMark} ");
 
             if (cmd is null)
@@ -92,32 +93,30 @@ namespace Eppie.CLI.Services
 
         internal string AskPassword()
         {
-            _logger.LogTrace("Application.ReadPassword has been called.");
+            _logger.LogMethodCall();
 
             return ReadSecretValue(_resourceLoader.Strings.AskPassword) ?? string.Empty;
         }
 
         internal string ConfirmPassword()
         {
-            _logger.LogTrace("Application.ReadPassword has been called.");
+            _logger.LogMethodCall();
 
             return ReadSecretValue(_resourceLoader.Strings.ConfirmPassword) ?? string.Empty;
         }
 
         internal void WriteGreetingMessage()
         {
-            _logger.LogTrace("Application.WriteApplicationHeader has been called.");
-
-            _logger.LogDebug("Application title is '{Title}'; version is {version}",
+            _logger.LogDebug("Application title is '{ApplicationTitle}'; version is {ApplicationVersion}",
                             _resourceLoader.AssemblyStrings.Title,
                             _resourceLoader.AssemblyStrings.Version);
             Console.WriteLine(_resourceLoader.Strings.GetLogo(_resourceLoader.AssemblyStrings.Title,
                                                               _resourceLoader.AssemblyStrings.Version));
 
-            using IDisposable? consoleLogScope = ConsoleLogScope();
             {
-                _logger.LogInformation("Hosting environment: {Environment}", _environment.EnvironmentName);
-                _logger.LogInformation("Content root path: {RootPath}", _environment.ContentRootPath);
+                using IDisposable? consoleLogScope = _logger.BeginConsoleScope();
+                _logger.LogInformation("Hosting environment: {EnvironmentName}", _environment.EnvironmentName);
+                _logger.LogInformation("Content root path: {ContentRootPath}", _environment.ContentRootPath);
             }
 
             Console.WriteLine(_resourceLoader.Strings.Description);
@@ -125,7 +124,7 @@ namespace Eppie.CLI.Services
 
         internal void WriteGoodbyeMessage()
         {
-            _logger.LogTrace("Application.WriteGoodbye has been called.");
+            _logger.LogMethodCall();
             Console.WriteLine(_resourceLoader.Strings.Goodbye);
         }
 
@@ -204,24 +203,19 @@ namespace Eppie.CLI.Services
 
         private string? ReadValue(string message, ConsoleColor foreground = ConsoleColor.Gray)
         {
-            _logger.LogTrace("Application.ReadValue has been called.");
+            _logger.LogMethodCall();
             return ConsoleExtension.ReadValue(message, (message) => ConsoleExtension.Write(message, foreground), Console.ReadLine);
         }
 
         private string? ReadSecretValue(string message, ConsoleColor foreground = ConsoleColor.Gray)
         {
-            _logger.LogTrace("Application.ReadSecretValue has been called.");
+            _logger.LogMethodCall();
             return ConsoleExtension.ReadValue(message, (message) => ConsoleExtension.Write(message, foreground), () => ConsoleExtension.ReadSecretLine());
         }
 
         private void LogCommandWarning(string reason)
         {
-            _logger.LogWarning("The command failed. (Reason: {reason}).", reason);
-        }
-
-        private IDisposable? ConsoleLogScope()
-        {
-            return _logger.BeginScope(new Dictionary<string, object> { { "scope", "console" } });
+            _logger.LogWarning("The command failed. (Reason: {WarningReason}).", reason);
         }
     }
 }
