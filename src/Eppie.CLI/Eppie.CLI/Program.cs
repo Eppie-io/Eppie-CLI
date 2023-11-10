@@ -16,6 +16,9 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+
 using Eppie.CLI.Menu;
 using Eppie.CLI.Options;
 using Eppie.CLI.Services;
@@ -30,20 +33,35 @@ namespace Eppie.CLI
 {
     internal sealed class Program
     {
-        public static IHost Host { get; private set; } = null!;
+        private const string DefaultLogFilePath = "./logs/default.log";
 
+        [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "to log exceptions")]
         private static void Main(string[] args)
         {
-            Host = Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
-                .UseContentRoot(AppContext.BaseDirectory)
-                .ConfigureServices(ConfigureServices)
-                .UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration))
-                .UseConsoleLifetime(options => options.SuppressStatusMessages = true)
-                .Build();
+            try
+            {
+                ConfigureDefaultLogger();
 
-            Host.Run();
+                Log.Information("Launching the application...");
 
-            Log.CloseAndFlush();
+                Host.CreateDefaultBuilder(args)
+                    .UseContentRoot(AppContext.BaseDirectory)
+                    .ConfigureServices(ConfigureServices)
+                    .UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration), preserveStaticLogger: true)
+                    .UseConsoleLifetime(options => options.SuppressStatusMessages = true)
+                    .Build()
+                    .Run();
+
+                Log.Information("The application is shutting down...");
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "The application terminated with an error.");
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
         }
 
         private static void ConfigureServices(HostBuilderContext ctx, IServiceCollection services)
@@ -59,6 +77,18 @@ namespace Eppie.CLI
                     .AddSingleton<Application>()
 
                     .AddHostedService<ApplicationLoop>();
+        }
+
+        private static void ConfigureDefaultLogger()
+        {
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.Console(restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Fatal,
+                                 formatProvider: CultureInfo.InvariantCulture)
+                .WriteTo.Debug(formatProvider: CultureInfo.InvariantCulture)
+                .WriteTo.File(path: DefaultLogFilePath,
+                              formatProvider: CultureInfo.InvariantCulture)
+                .CreateLogger();
         }
     }
 }
