@@ -19,6 +19,7 @@
 using System.Diagnostics.CodeAnalysis;
 
 using Eppie.CLI.Menu;
+using Eppie.CLI.Tools;
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -51,7 +52,7 @@ namespace Eppie.CLI.Services
 
         public override Task StartAsync(CancellationToken cancellationToken)
         {
-            _logger.LogTrace("ApplicationLoop.StartAsync has been called.");
+            _logger.LogMethodCall();
             _application.InitializeConsole();
             _application.WriteGreetingMessage();
 
@@ -60,7 +61,7 @@ namespace Eppie.CLI.Services
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogTrace("ApplicationLoop.ExecuteAsync has been called.");
+            _logger.LogMethodCall();
             await Task.Yield();
 
             if (!stoppingToken.IsCancellationRequested)
@@ -72,17 +73,17 @@ namespace Eppie.CLI.Services
 
         private void OnStopped()
         {
-            _logger.LogDebug("Application has been stopped.");
+            _logger.LogDebug("The application has been stopped.");
         }
 
         private void OnStopping()
         {
-            _logger.LogDebug("Application is stopping.");
+            _logger.LogDebug("The application is stopping...");
         }
 
         private void OnStarted()
         {
-            _logger.LogDebug("Application has been started.");
+            _logger.LogDebug("The application has been started.");
         }
     }
 }

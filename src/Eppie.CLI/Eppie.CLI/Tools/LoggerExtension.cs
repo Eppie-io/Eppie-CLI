@@ -16,44 +16,28 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
-using System.Diagnostics.CodeAnalysis;
-
-using ComponentBuilder;
-
-using Eppie.CLI.Tools;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 using Microsoft.Extensions.Logging;
 
-using Tuvi.Core;
-
-namespace Eppie.CLI.Services
+namespace Eppie.CLI.Tools
 {
-    [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal class CoreProvider
+    internal static class LoggerExtension
     {
-        private readonly ILogger<CoreProvider> _logger;
-
-        private ITuviMail? _tuviMailCore;
-        public ITuviMail TuviMailCore => _tuviMailCore ??= CreateTuviMail();
-
-        public CoreProvider(ILogger<CoreProvider> logger)
+        [Conditional("TRACE")]
+        public static void LogMethodCall(this ILogger logger,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0)
         {
-            _logger = logger;
+            logger.LogTrace("Method {MemberName} has been called; Source file path: {SourceFilePath}; Source line number: {SourceLineNumber}", memberName, sourceFilePath, sourceLineNumber);
         }
 
-        public async Task ResetAsync()
+        public static IDisposable? BeginConsoleScope(this ILogger logger)
         {
-            _logger.LogMethodCall();
-
-            await TuviMailCore.ResetApplicationAsync().ConfigureAwait(false);
-            _tuviMailCore = null;
-        }
-
-        private ITuviMail CreateTuviMail()
-        {
-            _logger.LogMethodCall();
-
-            return Components.CreateTuviMailCore("data.db", new ImplementationDetailsProvider("Eppie seed", "Eppie.Package", "backup@system.service.eppie.io"));
+            Debug.Assert(logger is not null);
+            return logger.BeginScope(new Dictionary<string, object> { { "log-scope", "console" } });
         }
     }
 }

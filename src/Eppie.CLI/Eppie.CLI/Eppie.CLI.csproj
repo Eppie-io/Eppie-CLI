@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -16,12 +16,14 @@
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <WarningLevel>9999</WarningLevel>
     <WarningsNotAsErrors>IL2104</WarningsNotAsErrors>
+    <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
     <WarningLevel>9999</WarningLevel>
     <WarningsNotAsErrors>IL2104</WarningsNotAsErrors>
+    <DefineConstants>TRACE=FALSE</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

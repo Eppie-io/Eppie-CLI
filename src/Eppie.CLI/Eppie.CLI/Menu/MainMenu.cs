@@ -20,6 +20,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 using Eppie.CLI.Services;
+using Eppie.CLI.Tools;
 
 using Microsoft.Extensions.Logging;
 
@@ -67,7 +68,7 @@ namespace Eppie.CLI.Menu
 
         public async Task LoopAsync(CancellationToken stoppingToken)
         {
-            _logger.LogTrace("MainMenu.LoopAsync has been called.");
+            _logger.LogMethodCall();
             IAsyncParser commandParser = Create();
 
             while (!stoppingToken.IsCancellationRequested)
@@ -78,7 +79,7 @@ namespace Eppie.CLI.Menu
 
         private IAsyncParser Create()
         {
-            _logger.LogTrace("MainMenu.Create has been called.");
+            _logger.LogMethodCall();
 
             IAsyncParser parser = BaseParser.Default();
 
@@ -119,7 +120,7 @@ namespace Eppie.CLI.Menu
 
                 int result = await commandParser.InvokeAsync(cmd).ConfigureAwait(false);
 
-                _logger.LogDebug("Command {cmd} is completed with code: {result}", cmd, result);
+                _logger.LogDebug("Command {CommandName} is completed with code: {CommandResult}", cmd, result);
             }
             catch (InvalidOperationException ex)
             {
