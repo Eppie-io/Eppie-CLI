@@ -179,12 +179,12 @@
     <comment>This message indicates to the user that the application has been reset to default settings and privacy data has been removed.</comment>
   </data>
   <data name="Message.AskPassword" xml:space="preserve">
-    <value>Password: </value>
-    <comment>This message prompts the user to enter a password.</comment>
+    <value>Enter the vault password: </value>
+    <comment>This message prompts the user to enter the vault password.</comment>
   </data>
   <data name="Message.ConfirmPassword" xml:space="preserve">
-    <value>Confirm password: </value>
-    <comment>This message prompts the user to confirm a password.</comment>
+    <value>Confirm your vault password: </value>
+    <comment>This message prompts the user to confirm the vault password.</comment>
   </data>
   <data name="Warning.Uninitialized" xml:space="preserve">
     <value>Warning: The application hasn't been initialized yet.</value>
@@ -221,5 +221,19 @@
   <data name="Message.HeaderAccountList" xml:space="preserve">
     <value>Accounts:</value>
     <comment>This is the header for the list of accounts.</comment>
+  </data>
+  <data name="Message.ConfirmReset" xml:space="preserve">
+    <value>All local data will be lost. Do you want to continue? (y/n): </value>
+    <comment>This message prompts the user to confirm to reset the application.</comment>
+  </data>
+  <data name="Message.AskNewPassword" xml:space="preserve">
+    <value>Enter your new vault password: </value>
+    <comment>This message prompts the user to enter a new vault password.</comment>
+  </data>
+  <data name="Menu.Description" xml:space="preserve">
+    <value>{0} (version {1})</value>
+    <comment>Description of the main menu in the help.
+{0} is a parameter containing the title of the application;
+{1} is a parameter containing the version of the application.</comment>
   </data>
 </root>

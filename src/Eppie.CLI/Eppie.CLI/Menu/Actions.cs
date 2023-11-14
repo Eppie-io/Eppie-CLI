@@ -66,7 +66,7 @@ namespace Eppie.CLI.Menu
 
             ISecurityManager sm = _coreProvider.TuviMailCore.GetSecurityManager();
             string[] seedPhrase = await sm.CreateSeedPhraseAsync().ConfigureAwait(false);
-            string password = _application.AskPassword();
+            string password = _application.AskNewPassword();
 
             if (password.Length == 0 || password != _application.ConfirmPassword())
             {
@@ -90,8 +90,11 @@ namespace Eppie.CLI.Menu
         {
             _logger.LogMethodCall();
 
-            await _coreProvider.ResetAsync().ConfigureAwait(false);
-            _application.WriteApplicationResetMessage();
+            if (_application.ConfirmReset())
+            {
+                await _coreProvider.ResetAsync().ConfigureAwait(false);
+                _application.WriteApplicationResetMessage();
+            }
         }
 
         internal async Task OpenActionAsync()
