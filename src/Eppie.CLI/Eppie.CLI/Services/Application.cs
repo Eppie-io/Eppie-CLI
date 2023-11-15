@@ -27,6 +27,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
+using Tuvi.Core.Entities;
 using Tuvi.Toolkit.Cli;
 
 namespace Eppie.CLI.Services
@@ -103,6 +104,45 @@ namespace Eppie.CLI.Services
             _logger.LogMethodCall();
 
             return ReadSecretValue(_resourceLoader.Strings.ConfirmPassword) ?? string.Empty;
+        }
+
+        internal string AskAccountAddress()
+        {
+            return ReadValue(_resourceLoader.Strings.AskAccountAddress) ?? string.Empty;
+        }
+
+        internal string AskAccountPassword()
+        {
+            return ReadSecretValue(_resourceLoader.Strings.AskAccountPassword) ?? string.Empty;
+        }
+
+        internal string AskIMAPServer()
+        {
+            return ReadValue(_resourceLoader.Strings.AskIMAPServer) ?? string.Empty;
+        }
+
+        internal string AskSMTPServer()
+        {
+            return ReadValue(_resourceLoader.Strings.AskSMTPServer) ?? string.Empty;
+        }
+
+        internal void PrintAccounts(IReadOnlyCollection<Account> accounts)
+        {
+            _logger.LogMethodCall();
+
+            if (accounts is null || accounts.Count == 0)
+            {
+                Console.WriteLine(_resourceLoader.Strings.EmptyAccountList);
+                return;
+            }
+
+            Console.WriteLine(_resourceLoader.Strings.HeaderAccountList);
+            foreach (Account account in accounts)
+            {
+                Console.WriteLine($"{account.Id}. {account.Email.Address}");
+            }
+
+            Console.WriteLine();
         }
 
         internal void WriteGreetingMessage()

@@ -33,22 +33,6 @@ namespace Eppie.CLI.Menu
     {
         private const string CommandMark = ">>>";
 
-        private static class MenuCommandName
-        {
-            public const string Exit = "exit";
-            public const string Initialize = "init";
-            public const string Open = "open";
-            public const string Reset = "reset";
-            public const string Restore = "restore";
-            public const string Send = "send";
-            public const string Import = "import";
-            public const string ListAccounts = "list-accounts";
-            public const string ListContacts = "list-contacts";
-            public const string AddContact = "add-contact";
-            public const string ShowMessage = "show-message";
-            public const string ShowMessages = "show-messages";
-        }
-
         private readonly ILogger<MainMenu> _logger;
         private readonly Actions _actions;
         private readonly Application _application;
@@ -86,18 +70,31 @@ namespace Eppie.CLI.Menu
             ICommand root = parser.CreateRoot(
                 subcommands: new[]
                 {
-                    CreateCommand(parser, MenuCommandName.Exit, _resourceLoader.Strings.ExitDescription, action: (cmd) => _actions.ExitAction()),
-                    CreateAsyncCommand(parser, MenuCommandName.Initialize, _resourceLoader.Strings.InitDescription, action: (cmd) => _actions.InitActionAsync()),
-                    CreateAsyncCommand(parser, MenuCommandName.Reset, _resourceLoader.Strings.ResetDescription, action: (cmd) => _actions.ResetActionAsync()),
-                    CreateAsyncCommand(parser, MenuCommandName.Open, _resourceLoader.Strings.OpenDescription, action: (cmd) => _actions.OpenActionAsync()),
-                    CreateCommand(parser, MenuCommandName.ListAccounts, string.Empty, action: (cmd) => _actions.ListAccountsAction()),
-                    CreateCommand(parser, MenuCommandName.AddContact, string.Empty, action: (cmd) => _actions.AddAccountAction()),
-                    CreateCommand(parser, MenuCommandName.Restore, string.Empty, action: (cmd) => _actions.RestoreAction()),
-                    CreateCommand(parser, MenuCommandName.Send, string.Empty, action: (cmd) => _actions.SendAction()),
-                    CreateCommand(parser, MenuCommandName.ListContacts, string.Empty, action: (cmd) => _actions.ListContactsAction()),
-                    CreateCommand(parser, MenuCommandName.ShowMessage, string.Empty, action: (cmd) => _actions.ShowMessageAction()),
-                    CreateCommand(parser, MenuCommandName.ShowMessages, string.Empty, action: (cmd) => _actions.ShowMessagesAction()),
-                    CreateCommand(parser, MenuCommandName.Import, string.Empty, action: (cmd) => _actions.ImportAction()),
+                    CreateCommand(parser, MenuCommand.Exit, _resourceLoader.Strings.ExitDescription,
+                                  action: (cmd) => _actions.ExitAction()),
+                    CreateAsyncCommand(parser, MenuCommand.Initialize, _resourceLoader.Strings.InitDescription,
+                                       action: (cmd) => _actions.InitActionAsync()),
+                    CreateAsyncCommand(parser, MenuCommand.Reset, _resourceLoader.Strings.ResetDescription,
+                                       action: (cmd) => _actions.ResetActionAsync()),
+                    CreateAsyncCommand(parser, MenuCommand.Open, _resourceLoader.Strings.OpenDescription,
+                                       action: (cmd) => _actions.OpenActionAsync()),
+                    CreateAsyncCommand(parser, MenuCommand.ListAccounts, _resourceLoader.Strings.ListAccountsDescription,
+                                       action: (cmd) => _actions.ListAccountsActionAsync()),
+                    CreateAsyncCommand(parser, MenuCommand.AddAccount, _resourceLoader.Strings.AddAccountDescription,
+                                      action: (cmd) => _actions.AddAccountActionAsync(MenuCommand.CommandAddAccountOptions.GetTypeValue(cmd)),
+                                      options: MenuCommand.CommandAddAccountOptions.GetOptions(parser)),
+                    CreateCommand(parser, MenuCommand.Restore, string.Empty,
+                                  action: (cmd) => _actions.RestoreAction()),
+                    CreateCommand(parser, MenuCommand.Send, string.Empty,
+                                  action: (cmd) => _actions.SendAction()),
+                    CreateCommand(parser, MenuCommand.ListContacts, string.Empty,
+                                  action: (cmd) => _actions.ListContactsAction()),
+                    CreateCommand(parser, MenuCommand.ShowMessage, string.Empty,
+                                  action: (cmd) => _actions.ShowMessageAction()),
+                    CreateCommand(parser, MenuCommand.ShowMessages, string.Empty,
+                                  action: (cmd) => _actions.ShowMessagesAction()),
+                    CreateCommand(parser, MenuCommand.Import, string.Empty,
+                                  action: (cmd) => _actions.ImportAction()),
                 }
             );
 
@@ -148,7 +145,7 @@ namespace Eppie.CLI.Menu
             return parser.CreateCommand(name, description, action: HandleException);
         }
 
-        private ICommand CreateAsyncCommand(IAsyncParser parser, string name, string description, Func<IAsyncCommand, Task>? action)
+        private ICommand CreateAsyncCommand(IAsyncParser parser, string name, string description, Func<IAsyncCommand, Task>? action, IReadOnlyCollection<IOption>? options = null)
         {
             Debug.Assert(parser is not null);
 
@@ -168,7 +165,7 @@ namespace Eppie.CLI.Menu
                 }
             }
 
-            return parser.CreateAsyncCommand(name, description, action: HandleException);
+            return parser.CreateAsyncCommand(name, description, options, action: HandleException);
         }
     }
 }

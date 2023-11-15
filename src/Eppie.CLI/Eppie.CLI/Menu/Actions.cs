@@ -23,7 +23,9 @@ using Eppie.CLI.Tools;
 
 using Microsoft.Extensions.Logging;
 
+using Tuvi;
 using Tuvi.Core;
+using Tuvi.Core.Entities;
 
 namespace Eppie.CLI.Menu
 {
@@ -116,16 +118,27 @@ namespace Eppie.CLI.Menu
             }
         }
 
-        internal void ListAccountsAction()
+        internal async Task ListAccountsActionAsync()
         {
             _logger.LogMethodCall();
-            throw new NotImplementedException();
+
+            List<Account> accounts = await _coreProvider.TuviMailCore.GetAccountsAsync().ConfigureAwait(true);
+            accounts.Sort((a, b) => a.Id.CompareTo(b.Id));
+
+            _application.PrintAccounts(accounts);
         }
 
-        internal void AddAccountAction()
+        internal Task AddAccountActionAsync(MenuCommand.CommandAddAccountOptions.AccountType type)
         {
             _logger.LogMethodCall();
-            throw new NotImplementedException();
+
+            return type switch
+            {
+                MenuCommand.CommandAddAccountOptions.AccountType.Email => AddEmailAccountAsync(),
+                MenuCommand.CommandAddAccountOptions.AccountType.Dec => AddDecAccountAsync(),
+                MenuCommand.CommandAddAccountOptions.AccountType.Proton => AddProtonAccountAsync(),
+                _ => throw new ArgumentException($"Account type '{type}' is not supported.", nameof(type)),
+            };
         }
 
         internal void RestoreAction()
@@ -162,6 +175,67 @@ namespace Eppie.CLI.Menu
         {
             _logger.LogMethodCall();
             throw new NotImplementedException();
+        }
+
+        private async Task AddEmailAccountAsync()
+        {
+            _logger.LogMethodCall();
+
+            Account account = await GetDefaultAccountAsync().ConfigureAwait(false);
+            await _coreProvider.TuviMailCore.AddAccountAsync(account).ConfigureAwait(false);
+
+            Task<Account> GetDefaultAccountAsync()
+            {
+                // TODO:
+                // 1) add email provider selection;
+                // 2) add OAuth2 authorization;
+
+                Account account = Account.Default;
+                account.Email = new EmailAddress(_application.AskAccountAddress());
+
+                BasicAuthData basicData = new()
+                {
+                    Password = _application.AskAccountPassword()
+                };
+
+                account.AuthData = basicData;
+
+                account.IncomingServerAddress = _application.AskIMAPServer();
+                account.OutgoingServerAddress = _application.AskSMTPServer();
+
+                return Task.FromResult(account);
+            }
+        }
+
+        private async Task AddProtonAccountAsync()
+        {
+            _logger.LogMethodCall();
+
+            //ToDo: This old code. ProtonAuthData must be use.
+
+            Account account = new()
+            {
+                Email = new EmailAddress(_application.AskAccountAddress())
+            };
+
+            BasicAuthData basicData = new()
+            {
+                Password = _application.AskAccountPassword()
+            };
+
+            account.AuthData = basicData;
+            account.Type = (int)MailBoxType.Proton;
+
+            await _coreProvider.TuviMailCore.AddAccountAsync(account).ConfigureAwait(false);
+        }
+
+        private async Task AddDecAccountAsync()
+        {
+            _logger.LogMethodCall();
+
+            Account account = await _coreProvider.TuviMailCore.NewDecentralizedAccountAsync().ConfigureAwait(false);
+            account.Type = (int)MailBoxType.Dec;
+            await _coreProvider.TuviMailCore.AddAccountAsync(account).ConfigureAwait(false);
         }
     }
 }
