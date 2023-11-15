@@ -222,6 +222,14 @@
     <value>Accounts:</value>
     <comment>This is the header for the list of accounts.</comment>
   </data>
+  <data name="Message.AppRestored" xml:space="preserve">
+    <value>The application has been restored successfully.</value>
+    <comment>This message indicates to the user that the application has been restored from a backup.</comment>
+  </data>
+  <data name="Message.AskSeedPhrase" xml:space="preserve">
+    <value>Enter seed phrase: </value>
+    <comment>This message prompts the user to enter a seed phrase.</comment>
+  </data>
   <data name="Message.ConfirmReset" xml:space="preserve">
     <value>All local data will be lost. Do you want to continue? (y/n): </value>
     <comment>This message prompts the user to confirm to reset the application.</comment>
@@ -229,6 +237,14 @@
   <data name="Message.AskNewPassword" xml:space="preserve">
     <value>Enter your new vault password: </value>
     <comment>This message prompts the user to enter a new vault password.</comment>
+  </data>
+  <data name="Message.AskRestorePath" xml:space="preserve">
+    <value>Enter the restore URI: </value>
+    <comment>This message prompts the user to enter the path to the backup.</comment>
+  </data>
+  <data name="Menu.RestoreDescription" xml:space="preserve">
+    <value>Restore your master account</value>
+    <comment>Description of the 'restore' command in the help.</comment>
   </data>
   <data name="Menu.Description" xml:space="preserve">
     <value>{0} (version {1})</value>
