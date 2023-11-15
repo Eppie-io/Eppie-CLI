@@ -136,11 +136,11 @@
     <comment>Description of the 'exit' command in the help.</comment>
   </data>
   <data name="Menu.InitDescription" xml:space="preserve">
-    <value>Initialize the application and create a master account.</value>
+    <value>Initialize the application and create Eppie account.</value>
     <comment>Description of the 'init' command in the help.</comment>
   </data>
   <data name="Menu.OpenDescription" xml:space="preserve">
-    <value>Open an existing master account.</value>
+    <value>Open an existing Eppie account.</value>
     <comment>Description of the 'open' command in the help.</comment>
   </data>
   <data name="Menu.ResetDescription" xml:space="preserve">
