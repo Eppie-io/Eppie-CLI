@@ -79,6 +79,9 @@ namespace Eppie.CLI.Services
             private string? _askPassword;
             internal string AskPassword => _askPassword ??= _localizer.LoadString(GetStringResourceName());
 
+            private string? _askNewPassword;
+            internal string AskNewPassword => _askNewPassword ??= _localizer.LoadString(GetStringResourceName());
+
             private string? _confirmPassword;
             internal string ConfirmPassword => _confirmPassword ??= _localizer.LoadString(GetStringResourceName());
 
@@ -106,6 +109,9 @@ namespace Eppie.CLI.Services
             private string? _appOpened;
             internal string AppOpened => _appOpened ??= _localizer.LoadString(GetStringResourceName());
 
+            private string? _confirmReset;
+            internal string ConfirmReset => _confirmReset ??= _localizer.LoadString(GetStringResourceName());
+
             private string? _invalidPassword;
             internal string InvalidPassword => _invalidPassword ??= _localizer.LoadString(GetStringResourceName(category: "Warning"));
 
@@ -121,6 +127,11 @@ namespace Eppie.CLI.Services
             internal string GetUnhandledException(Exception exception)
             {
                 return _localizer.LoadFormattedString(GetStringResourceName(category: "Error", name: "UnhandledException"), exception);
+            }
+
+            internal string GetMenuDescription(string name, string version)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Menu", name: "Description"), name, version);
             }
 
             private string? _exitDescription;

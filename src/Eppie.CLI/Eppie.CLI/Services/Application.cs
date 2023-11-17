@@ -96,34 +96,56 @@ namespace Eppie.CLI.Services
         {
             _logger.LogMethodCall();
 
-            return ReadSecretValue(_resourceLoader.Strings.AskPassword) ?? string.Empty;
+            return ReadSecretValue(_resourceLoader.Strings.AskPassword);
+        }
+
+        internal string AskNewPassword()
+        {
+            _logger.LogMethodCall();
+
+            return ReadSecretValue(_resourceLoader.Strings.AskNewPassword);
         }
 
         internal string ConfirmPassword()
         {
             _logger.LogMethodCall();
 
-            return ReadSecretValue(_resourceLoader.Strings.ConfirmPassword) ?? string.Empty;
+            return ReadSecretValue(_resourceLoader.Strings.ConfirmPassword);
         }
 
         internal string AskAccountAddress()
         {
-            return ReadValue(_resourceLoader.Strings.AskAccountAddress) ?? string.Empty;
+            _logger.LogMethodCall();
+
+            return ReadValue(_resourceLoader.Strings.AskAccountAddress);
         }
 
         internal string AskAccountPassword()
         {
-            return ReadSecretValue(_resourceLoader.Strings.AskAccountPassword) ?? string.Empty;
+            _logger.LogMethodCall();
+
+            return ReadSecretValue(_resourceLoader.Strings.AskAccountPassword);
         }
 
         internal string AskIMAPServer()
         {
-            return ReadValue(_resourceLoader.Strings.AskIMAPServer) ?? string.Empty;
+            _logger.LogMethodCall();
+
+            return ReadValue(_resourceLoader.Strings.AskIMAPServer);
         }
 
         internal string AskSMTPServer()
         {
-            return ReadValue(_resourceLoader.Strings.AskSMTPServer) ?? string.Empty;
+            _logger.LogMethodCall();
+
+            return ReadValue(_resourceLoader.Strings.AskSMTPServer);
+        }
+
+        internal bool ConfirmReset()
+        {
+            _logger.LogMethodCall();
+
+            return ReadBoolValue(_resourceLoader.Strings.ConfirmReset);
         }
 
         internal void PrintAccounts(IReadOnlyCollection<Account> accounts)
@@ -241,16 +263,22 @@ namespace Eppie.CLI.Services
             Console.ResetColor();
         }
 
-        private string? ReadValue(string message, ConsoleColor foreground = ConsoleColor.Gray)
+        private string ReadValue(string message, ConsoleColor foreground = ConsoleColor.Gray)
         {
             _logger.LogMethodCall();
-            return ConsoleExtension.ReadValue(message, (message) => ConsoleExtension.Write(message, foreground), Console.ReadLine);
+            return ConsoleExtension.ReadValue(message, (message) => ConsoleExtension.Write(message, foreground), Console.ReadLine) ?? string.Empty;
         }
 
-        private string? ReadSecretValue(string message, ConsoleColor foreground = ConsoleColor.Gray)
+        private string ReadSecretValue(string message, ConsoleColor foreground = ConsoleColor.Gray)
         {
             _logger.LogMethodCall();
-            return ConsoleExtension.ReadValue(message, (message) => ConsoleExtension.Write(message, foreground), () => ConsoleExtension.ReadSecretLine());
+            return ConsoleExtension.ReadValue(message, (message) => ConsoleExtension.Write(message, foreground), () => ConsoleExtension.ReadSecretLine()) ?? string.Empty;
+        }
+
+        private bool ReadBoolValue(string message, ConsoleColor foreground = ConsoleColor.Gray)
+        {
+            _logger.LogMethodCall();
+            return ConsoleExtension.ReadBool(message, (message) => ConsoleExtension.Write(message, foreground));
         }
 
         private void LogCommandWarning(string reason)

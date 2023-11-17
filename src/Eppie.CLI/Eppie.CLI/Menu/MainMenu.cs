@@ -68,6 +68,8 @@ namespace Eppie.CLI.Menu
             IAsyncParser parser = BaseParser.Default();
 
             ICommand root = parser.CreateRoot(
+                description: _resourceLoader.Strings.GetMenuDescription(_resourceLoader.AssemblyStrings.Title,
+                                                                        _resourceLoader.AssemblyStrings.Version),
                 subcommands: new[]
                 {
                     CreateCommand(parser, MenuCommand.Exit, _resourceLoader.Strings.ExitDescription,
