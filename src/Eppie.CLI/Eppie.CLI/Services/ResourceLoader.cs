@@ -30,19 +30,13 @@ namespace Eppie.CLI.Services
     /// Represents a service that provides localized resources.
     /// </summary>
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal sealed class ResourceLoader
+    internal sealed class ResourceLoader(IStringLocalizer<Resources.Program> localizer)
     {
         /// <summary>
         /// Gets the resource strings from the 'Program.resx' file.
         /// </summary>
-        internal ProgramStringLoader Strings { get; init; }
-        internal AssemblyStringLoader AssemblyStrings { get; init; }
-
-        public ResourceLoader(IStringLocalizer<Resources.Program> localizer)
-        {
-            AssemblyStrings = new AssemblyStringLoader();
-            Strings = new ProgramStringLoader(localizer);
-        }
+        internal ProgramStringLoader Strings { get; init; } = new ProgramStringLoader(localizer);
+        internal AssemblyStringLoader AssemblyStrings { get; init; } = new AssemblyStringLoader();
 
         /// <summary>
         /// Represents a set of resource strings from the 'Program.resx' file.

@@ -29,17 +29,12 @@ using Tuvi.Core;
 namespace Eppie.CLI.Services
 {
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal class CoreProvider
+    internal class CoreProvider(ILogger<CoreProvider> logger)
     {
-        private readonly ILogger<CoreProvider> _logger;
+        private readonly ILogger<CoreProvider> _logger = logger;
 
         private ITuviMail? _tuviMailCore;
         public ITuviMail TuviMailCore => _tuviMailCore ??= CreateTuviMail();
-
-        public CoreProvider(ILogger<CoreProvider> logger)
-        {
-            _logger = logger;
-        }
 
         public async Task ResetAsync()
         {
