@@ -27,6 +27,10 @@ on:
         - arm
         - arm64
         - all
+        
+env:
+  dotnet-version: 8.x
+        
 jobs:
   prepare:
     name: Prepare
@@ -96,7 +100,7 @@ jobs:
     - name: Install .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 7.0.x
+        dotnet-version: ${{ env.dotnet-version }}
     
     - name: Calculate version
       id: number-version-information

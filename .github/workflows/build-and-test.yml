@@ -34,6 +34,7 @@ env:
   project: src/Eppie.CLI/Eppie.CLI/Eppie.CLI.csproj
   test-project: ${{ null }}
   test-report-root: src/Eppie.CLI/TestResults
+  dotnet-version: 8.x
 
 jobs:
 
@@ -50,7 +51,7 @@ jobs:
     - name: Install dotnet
       uses: actions/setup-dotnet@3447fd6a9f9e57506b15f895c5b76d3b197dc7c2 # v3.2.0
       with:
-        dotnet-version: 7.0.x
+        dotnet-version: ${{ env.dotnet-version }}
 
     - name: Check formatting
       run: dotnet format ${{ env.project }} --verify-no-changes
@@ -75,7 +76,7 @@ jobs:
     - name: Install dotnet
       uses: actions/setup-dotnet@3447fd6a9f9e57506b15f895c5b76d3b197dc7c2 # v3.2.0
       with:
-        dotnet-version: 7.0.x
+        dotnet-version: ${{ env.dotnet-version }}
 
     - name: Build
       run: dotnet build ${{ env.project }} --configuration ${{ env.configuration }}
