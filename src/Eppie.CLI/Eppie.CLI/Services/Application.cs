@@ -61,6 +61,7 @@ namespace Eppie.CLI.Services
 
         internal void InitializeConsole()
         {
+            Console.InputEncoding = _consoleOptions.Encoding;
             Console.OutputEncoding = _consoleOptions.Encoding;
             CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = _consoleOptions.CultureInfo;
             Console.Title = _resourceLoader.AssemblyStrings.Title;
