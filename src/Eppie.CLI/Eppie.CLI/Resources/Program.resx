@@ -223,7 +223,7 @@
     <comment>This is the header for the list of accounts.</comment>
   </data>
   <data name="Message.AppRestored" xml:space="preserve">
-    <value>The application has been restored successfully.</value>
+    <value>Your Eppie account has been restored successfully.</value>
     <comment>This message indicates to the user that the application has been restored from a backup.</comment>
   </data>
   <data name="Message.AskSeedPhrase" xml:space="preserve">
@@ -243,7 +243,7 @@
     <comment>This message prompts the user to enter the path to the backup.</comment>
   </data>
   <data name="Menu.RestoreDescription" xml:space="preserve">
-    <value>Restore your master account</value>
+    <value>Restore your Eppie account.</value>
     <comment>Description of the 'restore' command in the help.</comment>
   </data>
   <data name="Menu.Description" xml:space="preserve">

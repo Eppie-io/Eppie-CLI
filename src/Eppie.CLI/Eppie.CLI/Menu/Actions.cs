@@ -177,7 +177,7 @@ namespace Eppie.CLI.Menu
                 Uri restoreUri = new(_application.AskRestorePath());
 
                 await _coreProvider.TuviMailCore.RestoreFromBackupIfNeededAsync(restoreUri).ConfigureAwait(false);
-                _application.WriteApplicationRestoredMessage();
+                _application.WriteSuccessfulRestoredMessage();
             }
             else
             {

@@ -232,9 +232,9 @@ namespace Eppie.CLI.Services
             Console.WriteLine(_resourceLoader.Strings.AppOpened);
         }
 
-        internal void WriteApplicationRestoredMessage()
+        internal void WriteSuccessfulRestoredMessage()
         {
-            _logger.LogDebug("The application was restored.");
+            _logger.LogDebug("Eppie account was restored.");
             Console.WriteLine(_resourceLoader.Strings.AppRestored);
         }
 
