@@ -30,21 +30,14 @@ using Tuvi.Core.Entities;
 namespace Eppie.CLI.Menu
 {
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal class Actions
+    internal class Actions(
+        ILogger<Actions> logger,
+        Application application,
+        CoreProvider coreProvider)
     {
-        private readonly ILogger<Actions> _logger;
-        private readonly Application _application;
-        private readonly CoreProvider _coreProvider;
-
-        public Actions(
-            ILogger<Actions> logger,
-            Application application,
-            CoreProvider coreProvider)
-        {
-            _logger = logger;
-            _application = application;
-            _coreProvider = coreProvider;
-        }
+        private readonly ILogger<Actions> _logger = logger;
+        private readonly Application _application = application;
+        private readonly CoreProvider _coreProvider = coreProvider;
 
         internal void ExitAction()
         {
