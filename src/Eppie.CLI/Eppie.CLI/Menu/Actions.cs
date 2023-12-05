@@ -137,10 +137,45 @@ namespace Eppie.CLI.Menu
             };
         }
 
-        internal void RestoreAction()
+        internal async Task RestoreActionAsync()
         {
             _logger.LogMethodCall();
-            throw new NotImplementedException();
+
+            bool isFirstTime = await _coreProvider.TuviMailCore.IsFirstApplicationStartAsync().ConfigureAwait(false);
+
+            if (!isFirstTime)
+            {
+                if (!_application.ConfirmReset())
+                {
+                    return;
+                }
+
+                await _coreProvider.ResetAsync().ConfigureAwait(false);
+            }
+
+            string[] seedPhrase = _application.AskSeedPhrase().Split(new char[] { ' ', ';' });
+            string password = _application.AskNewPassword();
+            if (password.Length == 0 || password != _application.ConfirmPassword())
+            {
+                _application.WriteInvalidPasswordWarning();
+                return;
+            }
+
+            await _coreProvider.TuviMailCore.GetSecurityManager().RestoreSeedPhraseAsync(seedPhrase).ConfigureAwait(false);
+            bool success = await _coreProvider.TuviMailCore.InitializeApplicationAsync(password).ConfigureAwait(false);
+
+            if (success)
+            {
+                //ToDo: temporary solution
+                Uri restoreUri = new(_application.AskRestorePath());
+
+                await _coreProvider.TuviMailCore.RestoreFromBackupIfNeededAsync(restoreUri).ConfigureAwait(false);
+                _application.WriteSuccessfulRestoredMessage();
+            }
+            else
+            {
+                _application.WriteImpossibleInitializationError();
+            }
         }
 
         internal void SendAction()

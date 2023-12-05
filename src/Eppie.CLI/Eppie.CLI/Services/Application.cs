@@ -142,6 +142,20 @@ namespace Eppie.CLI.Services
             return ReadValue(_resourceLoader.Strings.AskSMTPServer);
         }
 
+        internal string AskSeedPhrase()
+        {
+            _logger.LogMethodCall();
+
+            return ReadSecretValue(_resourceLoader.Strings.AskSeedPhrase);
+        }
+
+        internal string AskRestorePath()
+        {
+            _logger.LogMethodCall();
+
+            return ReadValue(_resourceLoader.Strings.AskRestorePath);
+        }
+
         internal bool ConfirmReset()
         {
             _logger.LogMethodCall();
@@ -217,6 +231,12 @@ namespace Eppie.CLI.Services
         {
             _logger.LogDebug("The application was opened.");
             Console.WriteLine(_resourceLoader.Strings.AppOpened);
+        }
+
+        internal void WriteSuccessfulRestoredMessage()
+        {
+            _logger.LogDebug("Eppie account was restored.");
+            Console.WriteLine(_resourceLoader.Strings.AppRestored);
         }
 
         internal void WriteInvalidPasswordWarning()
