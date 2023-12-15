@@ -163,6 +163,13 @@ namespace Eppie.CLI.Services
             return ReadBoolValue(_resourceLoader.Strings.ConfirmReset);
         }
 
+        internal string AskMessageBody()
+        {
+            _logger.LogMethodCall();
+
+            return ReadValue(_resourceLoader.Strings.AskMessageBody);
+        }
+
         internal void PrintAccounts(IReadOnlyCollection<Account> accounts)
         {
             _logger.LogMethodCall();

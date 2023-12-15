@@ -234,6 +234,18 @@
     <value>All local data will be lost. Do you want to continue? (y/n): </value>
     <comment>This message prompts the user to confirm to reset the application.</comment>
   </data>
+  <data name="MenuOption.ReceiverDescription" xml:space="preserve">
+    <value>Receiver address</value>
+    <comment>Description of the “send” command option in the help.</comment>
+  </data>
+  <data name="MenuOption.SenderDescription" xml:space="preserve">
+    <value>Sender address</value>
+    <comment>Description of the “send” command option in the help.</comment>
+  </data>
+  <data name="MenuOption.SubjectDescription" xml:space="preserve">
+    <value>Message subject</value>
+    <comment>Description of the “send” command option in the help.</comment>
+  </data>
   <data name="Message.AskNewPassword" xml:space="preserve">
     <value>Enter your new vault password: </value>
     <comment>This message prompts the user to enter a new vault password.</comment>
@@ -246,10 +258,22 @@
     <value>Restore your Eppie account.</value>
     <comment>Description of the 'restore' command in the help.</comment>
   </data>
+  <data name="Menu.SendDescription" xml:space="preserve">
+    <value>Send a message</value>
+    <comment>Description of the 'send' command in the help.</comment>
+  </data>
+  <data name="MenuOption.AccountTypeDescription" xml:space="preserve">
+    <value>Type of account</value>
+    <comment>Description of the “add-account” command option in the help.</comment>
+  </data>
   <data name="Menu.Description" xml:space="preserve">
     <value>{0} (version {1})</value>
     <comment>Description of the main menu in the help.
 {0} is a parameter containing the title of the application;
 {1} is a parameter containing the version of the application.</comment>
+  </data>
+  <data name="Message.AskMessageBody" xml:space="preserve">
+    <value>Enter a text message: </value>
+    <comment>This message prompts the user to enter a text message.</comment>
   </data>
 </root>

@@ -18,6 +18,8 @@
 
 using System.Diagnostics;
 
+using Eppie.CLI.Services;
+
 using Tuvi.Toolkit.Cli.CommandLine;
 
 namespace Eppie.CLI.Menu
@@ -48,19 +50,55 @@ namespace Eppie.CLI.Menu
 
             public static readonly IReadOnlyCollection<string> TypeOptionNames = new[] { "-t", "--type", "/Type" };
 
-            public static IReadOnlyCollection<IOption> GetOptions(IAsyncParser parser)
+            public static IReadOnlyCollection<IOption> GetOptions(IAsyncParser parser, ResourceLoader resourceLoader)
             {
                 Debug.Assert(parser is not null);
+                Debug.Assert(resourceLoader is not null);
 
                 return new IOption[]
                 {
-                    parser.CreateOption<AccountType>(TypeOptionNames, isRequired: true)
+                    parser.CreateOption<AccountType>(TypeOptionNames, isRequired: true, description: resourceLoader.Strings.AccountTypeDescription)
                 };
             }
 
             public static AccountType GetTypeValue(IAsyncCommand cmd)
             {
                 return GetOptionValue<AccountType>(cmd, TypeOptionNames.First());
+            }
+        }
+
+        public static class CommandSendOptions
+        {
+            public static readonly IReadOnlyCollection<string> SenderOptionNames = new[] { "-s", "--sender", "/Sender" };
+            public static readonly IReadOnlyCollection<string> ReceiverOptionNames = new[] { "-r", "--receiver", "/Receiver" };
+            public static readonly IReadOnlyCollection<string> SubjectOptionNames = new[] { "-t", "--subject", "/Subject" };
+
+            public static IReadOnlyCollection<IOption> GetOptions(IAsyncParser parser, ResourceLoader resourceLoader)
+            {
+                Debug.Assert(parser is not null);
+                Debug.Assert(resourceLoader is not null);
+
+                return new IOption[]
+                {
+                    parser.CreateOption<string>(SenderOptionNames, isRequired: true, description: resourceLoader.Strings.SenderDescription),
+                    parser.CreateOption<string>(ReceiverOptionNames, isRequired: true, description: resourceLoader.Strings.ReceiverDescription),
+                    parser.CreateOption<string>(SubjectOptionNames, isRequired: true, description: resourceLoader.Strings.SubjectDescription),
+                };
+            }
+
+            public static string GetSubjectValue(IAsyncCommand cmd)
+            {
+                return GetOptionValue<string>(cmd, SubjectOptionNames.First()) ?? string.Empty;
+            }
+
+            public static string GetSenderValue(IAsyncCommand cmd)
+            {
+                return GetOptionValue<string>(cmd, SenderOptionNames.First()) ?? string.Empty;
+            }
+
+            public static string GetReceiverValue(IAsyncCommand cmd)
+            {
+                return GetOptionValue<string>(cmd, ReceiverOptionNames.First()) ?? string.Empty;
             }
         }
 
