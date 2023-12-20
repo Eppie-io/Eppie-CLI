@@ -178,10 +178,26 @@ namespace Eppie.CLI.Menu
             }
         }
 
-        internal void SendAction()
+        internal async Task SendActionAsync(string sender, string receiver, string subject)
         {
             _logger.LogMethodCall();
-            throw new NotImplementedException();
+
+            EmailAddress senderAddress = new(sender);
+            EmailAddress receiverAddress = new(receiver);
+
+            IAccountService accountService = await _coreProvider.TuviMailCore.GetAccountServiceAsync(senderAddress).ConfigureAwait(false);
+
+            string body = _application.AskMessageBody();
+
+            Message message = new()
+            {
+                Subject = subject,
+                TextBody = body,
+            };
+            message.From.Add(senderAddress);
+            message.To.Add(receiverAddress);
+
+            await accountService.SendMessageAsync(message, false, false).ConfigureAwait(false);
         }
 
         internal void ListContactsAction()

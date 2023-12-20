@@ -115,6 +115,9 @@ namespace Eppie.CLI.Services
             private string? _askRestorePath;
             internal string AskRestorePath => _askRestorePath ??= _localizer.LoadString(GetStringResourceName());
 
+            private string? _askMessageBody;
+            internal string AskMessageBody => _askMessageBody ??= _localizer.LoadString(GetStringResourceName());
+
             private string? _invalidPassword;
             internal string InvalidPassword => _invalidPassword ??= _localizer.LoadString(GetStringResourceName(category: "Warning"));
 
@@ -157,6 +160,21 @@ namespace Eppie.CLI.Services
 
             private string? _restoreDescription;
             internal string RestoreDescription => _restoreDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+
+            private string? _sendDescription;
+            internal string SendDescription => _sendDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+
+            private string? _accountTypeDescription;
+            internal string AccountTypeDescription => _accountTypeDescription ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+
+            private string? _senderDescription;
+            internal string SenderDescription => _senderDescription ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+
+            private string? _receiverDescription;
+            internal string ReceiverDescription => _receiverDescription ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+
+            private string? _subjectDescription;
+            internal string SubjectDescription => _subjectDescription ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
 
             private static string GetStringResourceName(string category = "Message", [CallerMemberName] string name = "")
             {
