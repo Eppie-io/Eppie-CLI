@@ -37,7 +37,9 @@ namespace Eppie.CLI.Menu
         public const string AddAccount = "add-account";
         public const string ListContacts = "list-contacts";
         public const string ShowMessage = "show-message";
-        public const string ShowMessages = "show-messages";
+        public const string ShowAllMessages = "show-all-messages";
+        public const string ShowFolderMessages = "show-folder-messages";
+        public const string ShowContactMessages = "show-contact-messages";
 
         public static class CommandAddAccountOptions
         {
@@ -120,6 +122,114 @@ namespace Eppie.CLI.Menu
             public static FileInfo GetFileValue(IAsyncCommand cmd)
             {
                 return GetRequiredOptionValue<FileInfo>(cmd, FileOptionNames.First());
+            }
+        }
+
+        public static class CommandShowMessageOptions
+        {
+            public static readonly IReadOnlyCollection<string> AccountOptionNames = new[] { "-a", "--account", "/Account" };
+            public static readonly IReadOnlyCollection<string> FolderOptionNames = new[] { "-f", "--folder", "/Folder" };
+            public static readonly IReadOnlyCollection<string> IdOptionNames = new[] { "-i", "--message-id", "/MessageId" };
+            public static readonly IReadOnlyCollection<string> PrimaryKeyOptionNames = new[] { "-k", "--primary-key", "/PrimaryKey" };
+
+            public static IReadOnlyCollection<IOption> GetOptions(IAsyncParser parser, ResourceLoader resourceLoader)
+            {
+                Debug.Assert(parser is not null);
+                Debug.Assert(resourceLoader is not null);
+
+                return new IOption[]
+                {
+                    parser.CreateOption<string>(AccountOptionNames, isRequired: true, description: resourceLoader.Strings.AccountAddressDescription),
+                    parser.CreateOption<string>(FolderOptionNames, isRequired: true, description: resourceLoader.Strings.AccountFolderDescription),
+                    parser.CreateOption<uint>(IdOptionNames, isRequired: true, description: resourceLoader.Strings.MessageIDDescription),
+                    parser.CreateOption<int>(PrimaryKeyOptionNames, isRequired: true, description: resourceLoader.Strings.MessagePKDescription)
+                };
+            }
+
+            public static string GetAccountValue(IAsyncCommand cmd)
+            {
+                return GetRequiredOptionValue<string>(cmd, AccountOptionNames.First());
+            }
+
+            public static string GetFolderNameValue(IAsyncCommand cmd)
+            {
+                return GetRequiredOptionValue<string>(cmd, FolderOptionNames.First());
+            }
+
+            public static uint GetIdValue(IAsyncCommand cmd)
+            {
+                return GetRequiredOptionValue<uint>(cmd, IdOptionNames.First());
+            }
+
+            public static int GetPKValue(IAsyncCommand cmd)
+            {
+                return GetRequiredOptionValue<int>(cmd, PrimaryKeyOptionNames.First());
+            }
+        }
+
+        public static class CommandShowMessagesOptions
+        {
+            private const int DefaultPageSize = 20;
+
+            public static readonly IReadOnlyCollection<string> PageSizeOptionNames = new[] { "-s", "--page-size", "/PageSize" };
+            public static readonly IReadOnlyCollection<string> AccountOptionNames = new[] { "-a", "--account", "/Account" };
+            public static readonly IReadOnlyCollection<string> FolderOptionNames = new[] { "-f", "--folder", "/Folder" };
+            public static readonly IReadOnlyCollection<string> ContactOptionNames = new[] { "-c", "--contact-address", "/ContactAddress" };
+
+            public static IReadOnlyCollection<IOption> GetShowMessagesOptions(IAsyncParser parser, ResourceLoader resourceLoader)
+            {
+                Debug.Assert(parser is not null);
+                Debug.Assert(resourceLoader is not null);
+
+                return new IOption[]
+                {
+                    parser.CreateOption<int>(PageSizeOptionNames, getDefaultValue: () => DefaultPageSize, description: resourceLoader.Strings.PageSizeDescription),
+                };
+            }
+
+            public static IReadOnlyCollection<IOption> GetShowFolderMessagesOptions(IAsyncParser parser, ResourceLoader resourceLoader)
+            {
+                Debug.Assert(parser is not null);
+                Debug.Assert(resourceLoader is not null);
+
+                return new IOption[]
+                {
+                    parser.CreateOption<string>(AccountOptionNames, isRequired: true, description: resourceLoader.Strings.AccountAddressDescription),
+                    parser.CreateOption<string>(FolderOptionNames, isRequired: true, description: resourceLoader.Strings.AccountFolderDescription),
+                    parser.CreateOption<int>(PageSizeOptionNames, getDefaultValue: () => DefaultPageSize, description: resourceLoader.Strings.PageSizeDescription),
+                };
+            }
+
+            public static IReadOnlyCollection<IOption> GetShowContactMessagesOptions(IAsyncParser parser, ResourceLoader resourceLoader)
+            {
+                Debug.Assert(parser is not null);
+                Debug.Assert(resourceLoader is not null);
+
+                return new IOption[]
+                {
+                    parser.CreateOption<string>(ContactOptionNames, isRequired: true, description: resourceLoader.Strings.ContactAddressDescription),
+                    parser.CreateOption<int>(PageSizeOptionNames, getDefaultValue: () => DefaultPageSize, description: resourceLoader.Strings.PageSizeDescription),
+                };
+            }
+
+            public static int GetPageSizeValue(IAsyncCommand cmd)
+            {
+                return GetRequiredOptionValue<int>(cmd, PageSizeOptionNames.First());
+            }
+
+            public static string GetAccountValue(IAsyncCommand cmd)
+            {
+                return GetRequiredOptionValue<string>(cmd, AccountOptionNames.First());
+            }
+
+            public static string GetFolderNameValue(IAsyncCommand cmd)
+            {
+                return GetRequiredOptionValue<string>(cmd, FolderOptionNames.First());
+            }
+
+            public static string GetContactAddressValue(IAsyncCommand cmd)
+            {
+                return GetRequiredOptionValue<string>(cmd, ContactOptionNames.First());
             }
         }
 
