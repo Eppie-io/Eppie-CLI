@@ -63,7 +63,7 @@ namespace Eppie.CLI.Menu
 
             public static AccountType GetTypeValue(IAsyncCommand cmd)
             {
-                return GetOptionValue<AccountType>(cmd, TypeOptionNames.First());
+                return GetRequiredOptionValue<AccountType>(cmd, TypeOptionNames.First());
             }
         }
 
@@ -88,20 +88,48 @@ namespace Eppie.CLI.Menu
 
             public static string GetSubjectValue(IAsyncCommand cmd)
             {
-                return GetOptionValue<string>(cmd, SubjectOptionNames.First()) ?? string.Empty;
+                return GetRequiredOptionValue<string>(cmd, SubjectOptionNames.First());
             }
 
             public static string GetSenderValue(IAsyncCommand cmd)
             {
-                return GetOptionValue<string>(cmd, SenderOptionNames.First()) ?? string.Empty;
+                return GetRequiredOptionValue<string>(cmd, SenderOptionNames.First());
             }
 
             public static string GetReceiverValue(IAsyncCommand cmd)
             {
-                return GetOptionValue<string>(cmd, ReceiverOptionNames.First()) ?? string.Empty;
+                return GetRequiredOptionValue<string>(cmd, ReceiverOptionNames.First());
             }
         }
 
+        public static class CommandImportOptions
+        {
+            public static readonly IReadOnlyCollection<string> FileOptionNames = new[] { "-f", "--file", "/File" };
+
+            public static IReadOnlyCollection<IOption> GetOptions(IAsyncParser parser, ResourceLoader resourceLoader)
+            {
+                Debug.Assert(parser is not null);
+                Debug.Assert(resourceLoader is not null);
+
+                return new IOption[]
+                {
+                    parser.CreateOption<FileInfo>(FileOptionNames, isRequired: true, description: resourceLoader.Strings.KeyBundleFileDescription)
+                };
+            }
+
+            public static FileInfo GetFileValue(IAsyncCommand cmd)
+            {
+                return GetRequiredOptionValue<FileInfo>(cmd, FileOptionNames.First());
+            }
+        }
+
+        private static T GetRequiredOptionValue<T>(IAsyncCommand cmd, string name)
+        {
+            ArgumentNullException.ThrowIfNull(cmd);
+            return cmd.GetRequiredValue<T>(name) ?? throw new InvalidOperationException($"The required '{name}' option is missing.");
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "For future use.")]
         private static T? GetOptionValue<T>(IAsyncCommand cmd, string name)
         {
             ArgumentNullException.ThrowIfNull(cmd);
