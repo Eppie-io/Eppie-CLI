@@ -98,8 +98,9 @@ namespace Eppie.CLI.Menu
                                   action: (cmd) => _actions.ShowMessageAction()),
                     CreateCommand(parser, MenuCommand.ShowMessages, string.Empty,
                                   action: (cmd) => _actions.ShowMessagesAction()),
-                    CreateCommand(parser, MenuCommand.Import, string.Empty,
-                                  action: (cmd) => _actions.ImportAction()),
+                    CreateAsyncCommand(parser, MenuCommand.Import, _resourceLoader.Strings.ImportDescription,
+                                       action: (cmd) => _actions.ImportKeyBundleFromFileAsync(MenuCommand.CommandImportOptions.GetFileValue(cmd)),
+                                       options: MenuCommand.CommandImportOptions.GetOptions(parser, _resourceLoader)),
                 }
             );
 

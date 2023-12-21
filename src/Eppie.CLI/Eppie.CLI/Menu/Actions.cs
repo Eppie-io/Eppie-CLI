@@ -218,10 +218,16 @@ namespace Eppie.CLI.Menu
             throw new NotImplementedException();
         }
 
-        internal void ImportAction()
+        internal async Task ImportKeyBundleFromFileAsync(FileInfo file)
         {
             _logger.LogMethodCall();
-            throw new NotImplementedException();
+            await Task.Run(() => ImportBundle(file.FullName)).ConfigureAwait(false);
+        }
+
+        private void ImportBundle(string fileAddress)
+        {
+            using MemoryStream keyIn = new(File.ReadAllBytes(fileAddress));
+            _coreProvider.TuviMailCore.GetSecurityManager().ImportPgpKeyRingBundle(keyIn);
         }
 
         private async Task AddEmailAccountAsync()

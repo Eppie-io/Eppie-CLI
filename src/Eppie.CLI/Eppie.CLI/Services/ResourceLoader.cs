@@ -164,6 +164,9 @@ namespace Eppie.CLI.Services
             private string? _sendDescription;
             internal string SendDescription => _sendDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
 
+            private string? _importDescription;
+            internal string ImportDescription => _importDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+
             private string? _accountTypeDescription;
             internal string AccountTypeDescription => _accountTypeDescription ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
 
@@ -175,6 +178,9 @@ namespace Eppie.CLI.Services
 
             private string? _subjectDescription;
             internal string SubjectDescription => _subjectDescription ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+
+            private string? _keyBundleFileDescription;
+            internal string KeyBundleFileDescription => _keyBundleFileDescription ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
 
             private static string GetStringResourceName(string category = "Message", [CallerMemberName] string name = "")
             {
