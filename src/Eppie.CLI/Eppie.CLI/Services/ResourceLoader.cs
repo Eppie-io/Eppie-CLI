@@ -130,6 +130,11 @@ namespace Eppie.CLI.Services
             private string? _impossibleInitialization;
             internal string ImpossibleInitialization => _impossibleInitialization ??= _localizer.LoadString(GetStringResourceName(category: "Error"));
 
+            internal string GetUnknownFolderWarning(string address, string folder)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Warning", name: "UnknownFolder"), folder, address);
+            }
+
             internal string GetUnhandledException(Exception exception)
             {
                 return _localizer.LoadFormattedString(GetStringResourceName(category: "Error", name: "UnhandledException"), exception);
@@ -167,6 +172,18 @@ namespace Eppie.CLI.Services
             private string? _importDescription;
             internal string ImportDescription => _importDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
 
+            private string? _showMessageDescription;
+            internal string ShowMessageDescription => _showMessageDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+
+            private string? _showAllMessagesDescription;
+            internal string ShowAllMessagesDescription => _showAllMessagesDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+
+            private string? _showFolderMessagesDescription;
+            internal string ShowFolderMessagesDescription => _showFolderMessagesDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+
+            private string? _showContactMessagesDescription;
+            internal string ShowContactMessagesDescription => _showContactMessagesDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+
             private string? _accountTypeDescription;
             internal string AccountTypeDescription => _accountTypeDescription ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
 
@@ -181,6 +198,95 @@ namespace Eppie.CLI.Services
 
             private string? _keyBundleFileDescription;
             internal string KeyBundleFileDescription => _keyBundleFileDescription ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+
+            private string? _accountAddressDescription;
+            internal string AccountAddressDescription => _accountAddressDescription ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+
+            private string? _contactAddressDescription;
+            internal string ContactAddressDescription => _contactAddressDescription ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+
+            private string? _accountFolderDescription;
+            internal string AccountFolderDescription => _accountFolderDescription ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+
+            private string? _pageSizeDescription;
+            internal string PageSizeDescription => _pageSizeDescription ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+
+            private string? _messageIDDescription;
+            internal string MessageIDDescription => _messageIDDescription ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+
+            private string? _messagePKDescription;
+            internal string MessagePKDescription => _messagePKDescription ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+
+            private string? _printAllMessagesHeader;
+            internal string PrintAllMessagesHeader => _printAllMessagesHeader ??= _localizer.LoadString(GetStringResourceName(category: "Information"));
+
+            private string? _askMoreMessages;
+            internal string AskMoreMessages => _askMoreMessages ??= _localizer.LoadString(GetStringResourceName());
+
+            internal string GetPrintFolderMessagesHeader(string accountAddress, string folder)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Information", name: "PrintFolderMessagesHeader"), accountAddress, folder);
+            }
+
+            internal string GetPrintContactMessagesHeader(string contactAddress)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Information", name: "PrintContactMessagesHeader"), contactAddress);
+            }
+
+            internal string GetMessageDetailsText(uint id, int pk, DateTimeOffset date, string to, string from, string folder, string subject)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Information", name: "MessageDetails"), id, pk, date, to, from, folder, subject);
+            }
+
+            internal string GetMessageIDPropertyText(uint id)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Information", name: "MessageIDProperty"), id);
+            }
+
+            internal string GetMessagePKPropertyText(int pk)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Information", name: "MessagePKProperty"), pk);
+            }
+
+            internal string GetMessageDatePropertyText(DateTimeOffset date)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Information", name: "MessageDateProperty"), date);
+            }
+
+            internal string GetMessageFolderText(string folder)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Information", name: "MessageFolder"), folder);
+            }
+
+            internal string GetMessageFromPropertyText(string from)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Information", name: "MessageFromProperty"), from);
+            }
+
+            internal string GetMessageToPropertyText(string to)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Information", name: "MessageToProperty"), to);
+            }
+
+            internal string GetMessageCcPropertyText(string cc)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Information", name: "MessageCcProperty"), cc);
+            }
+
+            internal string GetMessageBccPropertyText(string bcc)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Information", name: "MessageBccProperty"), bcc);
+            }
+
+            internal string GetMessageSubjectPropertyText(string subject)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Information", name: "MessageSubjectProperty"), subject);
+            }
+
+            internal string GetMessageAttachmentsCountText(int attachments)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Information", name: "MessageAttachmentsCountProperty"), attachments);
+            }
 
             private static string GetStringResourceName(string category = "Message", [CallerMemberName] string name = "")
             {

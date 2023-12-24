@@ -284,4 +284,131 @@
     <value>A key bundle file.</value>
     <comment>Description of the 'import' command option in the help.</comment>
   </data>
+  <data name="Warning.UnknownFolder" xml:space="preserve">
+    <value>Warning: Folder '{0}' not found (check '{1}' address).</value>
+    <comment>This message warns the user that the folder not found.
+{0} is a parameter containing the folder name.
+{1} is a parameter containing the address.</comment>
+  </data>
+  <data name="Menu.ShowMessageDescription" xml:space="preserve">
+    <value>Show details of a specific message.</value>
+    <comment>Description of the 'show-message' command in the help.</comment>
+  </data>
+  <data name="MenuOption.AccountAddressDescription" xml:space="preserve">
+    <value>Account address.</value>
+    <comment>Description of the 'show-message' command option in the help.</comment>
+  </data>
+  <data name="MenuOption.AccountFolderDescription" xml:space="preserve">
+    <value>Account folder name.</value>
+    <comment>Description of the 'show-message' command option in the help.</comment>
+  </data>
+  <data name="MenuOption.MessageIDDescription" xml:space="preserve">
+    <value>Message ID.</value>
+    <comment>Description of the 'show-message' command option in the help.</comment>
+  </data>
+  <data name="MenuOption.MessagePKDescription" xml:space="preserve">
+    <value>The primary key of the message in the database.</value>
+    <comment>Description of the 'show-message' command option in the help.</comment>
+  </data>
+  <data name="Menu.ShowAllMessagesDescription" xml:space="preserve">
+    <value>Show all messages from all accounts.</value>
+    <comment>Description of the 'show-all-messages' command in the help.</comment>
+  </data>
+  <data name="Menu.ShowContactMessagesDescription" xml:space="preserve">
+    <value>Show messages from a specific contact.</value>
+    <comment>Description of the 'show-contact-messages' command in the help.</comment>
+  </data>
+  <data name="Menu.ShowFolderMessagesDescription" xml:space="preserve">
+    <value>Show messages from a specific account folder.</value>
+    <comment>Description of the 'show-folder-messages' command in the help.</comment>
+  </data>
+  <data name="MenuOption.ContactAddressDescription" xml:space="preserve">
+    <value>Contact address.</value>
+    <comment>Description of the 'show-contact-messages' command option in the help.</comment>
+  </data>
+  <data name="Information.MessageAttachmentsCountProperty" xml:space="preserve">
+    <value>Message has {0} attachments.</value>
+    <comment>This is a text format for displaying the number of email attachments.
+{0} is a parameter containing the number of attachments.</comment>
+  </data>
+  <data name="Information.MessageBccProperty" xml:space="preserve">
+    <value>Bcc: {0};</value>
+    <comment>This is the text format for displaying the "Bcc" property of the email.
+{0} is a parameter containing "Bcc" addresses.</comment>
+  </data>
+  <data name="Information.MessageCcProperty" xml:space="preserve">
+    <value>Cc: {0};</value>
+    <comment>This is the text format for displaying the "Cc" property of the email.
+{0} is a parameter containing "Cc" addresses.</comment>
+  </data>
+  <data name="Information.MessageDateProperty" xml:space="preserve">
+    <value>Date: {0};</value>
+    <comment>This is the text format for displaying the date of the email.
+{0} is a parameter containing the date of the message.</comment>
+  </data>
+  <data name="Information.MessageDetails" xml:space="preserve">
+    <value>Details of message #{0}: PK={1}; Date {2}; To: {3}; From {4}; Folder: {5}; Subject {6};</value>
+    <comment>This is the text format for displaying email details.
+{0} is a parameter containing the message id.
+{1} is a parameter containing the message primary key.
+{2} is a parameter containing the date of the message.
+{3} is a parameter containing the receiver's address.
+{4} is a parameter containing the sender's address.
+{5} is a parameter containing the folder name.
+{6} is a parameter containing the subject of the message.</comment>
+  </data>
+  <data name="Information.MessageFolder" xml:space="preserve">
+    <value>Folder: {0};</value>
+    <comment>This is the text format for displaying the folder of the email.
+{0} is a parameter containing the folder name.</comment>
+  </data>
+  <data name="Information.MessageFromProperty" xml:space="preserve">
+    <value>From: {0};</value>
+    <comment>This is the text format for displaying the "From" property of the email.
+{0} is a parameter containing "From" address.</comment>
+  </data>
+  <data name="Information.MessageIDProperty" xml:space="preserve">
+    <value>ID: {0};</value>
+    <comment>This is the text format for displaying a unique email ID.
+{0} is a parameter containing the message id.</comment>
+  </data>
+  <data name="Information.MessagePKProperty" xml:space="preserve">
+    <value>PK: {0};</value>
+    <comment>This is the text format for displaying the email key in the database.
+{0} is a parameter containing the message primary key.</comment>
+  </data>
+  <data name="Information.MessageSubjectProperty" xml:space="preserve">
+    <value>Subject: {0};</value>
+    <comment>This is the text format for displaying the subject of the email.
+{0} is a parameter containing the subject of the message.</comment>
+  </data>
+  <data name="Information.MessageToProperty" xml:space="preserve">
+    <value>To: {0};</value>
+    <comment>This is the text format for displaying the "To" property of the email.
+{0} is a parameter containing "To" address.</comment>
+  </data>
+  <data name="Information.PrintAllMessagesHeader" xml:space="preserve">
+    <value>All messages:</value>
+    <comment>Header text for list of all email messages.</comment>
+  </data>
+  <data name="Information.PrintFolderMessagesHeader" xml:space="preserve">
+    <value>Messages for {0}/{1}:</value>
+    <comment>Header format text for a list of email messages in a specific account folder.
+{0} is a parameter containing the account address.
+{1} is a parameter containing the folder name.</comment>
+  </data>
+  <data name="MenuOption.PageSizeDescription" xml:space="preserve">
+    <value>Number of messages displayed at a time.</value>
+    <comment>Description of the 'show-all-messages' command option in the help.</comment>
+  </data>
+  <data name="Information.PrintContactMessagesHeader" xml:space="preserve">
+    <value>Messages for contact {0}:</value>
+    <comment>Header format text for a list of email messages from a specific contact.
+{0} is a parameter containing the contact address.
+</comment>
+  </data>
+  <data name="Message.AskMoreMessages" xml:space="preserve">
+    <value>Show more messages? (y/n): </value>
+    <comment>This message prompts the user to show more messages.</comment>
+  </data>
 </root>

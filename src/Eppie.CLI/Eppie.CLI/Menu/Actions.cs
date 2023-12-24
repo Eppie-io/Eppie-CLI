@@ -206,16 +206,79 @@ namespace Eppie.CLI.Menu
             throw new NotImplementedException();
         }
 
-        internal void ShowMessageAction()
+        internal async Task ShowMessageActionAsync(string address, string folderName, uint id, int pk)
         {
             _logger.LogMethodCall();
-            throw new NotImplementedException();
+
+            EmailAddress accountEmail = new(address);
+            Account account = await _coreProvider.TuviMailCore.GetAccountAsync(accountEmail).ConfigureAwait(true);
+            Folder? folder = account.FoldersStructure.FirstOrDefault(x => x.HasSameName(folderName));
+
+            if (folder is null)
+            {
+                _application.WriteUnknownFolderWarning(address, folderName);
+                return;
+            }
+
+            Message msg = new()
+            {
+                Pk = pk,
+                Id = id,
+                Folder = folder,
+                FolderId = folder.Id
+            };
+
+            IAccountService accountService = await _coreProvider.TuviMailCore.GetAccountServiceAsync(accountEmail).ConfigureAwait(true);
+            Message message = await accountService.GetMessageBodyAsync(msg).ConfigureAwait(true);
+            _application.PrintMessage(message, false);
         }
 
-        internal void ShowMessagesAction()
+        internal async Task ShowAllMessagesActionAsync(int pageSize)
         {
             _logger.LogMethodCall();
-            throw new NotImplementedException();
+
+            await _application.PrintAllMessagesAsync(pageSize, (count, lastMsg) => GetMessages(count, lastMsg, _coreProvider.TuviMailCore)).ConfigureAwait(false);
+
+            static async Task<IEnumerable<Message>> GetMessages(int count, Message lastMessage, ITuviMail tuviMail)
+            {
+                return await tuviMail.GetAllEarlierMessagesAsync(count, lastMessage).ConfigureAwait(false);
+            }
+        }
+
+        internal async Task ShowFolderMessagesActionAsync(string accountAddress, string folderName, int pageSize)
+        {
+            _logger.LogMethodCall();
+
+            EmailAddress email = new(accountAddress);
+            Account account = await _coreProvider.TuviMailCore.GetAccountAsync(email).ConfigureAwait(false);
+            Folder? folder = account.FoldersStructure.Find(x => x.HasSameName(folderName));
+
+            if (folder is null)
+            {
+                _application.WriteUnknownFolderWarning(accountAddress, folderName);
+                return;
+            }
+
+            await _application.PrintFolderMessagesAsync(accountAddress, folderName, pageSize, (count, lastMsg) => GetMessages(count, lastMsg, folder, _coreProvider.TuviMailCore)).ConfigureAwait(false);
+
+            static async Task<IEnumerable<Message>> GetMessages(int count, Message lastMessage, Folder folder, ITuviMail tuviMail)
+            {
+                return await tuviMail.GetFolderEarlierMessagesAsync(folder, count, lastMessage).ConfigureAwait(false);
+            }
+        }
+
+        internal async Task ShowContactMessagesActionAsync(string contactAddress, int pageSize)
+        {
+            _logger.LogMethodCall();
+
+            EmailAddress contact = new(contactAddress);
+
+            await _application.PrintContactMessagesAsync(contactAddress, pageSize, (count, lastMsg) => GetMessages(count, lastMsg, contact, _coreProvider.TuviMailCore)).ConfigureAwait(false);
+
+            static async Task<IEnumerable<Message>> GetMessages(int count, Message lastMessage, EmailAddress email, ITuviMail tuviMail)
+            {
+                return await tuviMail.GetContactEarlierMessagesAsync(email, count, lastMessage).ConfigureAwait(false);
+            }
         }
 
         internal async Task ImportKeyBundleFromFileAsync(FileInfo file)

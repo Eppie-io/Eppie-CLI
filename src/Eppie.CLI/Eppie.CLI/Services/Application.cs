@@ -19,6 +19,7 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Text;
 
 using Eppie.CLI.Options;
 using Eppie.CLI.Tools;
@@ -189,6 +190,78 @@ namespace Eppie.CLI.Services
             Console.WriteLine();
         }
 
+        internal void PrintMessage(Message message, bool compact)
+        {
+            ArgumentNullException.ThrowIfNull(message);
+
+            var msg = new
+            {
+                message.Pk,
+                message.Id,
+
+                message.Date,
+                Folder = message.Folder.FullName,
+                From = string.Join(';', message.From),
+                To = string.Join(';', message.To),
+                Cc = string.Join(';', message.Cc),
+                Bcc = string.Join(';', message.Bcc),
+
+                message.Subject,
+                message.PreviewText,
+
+                TextBodyLength = message.TextBody?.Length,
+                HtmlBodyLength = message.HtmlBody?.Length,
+
+                Attachments = message.Attachments.Count
+            };
+
+            _logger.LogDebug("Print message {@Message}", msg);
+
+            if (compact)
+            {
+                string to = message.To.FirstOrDefault()?.Address ?? string.Empty;
+                string from = message.From.FirstOrDefault()?.Address ?? string.Empty;
+
+                Console.WriteLine(_resourceLoader.Strings.GetMessageDetailsText(msg.Id, msg.Pk, msg.Date, Truncate(to), Truncate(from), msg.Folder, msg.Subject));
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine(_resourceLoader.Strings.GetMessageIDPropertyText(msg.Id));
+                Console.WriteLine(_resourceLoader.Strings.GetMessagePKPropertyText(msg.Pk));
+                Console.WriteLine(_resourceLoader.Strings.GetMessageDatePropertyText(msg.Date));
+                Console.WriteLine(_resourceLoader.Strings.GetMessageToPropertyText(msg.To));
+                Console.WriteLine(_resourceLoader.Strings.GetMessageFromPropertyText(msg.From));
+                Console.WriteLine(_resourceLoader.Strings.GetMessageCcPropertyText(msg.Cc));
+                Console.WriteLine(_resourceLoader.Strings.GetMessageBccPropertyText(msg.Bcc));
+                Console.WriteLine(_resourceLoader.Strings.GetMessageFolderText(msg.Folder));
+                Console.WriteLine(_resourceLoader.Strings.GetMessageSubjectPropertyText(msg.Subject));
+
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine(message.TextBody ?? message.HtmlBody ?? string.Empty);
+
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine(_resourceLoader.Strings.GetMessageAttachmentsCountText(msg.Attachments));
+
+                Console.ResetColor();
+            }
+
+            static string Truncate(string s, int maxLength = 19)
+            {
+                if (s.Length <= maxLength)
+                {
+                    return s;
+                }
+
+                int halfLen = maxLength >> 1;
+                StringBuilder sb = new(maxLength);
+                sb.Append(s.AsSpan(0, halfLen));
+                sb.Append('…');
+                sb.Append(s.AsSpan(s.Length - halfLen, halfLen));
+                return sb.ToString();
+            }
+        }
+
         internal void WriteGreetingMessage()
         {
             _logger.LogDebug("Application title is '{ApplicationTitle}'; version is {ApplicationVersion}",
@@ -312,6 +385,64 @@ namespace Eppie.CLI.Services
         private void LogCommandWarning(string reason)
         {
             _logger.LogWarning("The command failed. (Reason: {WarningReason}).", reason);
+        }
+
+        private void LogCommandWarning(string reason, object parameters)
+        {
+            _logger.LogWarning("The command failed. (Reason: {WarningReason}; Parameters: {@Parameters}).", reason, parameters);
+        }
+
+        internal void WriteUnknownFolderWarning(string address, string folder)
+        {
+            LogCommandWarning($"Unknown folder", new { Address = address, Folder = folder });
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(_resourceLoader.Strings.GetUnknownFolderWarning(address, folder));
+            Console.ResetColor();
+        }
+
+        internal Task PrintAllMessagesAsync(int pageSize, Func<int, Message, Task<IEnumerable<Message>>> messageSource)
+        {
+            _logger.LogMethodCall();
+            return PrintMessagesAsync(_resourceLoader.Strings.PrintAllMessagesHeader, pageSize, messageSource);
+        }
+
+        internal Task PrintFolderMessagesAsync(string accountAddress, string folderName, int pageSize, Func<int, Message, Task<IEnumerable<Message>>> messageSource)
+        {
+            _logger.LogMethodCall();
+            return PrintMessagesAsync(_resourceLoader.Strings.GetPrintFolderMessagesHeader(accountAddress, folderName), pageSize, messageSource);
+        }
+
+        internal Task PrintContactMessagesAsync(string contactAddress, int pageSize, Func<int, Message, Task<IEnumerable<Message>>> messageSource)
+        {
+            _logger.LogMethodCall();
+            return PrintMessagesAsync(_resourceLoader.Strings.GetPrintContactMessagesHeader(contactAddress), pageSize, messageSource);
+        }
+
+        private async Task PrintMessagesAsync(string header, int pageSize, Func<int, Message, Task<IEnumerable<Message>>> source)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+
+            Console.WriteLine(header);
+
+            Message lastItem = null!;
+
+            while (true)
+            {
+                IEnumerable<Message> items = await source(pageSize, lastItem).ConfigureAwait(false);
+                int count = 0;
+                foreach (Message item in items)
+                {
+                    PrintMessage(item, true);
+                    lastItem = item;
+                    ++count;
+                }
+
+                if (count < pageSize || !ReadBoolValue(_resourceLoader.Strings.AskMoreMessages))
+                {
+                    break;
+                }
+            }
         }
     }
 }
