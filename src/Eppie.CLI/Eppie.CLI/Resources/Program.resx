@@ -411,4 +411,24 @@
     <value>Show more messages? (y/n): </value>
     <comment>This message prompts the user to show more messages.</comment>
   </data>
+  <data name="Information.ContactDetails" xml:space="preserve">
+    <value>Contact #{0}: {2}&lt;{1}&gt;; {3} unread message(s);</value>
+    <comment>This is the text format for displaying contact information.
+{0} is a parameter containing the contact id.
+{1} is a parameter containing the contact address.
+{2} is a parameter containing the full name of the contact.
+{3} is a parameter containing the number of unread messages.</comment>
+  </data>
+  <data name="Menu.ListContactsDescription" xml:space="preserve">
+    <value>Display all account contacts.</value>
+    <comment>Description of the 'list-contacts' command in the help.</comment>
+  </data>
+  <data name="Message.AskMoreContacts" xml:space="preserve">
+    <value>Show more contacts? (y/n): </value>
+    <comment>This message prompts the user to show more contacts.</comment>
+  </data>
+  <data name="Message.EmptyContactList" xml:space="preserve">
+    <value>There are no contacts yet.</value>
+    <comment>This message informs the user that no contacts were found.</comment>
+  </data>
 </root>

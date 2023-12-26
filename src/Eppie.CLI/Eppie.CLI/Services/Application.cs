@@ -401,6 +401,28 @@ namespace Eppie.CLI.Services
             Console.ResetColor();
         }
 
+        internal void PrintContacts(int pageSize, IEnumerable<Contact> contacts)
+        {
+            ArgumentNullException.ThrowIfNull(contacts);
+
+            if (!contacts.Any())
+            {
+                Console.WriteLine(_resourceLoader.Strings.EmptyContactList);
+                return;
+            }
+
+            do
+            {
+                foreach (Contact contact in contacts.Take(pageSize))
+                {
+                    PrintContact(contact);
+                }
+
+                contacts = contacts.Skip(pageSize);
+            }
+            while (contacts.Any() && ReadBoolValue(_resourceLoader.Strings.AskMoreContacts));
+        }
+
         internal Task PrintAllMessagesAsync(int pageSize, Func<int, Message, Task<IEnumerable<Message>>> messageSource)
         {
             _logger.LogMethodCall();
@@ -443,6 +465,27 @@ namespace Eppie.CLI.Services
                     break;
                 }
             }
+        }
+
+        private void PrintContact(Contact contact)
+        {
+            ArgumentNullException.ThrowIfNull(contact);
+
+            var contactDetails = new
+            {
+                contact.Id,
+                contact.Email.Address,
+                contact.EmailId,
+                contact.FullName,
+                contact.HasAvatar,
+                contact.AvatarInfoId,
+                contact.UnreadCount,
+                contact.LastMessageDataId,
+            };
+
+            _logger.LogDebug("Print contact {@Contact}", contactDetails);
+
+            Console.WriteLine(_resourceLoader.Strings.GetContactDetailsText(contact.Id, contact.Email.Address, contact.FullName, contact.UnreadCount));
         }
     }
 }

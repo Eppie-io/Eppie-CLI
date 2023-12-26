@@ -200,10 +200,12 @@ namespace Eppie.CLI.Menu
             await accountService.SendMessageAsync(message, false, false).ConfigureAwait(false);
         }
 
-        internal void ListContactsAction()
+        internal async Task ListContactsActionAsync(int pageSize)
         {
             _logger.LogMethodCall();
-            throw new NotImplementedException();
+
+            List<Contact> contacts = (await _coreProvider.TuviMailCore.GetContactsAsync().ConfigureAwait(true)).ToList();
+            _application.PrintContacts(pageSize, contacts);
         }
 
         internal async Task ShowMessageActionAsync(string address, string folderName, uint id, int pk)

@@ -233,6 +233,29 @@ namespace Eppie.CLI.Menu
             }
         }
 
+        public static class CommandListContactsOptions
+        {
+            private const int DefaultPageSize = 20;
+
+            public static readonly IReadOnlyCollection<string> PageSizeOptionNames = new[] { "-s", "--page-size", "/PageSize" };
+
+            public static IReadOnlyCollection<IOption> GetOptions(IAsyncParser parser, ResourceLoader resourceLoader)
+            {
+                Debug.Assert(parser is not null);
+                Debug.Assert(resourceLoader is not null);
+
+                return new IOption[]
+                {
+                    parser.CreateOption<int>(PageSizeOptionNames, getDefaultValue: () => DefaultPageSize, description: resourceLoader.Strings.PageSizeDescription),
+                };
+            }
+
+            public static int GetPageSizeValue(IAsyncCommand cmd)
+            {
+                return GetRequiredOptionValue<int>(cmd, PageSizeOptionNames.First());
+            }
+        }
+
         private static T GetRequiredOptionValue<T>(IAsyncCommand cmd, string name)
         {
             ArgumentNullException.ThrowIfNull(cmd);
