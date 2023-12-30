@@ -97,6 +97,9 @@ namespace Eppie.CLI.Services
             private string? _emptyAccountList;
             internal string EmptyAccountList => _emptyAccountList ??= _localizer.LoadString(GetStringResourceName());
 
+            private string? _emptyContactList;
+            internal string EmptyContactList => _emptyContactList ??= _localizer.LoadString(GetStringResourceName());
+
             private string? _appReset;
             internal string AppReset => _appReset ??= _localizer.LoadString(GetStringResourceName());
 
@@ -184,6 +187,9 @@ namespace Eppie.CLI.Services
             private string? _showContactMessagesDescription;
             internal string ShowContactMessagesDescription => _showContactMessagesDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
 
+            private string? _listContactsDescription;
+            internal string ListContactsDescription => _listContactsDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+
             private string? _accountTypeDescription;
             internal string AccountTypeDescription => _accountTypeDescription ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
 
@@ -222,6 +228,9 @@ namespace Eppie.CLI.Services
 
             private string? _askMoreMessages;
             internal string AskMoreMessages => _askMoreMessages ??= _localizer.LoadString(GetStringResourceName());
+
+            private string? _askMoreContacts;
+            internal string AskMoreContacts => _askMoreContacts ??= _localizer.LoadString(GetStringResourceName());
 
             internal string GetPrintFolderMessagesHeader(string accountAddress, string folder)
             {
@@ -291,6 +300,11 @@ namespace Eppie.CLI.Services
             private static string GetStringResourceName(string category = "Message", [CallerMemberName] string name = "")
             {
                 return string.Join('.', new string?[] { category, name });
+            }
+
+            internal string GetContactDetailsText(int id, string address, string fullName, int unreadCount)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Information", name: "ContactDetails"), id, address, fullName, unreadCount);
             }
         }
 
