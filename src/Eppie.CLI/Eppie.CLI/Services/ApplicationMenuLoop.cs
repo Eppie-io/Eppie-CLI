@@ -27,37 +27,14 @@ using Microsoft.Extensions.Logging;
 namespace Eppie.CLI.Services
 {
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal partial class ApplicationLoop : BackgroundService
+    internal partial class ApplicationMenuLoop(
+        ILogger<ApplicationMenuLoop> logger,
+        IHostApplicationLifetime lifetime,
+        MainMenu mainMenu) : BackgroundService
     {
-        private readonly ILogger<ApplicationLoop> _logger;
-        private readonly IHostApplicationLifetime _lifetime;
-        private readonly Application _application;
-        private readonly MainMenu _mainMenu;
-
-        public ApplicationLoop(
-            ILogger<ApplicationLoop> logger,
-            IHostApplicationLifetime lifetime,
-            Application application,
-            MainMenu mainMenu)
-        {
-            _logger = logger;
-            _mainMenu = mainMenu;
-            _application = application;
-
-            _lifetime = lifetime;
-            _lifetime.ApplicationStarted.Register(OnStarted);
-            _lifetime.ApplicationStopping.Register(OnStopping);
-            _lifetime.ApplicationStopped.Register(OnStopped);
-        }
-
-        public override Task StartAsync(CancellationToken cancellationToken)
-        {
-            _logger.LogMethodCall();
-            _application.InitializeConsole();
-            _application.WriteGreetingMessage();
-
-            return base.StartAsync(cancellationToken);
-        }
+        private readonly ILogger<ApplicationMenuLoop> _logger = logger;
+        private readonly IHostApplicationLifetime _lifetime = lifetime;
+        private readonly MainMenu _mainMenu = mainMenu;
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -69,21 +46,6 @@ namespace Eppie.CLI.Services
                 using CancellationTokenSource cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, _lifetime.ApplicationStopping);
                 await _mainMenu.LoopAsync(cancellationTokenSource.Token).ConfigureAwait(false);
             }
-        }
-
-        private void OnStopped()
-        {
-            _logger.LogDebug("The application has been stopped.");
-        }
-
-        private void OnStopping()
-        {
-            _logger.LogDebug("The application is stopping...");
-        }
-
-        private void OnStarted()
-        {
-            _logger.LogDebug("The application has been started.");
         }
     }
 }

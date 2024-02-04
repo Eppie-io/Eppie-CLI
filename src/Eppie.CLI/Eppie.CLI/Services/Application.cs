@@ -16,17 +16,14 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.Text;
 
-using Eppie.CLI.Options;
+using Eppie.CLI.Exceptions;
 using Eppie.CLI.Tools;
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 using Tuvi.Core.Entities;
 using Tuvi.Toolkit.Cli;
@@ -34,64 +31,19 @@ using Tuvi.Toolkit.Cli;
 namespace Eppie.CLI.Services
 {
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal class Application
+    internal class Application(
+       ILogger<Application> logger,
+       IHostApplicationLifetime lifetime,
+       ResourceLoader resourceLoader)
     {
-        private readonly IHostEnvironment _environment;
-        private readonly ResourceLoader _resourceLoader;
-        private readonly ILogger<Application> _logger;
-        private readonly IHostApplicationLifetime _lifetime;
-        private readonly ConsoleOptions _consoleOptions;
-
-        public Application(
-           ILogger<Application> logger,
-           IHostApplicationLifetime lifetime,
-           IHostEnvironment environment,
-           ResourceLoader resourceLoader,
-           IOptions<ConsoleOptions> consoleOptions)
-        {
-            Debug.Assert(consoleOptions is not null);
-
-            _logger = logger;
-
-            _lifetime = lifetime;
-            _environment = environment;
-            _resourceLoader = resourceLoader;
-
-            _consoleOptions = consoleOptions.Value;
-        }
-
-        internal void InitializeConsole()
-        {
-            Console.InputEncoding = _consoleOptions.Encoding;
-            Console.OutputEncoding = _consoleOptions.Encoding;
-            CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = _consoleOptions.CultureInfo;
-            Console.Title = _resourceLoader.AssemblyStrings.Title;
-
-            _logger.LogDebug(
-                "OutputEncoding is {OutputEncoding}; CurrentCulture is {CurrentCulture}",
-                Console.OutputEncoding,
-                CultureInfo.CurrentCulture);
-        }
+        private readonly ResourceLoader _resourceLoader = resourceLoader;
+        private readonly ILogger<Application> _logger = logger;
+        private readonly IHostApplicationLifetime _lifetime = lifetime;
 
         internal void StopApplication()
         {
             _logger.LogMethodCall();
             _lifetime.StopApplication();
-
-            WriteGoodbyeMessage();
-        }
-
-        internal string? ReadCommandMenu(string commandMark)
-        {
-            _logger.LogMethodCall();
-            string? cmd = ReadValue($"{commandMark} ");
-
-            if (cmd is null)
-            {
-                Console.WriteLine();
-            }
-
-            return cmd;
         }
 
         internal string AskPassword()
@@ -262,29 +214,6 @@ namespace Eppie.CLI.Services
             }
         }
 
-        internal void WriteGreetingMessage()
-        {
-            _logger.LogDebug("Application title is '{ApplicationTitle}'; version is {ApplicationVersion}",
-                            _resourceLoader.AssemblyStrings.Title,
-                            _resourceLoader.AssemblyStrings.Version);
-            Console.WriteLine(_resourceLoader.Strings.GetLogo(_resourceLoader.AssemblyStrings.Title,
-                                                              _resourceLoader.AssemblyStrings.Version));
-
-            {
-                using IDisposable? consoleLogScope = _logger.BeginConsoleScope();
-                _logger.LogInformation("Hosting environment: {EnvironmentName}", _environment.EnvironmentName);
-                _logger.LogInformation("Content root path: {ContentRootPath}", _environment.ContentRootPath);
-            }
-
-            Console.WriteLine(_resourceLoader.Strings.Description);
-        }
-
-        internal void WriteGoodbyeMessage()
-        {
-            _logger.LogMethodCall();
-            Console.WriteLine(_resourceLoader.Strings.Goodbye);
-        }
-
         internal void WriteApplicationInitializationMessage(string[] seedPhrase)
         {
             _logger.LogDebug("The application has been initialized.");
@@ -355,41 +284,13 @@ namespace Eppie.CLI.Services
             Console.ResetColor();
         }
 
-        internal void Error(Exception ex)
+        internal void WriteError(Exception ex)
         {
             _logger.LogError("An error has occurred {Exception}", ex);
 
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(_resourceLoader.Strings.GetUnhandledException(ex));
             Console.ResetColor();
-        }
-
-        private string ReadValue(string message, ConsoleColor foreground = ConsoleColor.Gray)
-        {
-            _logger.LogMethodCall();
-            return ConsoleExtension.ReadValue(message, (message) => ConsoleExtension.Write(message, foreground), Console.ReadLine) ?? string.Empty;
-        }
-
-        private string ReadSecretValue(string message, ConsoleColor foreground = ConsoleColor.Gray)
-        {
-            _logger.LogMethodCall();
-            return ConsoleExtension.ReadValue(message, (message) => ConsoleExtension.Write(message, foreground), () => ConsoleExtension.ReadSecretLine()) ?? string.Empty;
-        }
-
-        private bool ReadBoolValue(string message, ConsoleColor foreground = ConsoleColor.Gray)
-        {
-            _logger.LogMethodCall();
-            return ConsoleExtension.ReadBool(message, (message) => ConsoleExtension.Write(message, foreground));
-        }
-
-        private void LogCommandWarning(string reason)
-        {
-            _logger.LogWarning("The command failed. (Reason: {WarningReason}).", reason);
-        }
-
-        private void LogCommandWarning(string reason, object parameters)
-        {
-            _logger.LogWarning("The command failed. (Reason: {WarningReason}; Parameters: {@Parameters}).", reason, parameters);
         }
 
         internal void WriteUnknownFolderWarning(string address, string folder)
@@ -441,6 +342,24 @@ namespace Eppie.CLI.Services
             return PrintMessagesAsync(_resourceLoader.Strings.GetPrintContactMessagesHeader(contactAddress), pageSize, messageSource);
         }
 
+        internal string ReadValue(string message, ConsoleColor foreground = ConsoleColor.Gray)
+        {
+            _logger.LogMethodCall();
+            return ConsoleExtension.ReadValue(message, (message) => ConsoleExtension.Write(message, foreground), Console.ReadLine) ?? throw new ReadValueCanceledException();
+        }
+
+        private string ReadSecretValue(string message, ConsoleColor foreground = ConsoleColor.Gray)
+        {
+            _logger.LogMethodCall();
+            return ConsoleExtension.ReadValue(message, (message) => ConsoleExtension.Write(message, foreground), () => ConsoleExtension.ReadSecretLine()) ?? throw new ReadValueCanceledException();
+        }
+
+        private bool ReadBoolValue(string message, ConsoleColor foreground = ConsoleColor.Gray)
+        {
+            _logger.LogMethodCall();
+            return ConsoleExtension.ReadBool(message, (message) => ConsoleExtension.Write(message, foreground));
+        }
+
         private async Task PrintMessagesAsync(string header, int pageSize, Func<int, Message, Task<IEnumerable<Message>>> source)
         {
             ArgumentNullException.ThrowIfNull(source);
@@ -486,6 +405,16 @@ namespace Eppie.CLI.Services
             _logger.LogDebug("Print contact {@Contact}", contactDetails);
 
             Console.WriteLine(_resourceLoader.Strings.GetContactDetailsText(contact.Id, contact.Email.Address, contact.FullName, contact.UnreadCount));
+        }
+
+        private void LogCommandWarning(string reason)
+        {
+            _logger.LogWarning("The command failed. (Reason: {WarningReason}).", reason);
+        }
+
+        private void LogCommandWarning(string reason, object parameters)
+        {
+            _logger.LogWarning("The command failed. (Reason: {WarningReason}; Parameters: {@Parameters}).", reason, parameters);
         }
     }
 }

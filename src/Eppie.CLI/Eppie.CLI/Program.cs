@@ -48,7 +48,6 @@ namespace Eppie.CLI
                     .UseContentRoot(AppContext.BaseDirectory)
                     .ConfigureServices(ConfigureServices)
                     .UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration), preserveStaticLogger: true)
-                    .UseConsoleLifetime(options => options.SuppressStatusMessages = true)
                     .Build()
                     .Run();
 
@@ -73,10 +72,10 @@ namespace Eppie.CLI
             services.AddLocalization()
                     .AddSingleton<ResourceLoader>()
                     .AddSingleton<CoreProvider>()
-                    .AddSingleton<MainMenu>()
                     .AddSingleton<Application>()
-
-                    .AddHostedService<ApplicationLoop>();
+                    .AddSingleton<IHostLifetime, ApplicationLifetime>()
+                    .AddSingleton<MainMenu>()
+                    .AddHostedService<ApplicationMenuLoop>();
         }
 
         private static void ConfigureDefaultLogger()
