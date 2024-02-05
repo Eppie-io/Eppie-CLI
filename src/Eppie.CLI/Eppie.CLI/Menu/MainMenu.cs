@@ -19,6 +19,7 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
+using Eppie.CLI.Exceptions;
 using Eppie.CLI.Services;
 using Eppie.CLI.Tools;
 
@@ -57,7 +58,14 @@ namespace Eppie.CLI.Menu
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                await InvokeCommandAsync(commandParser, _application.ReadCommandMenu(CommandMark)).ConfigureAwait(false);
+                try
+                {
+                    await InvokeCommandAsync(commandParser, _application.ReadValue($"{CommandMark} ")).ConfigureAwait(false);
+                }
+                catch (ReadValueCanceledException)
+                {
+                    OnCancelCommand();
+                }
             }
         }
 
@@ -124,25 +132,19 @@ namespace Eppie.CLI.Menu
             return parser;
         }
 
-        private async Task InvokeCommandAsync(IAsyncParser commandParser, string? cmd)
+        private async Task InvokeCommandAsync(IAsyncParser commandParser, string cmd)
         {
             ArgumentNullException.ThrowIfNull(commandParser);
 
             try
             {
-                if (cmd is null)
-                {
-                    _actions.ExitAction();
-                    return;
-                }
-
                 int result = await commandParser.InvokeAsync(cmd).ConfigureAwait(false);
 
                 _logger.LogDebug("Command {CommandName} is completed with code: {CommandResult}", cmd, result);
             }
             catch (InvalidOperationException ex)
             {
-                _application.Error(ex);
+                _application.WriteError(ex);
             }
         }
 
@@ -157,9 +159,13 @@ namespace Eppie.CLI.Menu
                 {
                     action?.Invoke(cmd);
                 }
+                catch (ReadValueCanceledException)
+                {
+                    OnCancelCommand();
+                }
                 catch (Exception ex)
                 {
-                    _application.Error(ex);
+                    _application.WriteError(ex);
                 }
             }
 
@@ -180,13 +186,22 @@ namespace Eppie.CLI.Menu
                         await action.Invoke(cmd).ConfigureAwait(false);
                     }
                 }
+                catch (ReadValueCanceledException)
+                {
+                    OnCancelCommand();
+                }
                 catch (Exception ex)
                 {
-                    _application.Error(ex);
+                    _application.WriteError(ex);
                 }
             }
 
             return parser.CreateAsyncCommand(name, description, options, action: HandleException);
+        }
+
+        private static void OnCancelCommand()
+        {
+            Console.WriteLine();
         }
     }
 }
