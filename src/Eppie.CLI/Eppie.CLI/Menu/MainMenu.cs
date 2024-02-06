@@ -42,13 +42,14 @@ namespace Eppie.CLI.Menu
         public MainMenu(
             ILoggerFactory loggerFactory,
             Application application,
+            AuthorizationProvider authProvider,
             CoreProvider coreProvider,
             ResourceLoader resourceLoader)
         {
             _logger = loggerFactory.CreateLogger<MainMenu>();
             _application = application;
             _resourceLoader = resourceLoader;
-            _actions = new Actions(loggerFactory.CreateLogger<Actions>(), _application, coreProvider);
+            _actions = new Actions(loggerFactory.CreateLogger<Actions>(), _application, authProvider, coreProvider);
         }
 
         public async Task LoopAsync(CancellationToken stoppingToken)

@@ -16,34 +16,12 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-
-namespace Eppie.CLI.Options
+namespace Eppie.CLI.Entities
 {
-    internal interface IConfigurationSectionOptions
+    internal enum MailService
     {
-        string SectionName { get; }
-    }
-
-    internal static class ConfigurationSectionOptionsExtension
-    {
-        public static void ConfigureOptions<TOptions>(this IServiceCollection services, IConfiguration configuration)
-            where TOptions : class, IConfigurationSectionOptions
-        {
-            services.Configure<TOptions>(options => configuration.GetSection(options.SectionName).Bind(options));
-        }
-
-        public static void ConfigureOptions<TOptions>(this IServiceCollection services, IConfiguration configuration, BinderOptions binderOptions)
-            where TOptions : class, IConfigurationSectionOptions
-        {
-            static void Clone(BinderOptions options, BinderOptions other)
-            {
-                options.ErrorOnUnknownConfiguration = other.ErrorOnUnknownConfiguration;
-                options.BindNonPublicProperties = other.BindNonPublicProperties;
-            }
-
-            services.Configure<TOptions>(options => configuration.GetSection(options.SectionName).Bind(options, opt => Clone(opt, binderOptions)));
-        }
+        Other,
+        Gmail,
+        Outlook
     }
 }
