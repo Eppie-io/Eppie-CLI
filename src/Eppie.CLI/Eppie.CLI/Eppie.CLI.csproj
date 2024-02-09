@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -10,6 +10,7 @@
     <TrimMode>partial</TrimMode>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <UserSecretsId>c86a1928-bcaf-4406-8765-da45d40fb25d</UserSecretsId>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -27,7 +28,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Finebits.Authorization.OAuth2" Version="0.2.0-alpha" />
+    <PackageReference Include="Finebits.Authorization.OAuth2.AuthenticationBroker.Desktop" Version="0.2.0-alpha" />
+    <PackageReference Include="Finebits.Authorization.OAuth2.Google" Version="0.2.0-alpha" />
+    <PackageReference Include="Finebits.Authorization.OAuth2.Microsoft" Version="0.2.0-alpha" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Localization" Version="8.0.1" />
     <PackageReference Include="Serilog.Enrichers.Environment" Version="2.3.0" />
     <PackageReference Include="Serilog.Enrichers.Process" Version="2.0.2" />

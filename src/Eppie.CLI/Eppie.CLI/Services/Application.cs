@@ -109,6 +109,24 @@ namespace Eppie.CLI.Services
             return ReadValue(_resourceLoader.Strings.AskRestorePath);
         }
 
+        internal TEnum SelectOption<TEnum>(TEnum defaultOption, bool ignoreCase = false)
+            where TEnum : struct, Enum
+        {
+            _logger.LogMethodCall();
+
+            Console.WriteLine(_resourceLoader.Strings.SelectOptionHeader);
+
+            int i = 0;
+            foreach (string name in Enum.GetNames<TEnum>())
+            {
+                Console.WriteLine($"{i}) {name}");
+                ++i;
+            }
+
+            string value = ReadValue(_resourceLoader.Strings.GetAskOptionText(defaultOption.ToString()));
+            return Enum.TryParse(value, ignoreCase, out TEnum option) && Enum.IsDefined(option) ? option : defaultOption;
+        }
+
         internal bool ConfirmReset()
         {
             _logger.LogMethodCall();

@@ -18,8 +18,12 @@
 
 using System.Diagnostics.CodeAnalysis;
 
+using Eppie.CLI.Entities;
 using Eppie.CLI.Services;
 using Eppie.CLI.Tools;
+
+using Finebits.Authorization.OAuth2.Abstractions;
+using Finebits.Authorization.OAuth2.Types;
 
 using Microsoft.Extensions.Logging;
 
@@ -33,11 +37,13 @@ namespace Eppie.CLI.Menu
     internal class Actions(
         ILogger<Actions> logger,
         Application application,
+        AuthorizationProvider authProvider,
         CoreProvider coreProvider)
     {
         private readonly ILogger<Actions> _logger = logger;
         private readonly Application _application = application;
         private readonly CoreProvider _coreProvider = coreProvider;
+        private readonly AuthorizationProvider _authProvider = authProvider;
 
         internal void ExitAction()
         {
@@ -299,29 +305,94 @@ namespace Eppie.CLI.Menu
         {
             _logger.LogMethodCall();
 
-            Account account = await GetDefaultAccountAsync().ConfigureAwait(false);
-            await _coreProvider.TuviMailCore.AddAccountAsync(account).ConfigureAwait(false);
-
-            Task<Account> GetDefaultAccountAsync()
+            async Task<Account> CreateAccountAsync()
             {
-                // TODO:
-                // 1) add email provider selection;
-                // 2) add OAuth2 authorization;
+                MailService mailService = _application.SelectOption(MailService.Other, true);
 
-                Account account = Account.Default;
-                account.Email = new EmailAddress(_application.AskAccountAddress());
+                return mailService == MailService.Other ? CreateDefaultAccount()
+                                                        : await CreateOAuth2AccountAsync(mailService).ConfigureAwait(false);
+            }
 
-                BasicAuthData basicData = new()
+            try
+            {
+                Account account = await CreateAccountAsync().ConfigureAwait(false);
+                await _coreProvider.TuviMailCore.AddAccountAsync(account).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                //ToDo: Move string to resources
+#pragma warning disable CA1303 // Retrieve the following string(s) from a resource table.
+                Console.WriteLine("Authorization operation has been canceled.");
+#pragma warning restore CA1303 // Do not catch general exception types
+            }
+        }
+
+        private Account CreateDefaultAccount()
+        {
+            Account account = Account.Default;
+            account.Email = new EmailAddress(_application.AskAccountAddress());
+
+            BasicAuthData basicData = new()
+            {
+                Password = _application.AskAccountPassword()
+            };
+
+            account.AuthData = basicData;
+
+            account.IncomingServerAddress = _application.AskIMAPServer();
+            account.OutgoingServerAddress = _application.AskSMTPServer();
+
+            return account;
+        }
+
+        private async Task<Account> CreateOAuth2AccountAsync(MailService mailService)
+        {
+            using CancellationTokenSource cancellationLogin = new();
+
+            void CancelLogin(object? sender, ConsoleCancelEventArgs e)
+            {
+                cancellationLogin.Cancel();
+            }
+
+            try
+            {
+                Console.CancelKeyPress += CancelLogin;
+
+                IAuthorizationClient authClient = _authProvider.GetAuthorizationClient(mailService);
+
+                //ToDo: Move string to resources
+                Console.WriteLine($"Authorization to {mailService} service. Press Ctrl+C to cancel the operation.");
+                Token token = await authClient.LoginAsync(cancellationLogin.Token).ConfigureAwait(false);
+
+                if (authClient is IProfileReader profileReader)
                 {
-                    Password = _application.AskAccountPassword()
-                };
+                    IUserProfile profile = await profileReader.ReadProfileAsync(token).ConfigureAwait(false);
+                    //ToDo: Move string to resources
+                    Console.WriteLine($"Authorization of account '{profile.Email}' completed successfully.");
 
-                account.AuthData = basicData;
+                    Account account = Account.Default;
+                    account.Email = new EmailAddress(profile.Email);
 
-                account.IncomingServerAddress = _application.AskIMAPServer();
-                account.OutgoingServerAddress = _application.AskSMTPServer();
+                    OAuth2Data oauthData = new()
+                    {
+                        RefreshToken = token.RefreshToken,
+                        AuthAssistantId = mailService.ToString()
+                    };
+                    account.AuthData = oauthData;
 
-                return Task.FromResult(account);
+                    account.IncomingServerAddress = _application.AskIMAPServer();
+                    account.OutgoingServerAddress = _application.AskSMTPServer();
+
+                    return account;
+                }
+                else
+                {
+                    throw new InvalidOperationException("User data cannot be read");
+                }
+            }
+            finally
+            {
+                Console.CancelKeyPress -= CancelLogin;
             }
         }
 

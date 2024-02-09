@@ -67,9 +67,12 @@ namespace Eppie.CLI
         {
             ArgumentNullException.ThrowIfNull(ctx);
 
-            services.Configure<ConsoleOptions>(ctx.Configuration, new BinderOptions { BindNonPublicProperties = true });
+            services.ConfigureOptions<ConsoleOptions>(ctx.Configuration, new BinderOptions { BindNonPublicProperties = true });
+            services.ConfigureOptions<AuthorizationOptions>(ctx.Configuration, new BinderOptions { BindNonPublicProperties = true });
 
             services.AddLocalization()
+                    .AddHttpClient()
+                    .AddAuthorizationProvider()
                     .AddSingleton<ResourceLoader>()
                     .AddSingleton<CoreProvider>()
                     .AddSingleton<Application>()

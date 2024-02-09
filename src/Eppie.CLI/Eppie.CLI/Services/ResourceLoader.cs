@@ -232,6 +232,9 @@ namespace Eppie.CLI.Services
             private string? _askMoreContacts;
             internal string AskMoreContacts => _askMoreContacts ??= _localizer.LoadString(GetStringResourceName());
 
+            private string? _selectOptionHeader;
+            internal string SelectOptionHeader => _selectOptionHeader ??= _localizer.LoadString(GetStringResourceName());
+
             internal string GetPrintFolderMessagesHeader(string accountAddress, string folder)
             {
                 return _localizer.LoadFormattedString(GetStringResourceName(category: "Information", name: "PrintFolderMessagesHeader"), accountAddress, folder);
@@ -297,14 +300,19 @@ namespace Eppie.CLI.Services
                 return _localizer.LoadFormattedString(GetStringResourceName(category: "Information", name: "MessageAttachmentsCountProperty"), attachments);
             }
 
-            private static string GetStringResourceName(string category = "Message", [CallerMemberName] string name = "")
-            {
-                return string.Join('.', new string?[] { category, name });
-            }
-
             internal string GetContactDetailsText(int id, string address, string fullName, int unreadCount)
             {
                 return _localizer.LoadFormattedString(GetStringResourceName(category: "Information", name: "ContactDetails"), id, address, fullName, unreadCount);
+            }
+
+            internal string GetAskOptionText(string defaultOption)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(name: "AskOption"), defaultOption);
+            }
+
+            private static string GetStringResourceName(string category = "Message", [CallerMemberName] string name = "")
+            {
+                return string.Join('.', new string?[] { category, name });
             }
         }
 
