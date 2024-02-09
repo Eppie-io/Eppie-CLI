@@ -305,15 +305,25 @@ namespace Eppie.CLI.Menu
         {
             _logger.LogMethodCall();
 
-            Account account = await CreateAccountAsync().ConfigureAwait(false);
-            await _coreProvider.TuviMailCore.AddAccountAsync(account).ConfigureAwait(false);
-
             async Task<Account> CreateAccountAsync()
             {
                 MailService mailService = _application.SelectOption(MailService.Other, true);
 
                 return mailService == MailService.Other ? CreateDefaultAccount()
                                                         : await CreateOAuth2AccountAsync(mailService).ConfigureAwait(false);
+            }
+
+            try
+            {
+                Account account = await CreateAccountAsync().ConfigureAwait(false);
+                await _coreProvider.TuviMailCore.AddAccountAsync(account).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                //ToDo: Move string to resources
+#pragma warning disable CA1303 // Retrieve the following string(s) from a resource table.
+                Console.WriteLine("Authorization operation has been canceled.");
+#pragma warning restore CA1303 // Do not catch general exception types
             }
         }
 
@@ -337,11 +347,11 @@ namespace Eppie.CLI.Menu
 
         private async Task<Account> CreateOAuth2AccountAsync(MailService mailService)
         {
-            using CancellationTokenSource cancellationLogin = new(TimeSpan.FromSeconds(15));
+            using CancellationTokenSource cancellationLogin = new();
 
             void CancelLogin(object? sender, ConsoleCancelEventArgs e)
             {
-                Task.Run(cancellationLogin.Cancel).Wait();
+                cancellationLogin.Cancel();
             }
 
             try
