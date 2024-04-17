@@ -316,6 +316,21 @@ namespace Eppie.CLI.Menu
             try
             {
                 Account account = await CreateAccountAsync().ConfigureAwait(false);
+
+                ICredentialsProvider credentialsProvider = _coreProvider.TuviMailCore.CredentialsManager.CreateCredentialsProvider(account);
+                await _coreProvider.TuviMailCore.TestMailServerAsync(
+                    account.OutgoingServerAddress,
+                    account.OutgoingServerPort,
+                    account.OutgoingMailProtocol,
+                    credentialsProvider
+                    ).ConfigureAwait(false);
+
+                await _coreProvider.TuviMailCore.TestMailServerAsync(
+                    account.IncomingServerAddress,
+                    account.IncomingServerPort,
+                    account.IncomingMailProtocol,
+                    credentialsProvider).ConfigureAwait(false);
+
                 await _coreProvider.TuviMailCore.AddAccountAsync(account).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
@@ -339,8 +354,10 @@ namespace Eppie.CLI.Menu
 
             account.AuthData = basicData;
 
-            account.IncomingServerAddress = _application.AskIMAPServer();
             account.OutgoingServerAddress = _application.AskSMTPServer();
+            account.OutgoingServerPort = _application.AskSMTPServerPort(account.OutgoingServerPort);
+            account.IncomingServerAddress = _application.AskIMAPServer();
+            account.IncomingServerPort = _application.AskIMAPServerPort(account.IncomingServerPort);
 
             return account;
         }
@@ -358,11 +375,11 @@ namespace Eppie.CLI.Menu
             {
                 Console.CancelKeyPress += CancelLogin;
 
-                IAuthorizationClient authClient = _authProvider.GetAuthorizationClient(mailService);
+                IAuthorizationClient authClient = _authProvider.CreateAuthorizationClient(mailService);
 
                 //ToDo: Move string to resources
                 Console.WriteLine($"Authorization to {mailService} service. Press Ctrl+C to cancel the operation.");
-                Token token = await authClient.LoginAsync(cancellationLogin.Token).ConfigureAwait(false);
+                AuthorizationToken token = await authClient.LoginAsync(cancellationLogin.Token).ConfigureAwait(false);
 
                 if (authClient is IProfileReader profileReader)
                 {
@@ -380,8 +397,10 @@ namespace Eppie.CLI.Menu
                     };
                     account.AuthData = oauthData;
 
-                    account.IncomingServerAddress = _application.AskIMAPServer();
                     account.OutgoingServerAddress = _application.AskSMTPServer();
+                    account.OutgoingServerPort = _application.AskSMTPServerPort(account.OutgoingServerPort);
+                    account.IncomingServerAddress = _application.AskIMAPServer();
+                    account.IncomingServerPort = _application.AskIMAPServerPort(account.IncomingServerPort);
 
                     return account;
                 }

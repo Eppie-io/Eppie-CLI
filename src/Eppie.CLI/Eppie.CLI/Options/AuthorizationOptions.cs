@@ -61,7 +61,7 @@ namespace Eppie.CLI.Options
     {
         public string? ClientId { get; init; }
         public Uri? RedirectUri { get; init; }
-        public Collection<string>? Scope => ScopeList ?? ["https://graph.microsoft.com/.default", "offline_access"];
+        public Collection<string>? Scope => ScopeList ?? ["https://outlook.office.com/.default", "offline_access"];
 
         private Collection<string>? ScopeList { get; init; }
 

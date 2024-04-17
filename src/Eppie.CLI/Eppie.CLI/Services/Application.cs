@@ -88,6 +88,31 @@ namespace Eppie.CLI.Services
             return ReadValue(_resourceLoader.Strings.AskIMAPServer);
         }
 
+        internal int AskIMAPServerPort(int defaultPort)
+        {
+            _logger.LogMethodCall();
+
+            //ToDo: Move string to resources
+            return AskServerPort($"IMAP Port (default is {defaultPort}): ", defaultPort);
+        }
+
+        internal int AskSMTPServerPort(int defaultPort)
+        {
+            _logger.LogMethodCall();
+
+            //ToDo: Move string to resources
+            return AskServerPort($"SMTP Port (default is {defaultPort}): ", defaultPort);
+        }
+
+        internal int AskServerPort(string text, int defaultPort)
+        {
+            _logger.LogMethodCall();
+
+            return int.TryParse(ReadValue(text), out int port) && port > 0
+                ? port
+                : defaultPort;
+        }
+
         internal string AskSMTPServer()
         {
             _logger.LogMethodCall();

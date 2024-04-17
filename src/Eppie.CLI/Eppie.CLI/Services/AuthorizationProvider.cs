@@ -20,30 +20,38 @@ using System.Diagnostics.CodeAnalysis;
 
 using Eppie.CLI.Entities;
 using Eppie.CLI.Options;
+using Eppie.CLI.Tools;
 
 using Finebits.Authorization.OAuth2.Abstractions;
 using Finebits.Authorization.OAuth2.AuthenticationBroker;
 using Finebits.Authorization.OAuth2.AuthenticationBroker.Abstractions;
 using Finebits.Authorization.OAuth2.Google;
-using Finebits.Authorization.OAuth2.Microsoft;
+using Finebits.Authorization.OAuth2.Outlook;
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
+using Tuvi.Core;
 
 namespace Eppie.CLI.Services
 {
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal class AuthorizationProvider(IServiceProvider serviceProvider)
+    internal class AuthorizationProvider(ILogger<AuthorizationProvider> logger,
+                                         IServiceProvider serviceProvider)
     {
+        private readonly ILogger<AuthorizationProvider> _logger = logger;
         private readonly IServiceProvider _serviceProvider = serviceProvider;
 
-        internal IAuthorizationClient GetAuthorizationClient(MailService mailService)
+        internal IAuthorizationClient CreateAuthorizationClient(MailService mailService)
         {
+            _logger.LogMethodCall();
             return _serviceProvider.GetRequiredKeyedService<IAuthorizationClient>(mailService);
         }
 
-        internal IRefreshable GetRefreshTokenClient(MailService mailService)
+        internal IRefreshable CreateRefreshTokenClient(MailService mailService)
         {
+            _logger.LogMethodCall();
             return _serviceProvider.GetRequiredKeyedService<IRefreshable>(mailService);
         }
     }
@@ -56,6 +64,7 @@ namespace Eppie.CLI.Services
         {
             return DesktopAuthenticationBroker.IsSupported
                 ? services.AddSingleton<AuthorizationProvider>()
+                          .AddSingleton<ITokenResolver, TokenResolver>()
                           .AddSingleton<IWebBrowserLauncher, WebBrowserLauncher>()
                           .AddTransient<IAuthenticationBroker, DesktopAuthenticationBroker>()
                           .AddKeyedTransient<IAuthorizationClient>(MailService.Gmail, (services, key) => CreateGoogleAuthClient(services))
@@ -81,14 +90,14 @@ namespace Eppie.CLI.Services
                  });
         }
 
-        private static MicrosoftAuthClient CreateOutlookAuthClient(IServiceProvider services)
+        private static OutlookAuthClient CreateOutlookAuthClient(IServiceProvider services)
         {
             AuthorizationOptions authOptions = services.GetRequiredService<IOptions<AuthorizationOptions>>().Value;
 
-            return new MicrosoftAuthClient(
+            return new OutlookAuthClient(
                  httpClient: services.GetRequiredService<IHttpClientFactory>().CreateClient(AuthHttpClientName),
                  broker: services.GetRequiredService<IAuthenticationBroker>(),
-                 config: new MicrosoftConfiguration
+                 config: new OutlookConfiguration()
                  {
                      ClientId = authOptions.Outlook.ClientId,
                      RedirectUri = authOptions.Outlook.RedirectUri ?? DesktopAuthenticationBroker.GetLoopbackUri(),
