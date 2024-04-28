@@ -81,6 +81,7 @@ namespace Eppie.CLI.Services
 
         private async Task<AuthorizationToken> RefreshAsync(EmailAddress emailAddress, CancellationToken cancellationToken = default)
         {
+            _logger.LogMethodCall();
             ArgumentNullException.ThrowIfNull(emailAddress);
 
             await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
@@ -91,8 +92,6 @@ namespace Eppie.CLI.Services
 
                 if (data.ExpireTime < DateTime.UtcNow + ReserveTime)
                 {
-                    _logger.LogDebug("Refreshing token for {EmailAddress} (mail service: {MailService})", emailAddress.Address, data.MailService);
-
                     AuthorizationToken token = data.Token;
 
                     IRefreshable refresher = _authorizationProvider.CreateRefreshTokenClient(data.MailService);
