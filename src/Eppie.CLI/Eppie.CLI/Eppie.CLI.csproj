@@ -28,10 +28,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Finebits.Authorization.OAuth2" Version="0.2.0-alpha" />
-    <PackageReference Include="Finebits.Authorization.OAuth2.AuthenticationBroker.Desktop" Version="0.2.0-alpha" />
-    <PackageReference Include="Finebits.Authorization.OAuth2.Google" Version="0.2.0-alpha" />
-    <PackageReference Include="Finebits.Authorization.OAuth2.Microsoft" Version="0.2.0-alpha" />
+    <PackageReference Include="Finebits.Authorization.OAuth2" Version="0.3.0-alpha" />
+    <PackageReference Include="Finebits.Authorization.OAuth2.AuthenticationBroker.Desktop" Version="0.3.0-alpha" />
+    <PackageReference Include="Finebits.Authorization.OAuth2.Google" Version="0.3.0-alpha" />
+    <PackageReference Include="Finebits.Authorization.OAuth2.Outlook" Version="0.3.0-alpha" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Localization" Version="8.0.4" />
