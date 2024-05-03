@@ -1,7 +1,9 @@
+.vs/
+codeql/eppie-database/
+codeql/output/
+publish/output/
 src/Eppie.CLI/.vs/
 src/Eppie.CLI/Eppie.CLI/bin/
 src/Eppie.CLI/Eppie.CLI/obj/
 src/Eppie.CLI/Eppie.CLI/logs/
 src/Eppie.CLI/Eppie.CLI/Eppie.CLI.csproj.user
-publish/output/
-.vs/
