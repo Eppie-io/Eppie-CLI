@@ -338,7 +338,7 @@ namespace Eppie.CLI.Menu
                 //ToDo: Move string to resources
 #pragma warning disable CA1303 // Retrieve the following string(s) from a resource table.
                 Console.WriteLine("Authorization operation has been canceled.");
-#pragma warning restore CA1303 // Do not catch general exception types
+#pragma warning restore CA1303
             }
         }
 
