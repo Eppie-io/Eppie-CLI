@@ -28,7 +28,7 @@ The decentralized protoccol is still in development and its features are not yet
 * Creating a local backup
 * Viewing mailboxes
 * Viewing a single message
-* Wrigthing & sending messages
+* Writing & sending messages
 
 
 ## Build
