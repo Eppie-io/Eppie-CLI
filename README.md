@@ -2,9 +2,10 @@
 
 ![StaticBadge](https://img.shields.io/badge/version-Alpha-lightgrey)
 ![StaticBadge](https://img.shields.io/badge/licence-Apache--2.0-green)
-![StaticBadge](https://img.shields.io/badge/Windows-blue?logo=windows)
-![StaticBadge](https://img.shields.io/badge/macOS-black?logo=apple)
 ![StaticBadge](https://img.shields.io/badge/Linux-red?logo=linux)
+![StaticBadge](https://img.shields.io/badge/macOS-black?logo=apple)
+![StaticBadge](https://img.shields.io/badge/Windows-blue?logo=windows)
+[![Crowdin](https://badges.crowdin.net/e/8fee200a40ee70ffd3fa6b7d8d23deee/localized.svg)](https://eppie.crowdin.com/eppie)
 
 
 ## Intro
