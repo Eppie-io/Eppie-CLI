@@ -55,7 +55,9 @@ As the main project matures more features will be added to this CLI, including b
 ## How to contribute
 First of all this is a pretty ambitiois project and we are greateful beyond measure for every bit of help from our community.
 
-If you decide to contribute, please create an issue first, or find an existing one, unless it's a very minor fix, like a typo. 
+If you decide to contribute, please create an issue first, or find an existing one, unless it's a very minor fix, like a typo.
+
+[Here](https://eppie.crowdin.com/eppie) you can help Eppie with localization.
 
 ## Background
 Eppie is a next generation email and decentralized identity provider. It features open protocol, serverless architecture, cryptocurrency-grade privacy with full account ownership, ease of use, and SMTP-to-web3 messaging capability.
