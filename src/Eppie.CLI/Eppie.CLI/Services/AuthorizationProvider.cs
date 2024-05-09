@@ -64,7 +64,7 @@ namespace Eppie.CLI.Services
         {
             return DesktopAuthenticationBroker.IsSupported
                 ? services.AddSingleton<AuthorizationProvider>()
-                          .AddSingleton<ITokenResolver, TokenResolver>()
+                          .AddSingleton<ITokenRefresher, TokenRefresher>()
                           .AddSingleton<IWebBrowserLauncher, WebBrowserLauncher>()
                           .AddTransient<IAuthenticationBroker, DesktopAuthenticationBroker>()
                           .AddKeyedTransient<IAuthorizationClient>(MailService.Gmail, (services, key) => CreateGoogleAuthClient(services))

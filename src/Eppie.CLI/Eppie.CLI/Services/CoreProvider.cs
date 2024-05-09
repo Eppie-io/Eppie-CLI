@@ -30,10 +30,10 @@ namespace Eppie.CLI.Services
 {
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
     internal class CoreProvider(ILogger<CoreProvider> logger,
-                                ITokenResolver tokenResolver)
+                                ITokenRefresher tokenRefresher)
     {
         private readonly ILogger<CoreProvider> _logger = logger;
-        private readonly ITokenResolver _tokenResolver = tokenResolver;
+        private readonly ITokenRefresher _tokenRefresher = tokenRefresher;
 
         private ITuviMail? _tuviMailCore;
         public ITuviMail TuviMailCore => _tuviMailCore ??= CreateTuviMail();
@@ -43,14 +43,19 @@ namespace Eppie.CLI.Services
             _logger.LogMethodCall();
 
             await TuviMailCore.ResetApplicationAsync().ConfigureAwait(false);
-            _tuviMailCore = null;
+
+            if (_tuviMailCore is not null)
+            {
+                _tuviMailCore.Dispose();
+                _tuviMailCore = null;
+            }
         }
 
         private ITuviMail CreateTuviMail()
         {
             _logger.LogMethodCall();
 
-            return Components.CreateTuviMailCore("data.db", new ImplementationDetailsProvider("Eppie seed", "Eppie.Package", "backup@system.service.eppie.io"), _tokenResolver);
+            return Components.CreateTuviMailCore("data.db", new ImplementationDetailsProvider("Eppie seed", "Eppie.Package", "backup@system.service.eppie.io"), _tokenRefresher);
         }
     }
 }
