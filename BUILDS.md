@@ -2,14 +2,14 @@
 
 ## Prerequisites
 
-- .NET 7.0 [download](https://dotnet.microsoft.com/en-us/download)
+- [.NET 8.0](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
 
 ## Build
 
 To build the **Eppie.CLI** project, run the following command in the project root directory:
 
 ```console
-dotnet build .\src\Eppie.CLI\
+dotnet build ./src/Eppie.CLI/
 ```
 
 ### How to build with forked submodules
@@ -34,12 +34,12 @@ To build the project with your own forked submodules, you have to add the follow
     insteadOf = https://github.com/Eppie-io/<REPOSITORY-NAME>.git
 ```
 
-## Launches
+## Launch
 
 To launch **Eppie Console** application, you can run the following command:
 
 ```console
-dotnet run --project .\src\Eppie.CLI\Eppie.CLI\Eppie.CLI.csproj
+dotnet run --project ./src/Eppie.CLI/Eppie.CLI/Eppie.CLI.csproj
 ```
 
 ### Environment
@@ -47,7 +47,7 @@ dotnet run --project .\src\Eppie.CLI\Eppie.CLI\Eppie.CLI.csproj
 To change the default environment configuration to some custom configuration, run the command with the arguments `--ENVIRONMENT=<environment-name>`:
 
 ```console
-dotnet run --project .\src\Eppie.CLI\Eppie.CLI\Eppie.CLI.csproj -- --ENVIRONMENT=Development
+dotnet run --project ./src/Eppie.CLI/Eppie.CLI/Eppie.CLI.csproj -- --ENVIRONMENT=Development
 ```
 
 - The default environment is **Production**. The location of the configuration file is *.\src\Eppie.CLI\Eppie.CLI\appsettings.json*.
