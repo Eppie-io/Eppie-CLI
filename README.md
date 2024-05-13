@@ -58,7 +58,7 @@ WIP
   
   Adds an email account.
 
-- **`list-accounts*`**
+- **`list-accounts`**
 
   Displays a list of accounts.
 
