@@ -1,8 +1,8 @@
 # Command line client for Eppie &#8212; an encrypted p2p email
 
 ![StaticBadge](https://img.shields.io/badge/version-Alpha-lightgrey)
-![StaticBadge](https://img.shields.io/badge/licence-Apache--2.0-green)
-![StaticBadge](https://img.shields.io/badge/Linux-red?logo=linux)
+[![StaticBadge](https://img.shields.io/github/license/Eppie-io/Eppie-CLI.svg)](https://raw.githubusercontent.com/Eppie-io/Eppie-CLI/main/LICENSE)
+![StaticBadge](https://img.shields.io/badge/Linux-gold?logo=linux&logoColor=black)
 ![StaticBadge](https://img.shields.io/badge/macOS-black?logo=apple)
 ![StaticBadge](https://img.shields.io/badge/Windows-blue?logo=windows)
 [![Crowdin](https://badges.crowdin.net/e/8fee200a40ee70ffd3fa6b7d8d23deee/localized.svg)](https://eppie.crowdin.com/eppie)
@@ -32,9 +32,35 @@ The decentralized protoccol is still in development and its features are not yet
 - Viewing a single message
 - Writing & sending messages
 
-## Build
+## Build project
 
-WIP
+### Prerequisites
+
+- [.NET 8.0](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+
+### Clone
+
+First of all, clone the project repository to your machine:
+
+```console
+git clone --recursive https://github.com/Eppie-io/Eppie-CLI.git eppie-cli
+```
+
+### Build
+
+To build the **Eppie.CLI** project, run the following command in the project root directory:
+
+```console
+dotnet build ./src/Eppie.CLI/
+```
+
+### Launch
+
+To launch **Eppie Console** application, you can run the following command:
+
+```console
+dotnet run --project ./src/Eppie.CLI/Eppie.CLI/Eppie.CLI.csproj
+```
 
 ## Available commands
 
