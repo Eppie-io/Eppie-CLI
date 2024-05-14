@@ -2,7 +2,7 @@
 
 ![StaticBadge](https://img.shields.io/badge/version-Alpha-lightgrey)
 [![StaticBadge](https://img.shields.io/github/license/Eppie-io/Eppie-CLI.svg)](https://raw.githubusercontent.com/Eppie-io/Eppie-CLI/main/LICENSE)
-![StaticBadge](https://img.shields.io/badge/Linux-red?logo=linux&logoColor=white)
+![StaticBadge](https://img.shields.io/badge/Linux-gold?logo=linux&logoColor=black)
 ![StaticBadge](https://img.shields.io/badge/macOS-black?logo=apple)
 ![StaticBadge](https://img.shields.io/badge/Windows-blue?logo=windows)
 [![Crowdin](https://badges.crowdin.net/e/8fee200a40ee70ffd3fa6b7d8d23deee/localized.svg)](https://eppie.crowdin.com/eppie)
