@@ -1,11 +1,12 @@
 # Command line client for Eppie &#8212; an encrypted p2p email
 
-![StaticBadge](https://img.shields.io/badge/version-Alpha-lightgrey)
-[![StaticBadge](https://img.shields.io/github/license/Eppie-io/Eppie-CLI.svg)](https://raw.githubusercontent.com/Eppie-io/Eppie-CLI/main/LICENSE)
-![StaticBadge](https://img.shields.io/badge/Linux-gold?logo=linux&logoColor=black)
-![StaticBadge](https://img.shields.io/badge/macOS-black?logo=apple)
-![StaticBadge](https://img.shields.io/badge/Windows-blue?logo=windows)
-[![Crowdin](https://badges.crowdin.net/e/8fee200a40ee70ffd3fa6b7d8d23deee/localized.svg)](https://eppie.crowdin.com/eppie)
+[![FrameworkBadge](https://img.shields.io/badge/dynamic/xml?label=framework&query=//TargetFramework[1]&url=https://raw.githubusercontent.com/Eppie-io/Eppie-CLI/main/src/Eppie.CLI/Eppie.CLI/Eppie.CLI.csproj)](https://dotnet.microsoft.com/en-us/download/dotnet)
+[![LicenseBadge](https://img.shields.io/github/license/Eppie-io/Eppie-CLI.svg)](https://raw.githubusercontent.com/Eppie-io/Eppie-CLI/main/LICENSE)
+[![CrowdinBadge](https://badges.crowdin.net/e/8fee200a40ee70ffd3fa6b7d8d23deee/localized.svg)](https://eppie.crowdin.com/eppie)
+![WindowsBadge](https://img.shields.io/badge/Windows-blue?logo=windows)
+![LinuxBadge](https://img.shields.io/badge/Linux-gold?logo=linux&logoColor=black)
+![macOSBadge](https://img.shields.io/badge/macOS-black?logo=apple)
+[![Release](https://img.shields.io/github/v/release/Eppie-io/Eppie-CLI)](https://github.com/Eppie-io/Eppie-CLI/releases/latest)
 
 ## Intro
 
