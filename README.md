@@ -14,7 +14,7 @@ Eppie-CLI is a work-in-progress command line client for the upcoming encrypted p
 You might find Eppie-CLI interesting if
 
 - You would like to contribute to Eppie development (yay! &#128077;)
-- You want a CLI for your SMTP email. Eppie can be used as a conventional email client with Gmail, Microsoft Outlook etc. It can also work with ProtonMail.
+- You want a CLI for your SMTP email. Eppie can be used as a conventional email client with Gmail, Microsoft Outlook etc. It can also work with Proton Mail.
 - You want to be the first to try our p2p email, as soon as it's ready
 
 In any case you are very welcome to fork, build and explore this module to your heart's content (see instructions below).
@@ -26,7 +26,7 @@ The decentralized protoccol is still in development and its features are not yet
 - Creating a local account using a Seed Phrase according to [BIP39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) standard
 - [PGP](https://www.openpgp.org/) encryption support (WIP)
 - Connecting any number of third-party email accounts (e.g. Gmail. Microsoft Outlook etc.)
-- Connecting ProtonMail account (WIP)
+- Connecting Proton Mail account (WIP)
 - Creating a local backup
 - Viewing mailboxes
 - Viewing a single message
