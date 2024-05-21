@@ -81,6 +81,20 @@ namespace Eppie.CLI.Services
             return ReadSecretValue(_resourceLoader.Strings.AskAccountPassword);
         }
 
+        internal string AskTwoFactorCode()
+        {
+            _logger.LogMethodCall();
+
+            return ReadValue(_resourceLoader.Strings.AskTwoFactorCode);
+        }
+
+        internal string AskMailboxPassword()
+        {
+            _logger.LogMethodCall();
+
+            return ReadSecretValue(_resourceLoader.Strings.AskMailboxPassword);
+        }
+
         internal string AskIMAPServer()
         {
             _logger.LogMethodCall();

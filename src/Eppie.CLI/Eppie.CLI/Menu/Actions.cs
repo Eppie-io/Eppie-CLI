@@ -419,20 +419,25 @@ namespace Eppie.CLI.Menu
         {
             _logger.LogMethodCall();
 
-            //ToDo: This old code. ProtonAuthData must be use.
+            string email = _application.AskAccountAddress();
 
-            Account account = new()
-            {
-                Email = new EmailAddress(_application.AskAccountAddress())
-            };
+            (string userId, string refreshToken, string saltedKeyPass) = await Tuvi.Proton.ClientAuth.LoginFullAsync(
+                email,
+                _application.AskAccountPassword(),
+                (ct) => Task.FromResult(_application.AskTwoFactorCode()),
+                (ct) => Task.FromResult(_application.AskMailboxPassword()),
+                default).ConfigureAwait(false);
 
-            BasicAuthData basicData = new()
-            {
-                Password = _application.AskAccountPassword()
-            };
+            Account account = Account.Default;
 
-            account.AuthData = basicData;
+            account.Email = new EmailAddress(email);
             account.Type = (int)MailBoxType.Proton;
+            account.AuthData = new ProtonAuthData()
+            {
+                UserId = userId,
+                RefreshToken = refreshToken,
+                SaltedPassword = saltedKeyPass
+            };
 
             await _coreProvider.TuviMailCore.AddAccountAsync(account).ConfigureAwait(false);
         }
