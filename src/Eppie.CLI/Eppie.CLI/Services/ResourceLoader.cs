@@ -85,6 +85,12 @@ namespace Eppie.CLI.Services
             private string? _askAccountPassword;
             internal string AskAccountPassword => _askAccountPassword ??= _localizer.LoadString(GetStringResourceName());
 
+            private string? _askTwoFactorCode;
+            internal string AskTwoFactorCode => _askTwoFactorCode ??= _localizer.LoadString(GetStringResourceName());
+
+            private string? _askMailboxPassword;
+            internal string AskMailboxPassword => _askMailboxPassword ??= _localizer.LoadString(GetStringResourceName());
+
             private string? _askIMAPServer;
             internal string AskIMAPServer => _askIMAPServer ??= _localizer.LoadString(GetStringResourceName());
 

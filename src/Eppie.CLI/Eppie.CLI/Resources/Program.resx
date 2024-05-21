@@ -440,4 +440,12 @@
     <value>Please select which option you want:</value>
     <comment>Header text for the list of options that the user is asked to select.</comment>
   </data>
+  <data name="Message.AskMailboxPassword" xml:space="preserve">
+    <value>Enter mailbox password: </value>
+    <comment>This message asks the user to enter the proton mailbox password.</comment>
+  </data>
+  <data name="Message.AskTwoFactorCode" xml:space="preserve">
+    <value>Enter two-factor code: </value>
+    <comment>This message asks the user to enter the two-factor code.</comment>
+  </data>
 </root>
