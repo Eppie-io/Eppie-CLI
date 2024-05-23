@@ -63,6 +63,12 @@ To launch **Eppie Console** application, you can run the following command:
 dotnet run --project ./src/Eppie.CLI/Eppie.CLI/Eppie.CLI.csproj
 ```
 
+To use **Gmail** or **Microsoft Outlook** OAuth2 authorization, you need to [register the application](docs/Register%20the%20application.md) and then to pass the **ClientId** and **ClientSecret** arguments with the command:
+
+```console
+dotnet run --project ./src/Eppie.CLI/Eppie.CLI/Eppie.CLI.csproj -- --Authorization:Gmail:ClientId="<gmail-client-id>" --Authorization:Gmail:ClientSecret="<gmail-client-secret>" --Authorization:Outlook:ClientId="<outlook-client-id>"
+```
+
 ## Available commands
 
 - **`-?|-h|--help`**
