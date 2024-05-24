@@ -27,7 +27,7 @@ The decentralized protoccol is still in development and its features are not yet
 - Creating a local account using a Seed Phrase according to [BIP39](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki) standard
 - [PGP](https://www.openpgp.org/) encryption support (WIP)
 - Connecting any number of third-party email accounts (e.g. Gmail. Microsoft Outlook etc.)
-- Connecting Proton Mail account (WIP)
+- Connecting Proton Mail account
 - Creating a local backup
 - Viewing mailboxes
 - Viewing a single message
