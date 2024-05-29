@@ -9,8 +9,8 @@
       "os": "windows-latest",
       "runtime": "win-x86",
       "configuration": "release",
-      "framework": "net7.0",
-      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:DebugType=None"
+      "framework": "net8.0",
+      "options" : "--self-contained --property:PublishSingleFile=true --property:DebugSymbols=false --property:DebugType=None --property:GenerateDocumentationFile=fasle"
     },
 
     {
@@ -18,17 +18,8 @@
       "os": "windows-latest",
       "runtime": "win-x64",
       "configuration": "release",
-      "framework": "net7.0",
-      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:DebugType=None"
-    },
-
-    {
-      "tags": ["windows", "arm", "all"],
-      "os": "windows-latest",
-      "runtime": "win-arm",
-      "configuration": "release",
-      "framework": "net7.0",
-      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:DebugType=None"
+      "framework": "net8.0",
+      "options" : "--self-contained --property:PublishSingleFile=true --property:DebugSymbols=false --property:DebugType=None --property:GenerateDocumentationFile=fasle"
     },
 
     {
@@ -36,8 +27,8 @@
       "os": "windows-latest",
       "runtime": "win-arm64",
       "configuration": "release",
-      "framework": "net7.0",
-      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:DebugType=None"
+      "framework": "net8.0",
+      "options" : "--self-contained --property:PublishSingleFile=true --property:DebugSymbols=false --property:DebugType=None --property:GenerateDocumentationFile=fasle"
     },
 
     {
@@ -45,8 +36,8 @@
       "os": "ubuntu-latest",
       "runtime": "linux-x64",
       "configuration": "release",
-      "framework": "net7.0",
-      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:DebugType=None"
+      "framework": "net8.0",
+      "options" : "--self-contained --property:PublishSingleFile=true --property:DebugSymbols=false --property:DebugType=None --property:GenerateDocumentationFile=fasle"
     },
 
     {
@@ -54,8 +45,8 @@
       "os": "ubuntu-latest",
       "runtime": "linux-arm",
       "configuration": "release",
-      "framework": "net7.0",
-      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:DebugType=None"
+      "framework": "net8.0",
+      "options" : "--self-contained --property:PublishSingleFile=true --property:DebugSymbols=false --property:DebugType=None --property:GenerateDocumentationFile=fasle"
     },
 
     {
@@ -63,8 +54,8 @@
       "os": "ubuntu-latest",
       "runtime": "linux-arm64",
       "configuration": "release",
-      "framework": "net7.0",
-      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:DebugType=None"
+      "framework": "net8.0",
+      "options" : "--self-contained --property:PublishSingleFile=true --property:DebugSymbols=false --property:DebugType=None --property:GenerateDocumentationFile=fasle"
     },
 
     {
@@ -72,8 +63,8 @@
       "os": "macos-latest",
       "runtime": "osx-x64",
       "configuration": "release",
-      "framework": "net7.0",
-      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:DebugType=None"      
+      "framework": "net8.0",
+      "options" : "--self-contained --property:PublishSingleFile=true --property:DebugSymbols=false --property:DebugType=None --property:GenerateDocumentationFile=fasle"
     },
 
     {
@@ -81,8 +72,8 @@
       "os": "macos-latest",
       "runtime": "osx-arm64",
       "configuration": "release",
-      "framework": "net7.0",
-      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:DebugType=None"      
+      "framework": "net8.0",
+      "options" : "--self-contained --property:PublishSingleFile=true --property:DebugSymbols=false --property:DebugType=None --property:GenerateDocumentationFile=fasle"
     }
   ]
 }

@@ -36,7 +36,12 @@ namespace Eppie.CLI.Options
         public string? ClientId { get; init; }
         public string? ClientSecret { get; init; }
         public Uri? RedirectUri { get; init; }
-        public Collection<string>? Scope => ScopeList ?? ["https://mail.google.com/", "profile", "email"];
+        public Collection<string>? Scope => ScopeList ??
+            [
+                "https://mail.google.com/",
+                "profile",
+                "email"
+            ];
 
         private Collection<string>? ScopeList { get; init; }
 
@@ -61,7 +66,13 @@ namespace Eppie.CLI.Options
     {
         public string? ClientId { get; init; }
         public Uri? RedirectUri { get; init; }
-        public Collection<string>? Scope => ScopeList ?? ["https://outlook.office.com/.default", "offline_access"];
+        public Collection<string>? Scope => ScopeList ??
+            [
+                "https://outlook.office.com/user.read",
+                "https://outlook.office.com/IMAP.AccessAsUser.All",
+                "https://outlook.office.com/SMTP.Send",
+                "offline_access"
+            ];
 
         private Collection<string>? ScopeList { get; init; }
 

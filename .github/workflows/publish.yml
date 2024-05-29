@@ -27,10 +27,15 @@ on:
         - arm
         - arm64
         - all
-        
+  release:
+    types: [published]
+
 env:
   dotnet-version: 8.x
-        
+  default-config-file: "./publish/config.json"
+  default-target-os: all
+  default-target-runtime: all
+
 jobs:
   prepare:
     name: Prepare
@@ -49,12 +54,27 @@ jobs:
         fetch-depth: 0
         submodules: recursive
 
+    - id: inputs
+      shell: bash
+      run: |
+        config_file='${{ github.event.inputs.config-file }}'
+        target_os='${{ github.event.inputs.target-os }}'
+        target_runtime='${{ github.event.inputs.target-runtime }}'
+
+        echo "config-file=${config_file:=${{ env.default-config-file }}}" >> $GITHUB_OUTPUT
+        echo "target-os=${target_os:=${{ env.default-target-os }}}" >> $GITHUB_OUTPUT
+        echo "target-runtime=${target_runtime:=${{ env.default-target-runtime }}}" >> $GITHUB_OUTPUT
+
     - name: Parse configuration "${{ github.event.inputs.config-file }}"
       id: publish-config-parser
       uses: ./.github/actions/publish-config-parser
       with:
-        config-file: ${{ github.event.inputs.config-file }}
-        tags: "${{ github.event.inputs.target-os }},${{ github.event.inputs.target-runtime }}"
+        config-file: ${{ env.config-file }}
+        tags: "${{ env.target-os }},${{ env.target-runtime }}"
+      env:
+        config-file: ${{ steps.inputs.outputs.config-file }}
+        target-os: ${{ steps.inputs.outputs.target-os }}
+        target-runtime: ${{ steps.inputs.outputs.target-runtime }}
 
     - name: Check profiles
       id: checker
@@ -63,17 +83,16 @@ jobs:
         length=$( echo $profiles | jq '.include | length' )
 
         if(( $length > 0 )); then
-           echo "status=success" >> $GITHUB_OUTPUT
-         else
-           echo "status=failure" >> $GITHUB_OUTPUT
-           echo "No suitable publish profile found"
-         fi
-    
+          echo "status=success" >> $GITHUB_OUTPUT
+        else
+          echo "status=failure" >> $GITHUB_OUTPUT
+          echo "No suitable publish profile found"
+        fi
+
   publish:
     name: Publish
     needs: prepare
     if: needs.prepare.outputs.status == 'success'
-    
     runs-on: ${{ matrix.os }}
     strategy:
       matrix: ${{fromJson(needs.prepare.outputs.matrix)}}
@@ -85,11 +104,8 @@ jobs:
       framework: ${{ matrix.framework }}
       runtime: ${{ matrix.runtime }}
       publish-options: ${{ matrix.options }}
-      output-root: publish/output
+      output-path: 'publish/output/${{ matrix.configuration }}/${{ matrix.framework }}/${{ matrix.runtime }}'
 
-      # template: root/configuration/framework/runtime
-      output-template: '{0}/{1}/{2}/{3}'
-      
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -101,39 +117,65 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.dotnet-version }}
-    
-    - name: Calculate version
-      id: number-version-information
-      uses: ./.github/actions/number-version-information
 
-    - name: New version
-      run: | 
-        echo "Short version: ${{ steps.number-version-information.outputs.version-short }}"
-        echo "Full version: ${{ steps.number-version-information.outputs.version-full }}"
-        echo "Major: ${{ steps.number-version-information.outputs.major }}"
-        echo "Minor: ${{ steps.number-version-information.outputs.minor }}"
-        echo "Patch: ${{ steps.number-version-information.outputs.patch }}"
-        echo "Build: ${{ steps.number-version-information.outputs.build }}"
-        echo "Attempt: ${{ steps.number-version-information.outputs.attempt }}"
-        echo "Today: ${{ steps.number-version-information.outputs.today }}"
-        echo "Revision: ${{ steps.number-version-information.outputs.revision }}"
-        echo "Suffix: ${{ steps.number-version-information.outputs.suffix }}"
+    - id: version-number
+      uses: finebits/github-actions/version-number@v1
 
     - name: Publish ${{ env.output-name }} [${{ env.version-short }}]
       run: |
-        dotnet publish "${{ env.project-file }}" --output "${{ env.output }}" --configuration "${{ env.configuration }}" --framework "${{ env.framework }}" --runtime "${{ env.runtime }}" --property:Version="${{ env.version-full }}" ${{ env.publish-options }} 
+        dotnet publish "${{ env.project-file }}" --output "${{ env.output-path }}" --configuration "${{ env.configuration }}" --framework "${{ env.framework }}" --runtime "${{ env.runtime }}" --property:Version="${{ env.version-full }}" ${{ env.publish-options }} 
       env:
-        output: "${{ format(env.output-template, env.output-root, env.configuration, env.framework, env.runtime) }}"
-        version-full: "${{ steps.number-version-information.outputs.version-full }}"
-        version-short: "${{ steps.number-version-information.outputs.version-short }}"
+        version-full: "${{ steps.version-number.outputs.suffix-githash-version }}"
+        version-short: "${{ steps.version-number.outputs.suffix-version }}"
 
-    - name: Archive artifacts
+    - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: "${{ env.output-name }} [${{ env.version-short }}]"
-        path: |
-          ${{ env.output }}
+        name: "${{ env.output-name }}-${{ env.runtime }} [${{ env.version-short }}]"
+        path: "${{ env.output-path }}"
       env:
         artifact-name: "${{ env.output-name }}"
-        version-short: "${{ steps.number-version-information.outputs.version-short }}"
-        output: "${{ env.output-root }}"
+        version-short: "${{ steps.version-number.outputs.suffix-version }}"
+
+  upload-assets:
+    name: Upload Assets
+    if: github.event_name == 'release'
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    env:
+      artifacts-root: artifacts
+      assets-root: assets
+
+    steps:
+    - name: Download All Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: "${{ env.artifacts-root }}"
+
+    - name: Prepare Assets
+      shell: bash
+      run: |
+        asset_root="${{ env.assets-root }}"
+        mkdir -p "${asset_root}"
+
+        artifact_pattern="${{ env.artifacts-root }}/*"
+        for item in $artifact_pattern ; do
+          if [ -d "$item" ] ; then
+            item_name="${item##*/}"
+
+            # remove version
+            asset_name="${item_name% [*}.zip"
+
+            zip -r -j "$asset_root/$asset_name" "$item" && echo "Archiving of the asset '$asset_name' has been completed successfully." || echo "::warning::Failed to archive asset '$asset_name'"
+          fi
+        done
+
+    - name: Upload All Assets
+      uses: finebits/github-actions/upload-release-asset@v1
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        tag: ${{ github.event.release.tag_name }}
+        path: "${{ env.assets-root }}/*"
