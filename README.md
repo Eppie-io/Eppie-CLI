@@ -47,12 +47,29 @@ First of all, clone the project repository to your machine:
 git clone --recursive https://github.com/Eppie-io/Eppie-CLI.git eppie-cli
 ```
 
-### Build
+### Build or download the latest release
 
 To build the **Eppie.CLI** project, run the following command in the project root directory:
 
 ```console
 dotnet build ./src/Eppie.CLI/
+```
+
+You may want to skip the building and download the latest release for your system:
+
+#### Windows
+[Eppie.CLI-win-arm64.zip](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-win-arm64.zip)  
+[Eppie.CLI-win-x64.zip](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-win-x64.zip)  
+[Eppie.CLI-win-x86.zip](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-win-x86.zip)
+
+#### Linux
+[Eppie.CLI-linux-arm.zip](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-linux-arm.zip)  
+[Eppie.CLI-linux-arm64.zip](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-linux-arm64.zip)  
+[Eppie.CLI-linux-x64.zip](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-linux-x64.zip)
+
+#### MacOS
+[Eppie.CLI-osx-arm64.zip](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-osx-arm64.zip)  
+[Eppie.CLI-osx-x64.zip](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-osx-x64.zip)
 ```
 
 ### Launch
