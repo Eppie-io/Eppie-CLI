@@ -47,7 +47,7 @@ First of all, clone the project repository to your machine:
 git clone --recursive https://github.com/Eppie-io/Eppie-CLI.git eppie-cli
 ```
 
-### Build or download the latest release
+### Build
 
 To build the **Eppie.CLI** project, run the following command in the project root directory:
 
@@ -55,6 +55,7 @@ To build the **Eppie.CLI** project, run the following command in the project roo
 dotnet build ./src/Eppie.CLI/
 ```
 
+## Download binary
 You may want to skip the building and download the latest release for your system:
 
 #### Windows
@@ -71,10 +72,10 @@ You may want to skip the building and download the latest release for your syste
 [Eppie.CLI-osx-arm64.zip](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-osx-arm64.zip)  
 [Eppie.CLI-osx-x64.zip](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-osx-x64.zip)
 
+## Launch
 
-### Launch
-
-To launch **Eppie Console** application, you can run the following command:
+### If built from the source
+To launch **Eppie Console** application, run the following command:
 
 ```console
 dotnet run --project ./src/Eppie.CLI/Eppie.CLI/Eppie.CLI.csproj
@@ -85,6 +86,20 @@ To use **Gmail** or **Microsoft Outlook** OAuth2 authorization, you need to [reg
 ```console
 dotnet run --project ./src/Eppie.CLI/Eppie.CLI/Eppie.CLI.csproj -- --Authorization:Gmail:ClientId="<gmail-client-id>" --Authorization:Gmail:ClientSecret="<gmail-client-secret>" --Authorization:Outlook:ClientId="<outlook-client-id>"
 ```
+
+### If downloaded the binaries
+Run this while in project folder:
+
+```console
+./eppie-console
+```
+
+or, to authorize Eppie with **Gmail** and **Microsoft Outlook**:
+
+```console
+./eppie-console --Authorization:Gmail:ClientId="<gmail-client-id>" --Authorization:Gmail:ClientSecret="<gmail-client-secret>" --Authorization:Outlook:ClientId="<outlook-client-id>"
+```
+
 
 ## Available commands
 
