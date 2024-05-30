@@ -88,18 +88,31 @@ dotnet run --project ./src/Eppie.CLI/Eppie.CLI/Eppie.CLI.csproj -- --Authorizati
 ```
 
 ### If downloaded the binaries
-Run this while in project folder:
+Run this while in the project folder
+
+#### Linux and MacOS
 
 ```console
 ./eppie-console
 ```
 
-or, to authorize Eppie with **Gmail** and **Microsoft Outlook**:
+To authorize Eppie with **Gmail** and **Microsoft Outlook**:
 
 ```console
 ./eppie-console --Authorization:Gmail:ClientId="<gmail-client-id>" --Authorization:Gmail:ClientSecret="<gmail-client-secret>" --Authorization:Outlook:ClientId="<outlook-client-id>"
 ```
 
+#### Windows
+
+```console
+.\eppie-console.exe
+```
+
+To authorize Eppie with **Gmail** and **Microsoft Outlook**:
+
+```console
+.\eppie-console.exe --Authorization:Gmail:ClientId="<gmail-client-id>" --Authorization:Gmail:ClientSecret="<gmail-client-secret>" --Authorization:Outlook:ClientId="<outlook-client-id>"
+```
 
 ## Available commands
 
