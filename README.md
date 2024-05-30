@@ -70,7 +70,7 @@ You may want to skip the building and download the latest release for your syste
 #### MacOS
 [Eppie.CLI-osx-arm64.zip](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-osx-arm64.zip)  
 [Eppie.CLI-osx-x64.zip](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-osx-x64.zip)
-```
+
 
 ### Launch
 
