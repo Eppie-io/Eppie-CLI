@@ -55,8 +55,8 @@ namespace Eppie.CLI.Options
                 // Or run eppie client with arguments:
                 // --Authorization:Gmail:ClientId="<client-id>" --Authorization:Gmail:ClientSecret="<client-secret>"
 
-                ClientId = "Gmail ClientId is unset",
-                ClientSecret = "Gmail ClientSecret is unset",
+                ClientId = "<Gmail-ClientId>",
+                ClientSecret = "<Gmail-ClientSecret>",
             };
         }
     }
@@ -84,7 +84,7 @@ namespace Eppie.CLI.Options
                 //      > dotnet user-secrets set "Authorization:Outlook:ClientId" "<client-id>"
                 // Or run eppie client with arguments: --Authorization:Outlook:ClientId="<client-id>"
 
-                ClientId = "Outlook ClientId is unset",
+                ClientId = "<Outlook-ClientId>",
             };
         }
     }

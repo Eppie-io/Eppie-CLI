@@ -121,6 +121,24 @@ jobs:
     - id: version-number
       uses: finebits/github-actions/version-number@v1
 
+    - uses: finebits/github-actions/pre-build/replace@v1
+      with:
+        file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
+        placeholder: '\"<Gmail-ClientId>\"'
+        value: "${{ secrets.GMAIL_CLIENT_ID }}"
+
+    - uses: finebits/github-actions/pre-build/replace@v1
+      with:
+        file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
+        placeholder: '\"<Gmail-ClientSecret>\"'
+        value: "${{ secrets.GMAIL_CLIENT_SECRET }}"
+
+    - uses: finebits/github-actions/pre-build/replace@v1
+      with:
+        file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
+        placeholder: '\"<Outlook-ClientId>\"'
+        value: "${{ secrets.OUTLOOK_CLIENT_ID }}"
+
     - name: Publish ${{ env.output-name }} [${{ env.version-short }}]
       run: |
         dotnet publish "${{ env.project-file }}" --output "${{ env.output-path }}" --configuration "${{ env.configuration }}" --framework "${{ env.framework }}" --runtime "${{ env.runtime }}" --property:Version="${{ env.version-full }}" ${{ env.publish-options }} 
@@ -167,9 +185,14 @@ jobs:
             item_name="${item##*/}"
 
             # remove version
-            asset_name="${item_name% [*}.zip"
+            asset_name="${item_name% [*}"
 
-            zip -r -j "$asset_root/$asset_name" "$item" && echo "Archiving of the asset '$asset_name' has been completed successfully." || echo "::warning::Failed to archive asset '$asset_name'"
+            if [[ "$asset_name" == *"-osx-"* || "$asset_name" == *"-linux-"* ]]; then
+              tar -czf "$asset_root/${asset_name}.tar.gz" -C "$item" . && echo "Archiving of the asset '$asset_name' has been completed successfully." || echo "::warning::Failed to archive asset '$asset_name'"
+            else
+              zip -rjq "$asset_root/${asset_name}.zip" "$item" && echo "Archiving of the asset '$asset_name' has been completed successfully." || echo "::warning::Failed to archive asset '$asset_name'"
+            fi
+
           fi
         done
 
