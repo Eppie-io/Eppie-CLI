@@ -80,9 +80,9 @@ Choose **Microsoft Graph** from the side menu.
 
 ![Microsoft Graph](images/outlook/outlook6.png)
 
-Eppie needs permissions to read and write into your mailbox, send new emails and see your profile. Look for theses checkboxes:
+Select **Delegated permissions**. Eppie needs permissions to read and write into your mailbox, send new emails and see your profile. Look for theses checkboxes:
 
-**email**, **offline_access** and **profile** within **OpenId permissions**,
+**OpenId permissions > offline_access**,
 
 ![OpenId permissions](images/outlook/outlook7.png)
 
