@@ -121,6 +121,24 @@ jobs:
     - id: version-number
       uses: finebits/github-actions/version-number@v1
 
+    - uses: finebits/github-actions/pre-build/replace@v1
+      with:
+        file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
+        placeholder: '\"<Gmail-ClientId>\"'
+        value: "${{ secrets.GMAIL_CLIENT_ID }}"
+
+    - uses: finebits/github-actions/pre-build/replace@v1
+      with:
+        file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
+        placeholder: '\"<Gmail-ClientSecret>\"'
+        value: "${{ secrets.GMAIL_CLIENT_SECRET }}"
+
+    - uses: finebits/github-actions/pre-build/replace@v1
+      with:
+        file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
+        placeholder: '\"<Outlook-ClientId>\"'
+        value: "${{ secrets.OUTLOOK_CLIENT_ID }}"
+
     - name: Publish ${{ env.output-name }} [${{ env.version-short }}]
       run: |
         dotnet publish "${{ env.project-file }}" --output "${{ env.output-path }}" --configuration "${{ env.configuration }}" --framework "${{ env.framework }}" --runtime "${{ env.runtime }}" --property:Version="${{ env.version-full }}" ${{ env.publish-options }} 
