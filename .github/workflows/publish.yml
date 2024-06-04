@@ -167,9 +167,14 @@ jobs:
             item_name="${item##*/}"
 
             # remove version
-            asset_name="${item_name% [*}.zip"
+            asset_name="${item_name% [*}"
 
-            zip -r -j "$asset_root/$asset_name" "$item" && echo "Archiving of the asset '$asset_name' has been completed successfully." || echo "::warning::Failed to archive asset '$asset_name'"
+            if [[ "$asset_name" == *"-osx-"* || "$asset_name" == *"-linux-"* ]]; then
+              tar -czf "$asset_root/${asset_name}.tar.gz" -C "$item" . && echo "Archiving of the asset '$asset_name' has been completed successfully." || echo "::warning::Failed to archive asset '$asset_name'"
+            else
+              zip -rjq "$asset_root/${asset_name}.zip" "$item" && echo "Archiving of the asset '$asset_name' has been completed successfully." || echo "::warning::Failed to archive asset '$asset_name'"
+            fi
+
           fi
         done
 
