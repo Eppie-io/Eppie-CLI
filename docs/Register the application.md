@@ -52,7 +52,53 @@ And you are done. Pass the **Client ID** and **Client secret** as arguments when
 
 ## Microsoft Outlook API Registration
 
-WIP
+1. Go to [Azure Portal](https://portal.azure.com/) and log in or create an account. Choose **Microsoft Entra ID** on the dashboard or in the side menu. Here we will register Eppie-CLI so Microsoft's servers recognize it and allow it to access your Outlook mailbox.
+
+![Azure portal](images/outlook/outlook1.png)
+
+2. Select **App registrations > New registration**.
+
+![App registration](images/outlook/outlook2.png)
+
+Fill in the name, select the third option for the Supported account types: **Accounts in any organizational directory (Any Microsoft Entra ID tenant - Multitenant) and personal Microsoft accounts (e.g. Skype, Xbox)**.
+
+Also, add a redirect URI: choose **Public client/native (mobile & desctop)**, type in **http://127.0.0.1**.
+
+Hit **Register**.
+
+![Application forml](images/outlook/outlook3.png)
+
+You will need the **Application (client) ID** later when running Eppie-CLI.
+
+![Overview](images/outlook/outlook4.png)
+
+3. Now let's set API permissions. These will be requested on the user consent screen when you log into your mailbox with Eppie. Hit **API permissions > Add permission**.
+
+![API permissions](images/outlook/outlook5.png)
+
+Choose **Microsoft Graph** from the side menu.
+
+![Microsoft Graph](images/outlook/outlook6.png)
+
+Eppie needs permissions to read and write into your mailbox, send new emails and see your profile. Look for theses checkboxes:
+
+**email**, **offline_access** and **profile** within **OpenId permissions**,
+
+![OpenId permissions](images/outlook/outlook7.png)
+
+**IMAP > IMAP.AccessAsUser.All**,
+
+![IMAP permission](images/outlook/outlook8.png)
+
+**SMTP > SMTP.Send**,
+
+![SMTP permission](images/outlook/outlook9.png)
+
+and **User > User.Read**
+
+![User permission](images/outlook/outlook10.png)
+
+And this is it. Now you can pass the application ID to Eppie-CLI as an argument as shown [here](https://github.com/Eppie-io/Eppie-CLI/blob/main/README.md#Launch), and it will be authorized to access your Microsoft Outlook mailbox.
 
 ## See Also
 
