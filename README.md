@@ -93,6 +93,8 @@ If you compile your own binaries, you will need to authorize the application in 
 dotnet run --project ./src/Eppie.CLI/Eppie.CLI/Eppie.CLI.csproj -- --Authorization:Gmail:ClientId="<gmail-client-id>" --Authorization:Gmail:ClientSecret="<gmail-client-secret>" --Authorization:Outlook:ClientId="<outlook-client-id>"
 ```
 
+If you download the binaries you can skip this step. We went through Google's and Microsoft's security audits and certification procedures, so it is now a bit more convenient.
+
 ### If downloaded the binaries
 
 Run this while in the project folder:
