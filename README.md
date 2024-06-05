@@ -87,38 +87,36 @@ To launch **Eppie Console** application, run the following command:
 dotnet run --project ./src/Eppie.CLI/Eppie.CLI/Eppie.CLI.csproj
 ```
 
-To use **Gmail** or **Microsoft Outlook** OAuth2 authorization, you need to [register the application](docs/Register%20the%20application.md) and then to pass the **ClientId** and **ClientSecret** arguments with the command:
+If you compile your own binaries, you will need to authorize the application in **Google Developer Console** and **Microsoft Azure Portal** in order to be able to connect **Gmail** and **Microsoft Outlook** mailboxes. Basically, Google and Microsoft want to know a little bit about the app before they allow it to access their users' data. [Here](docs/Register%20the%20application.md) is a little tutorial. When you get the **Client ID** and **Client Secret** (only Gmail) pass them as arguments with launch command, like this:
 
 ```console
 dotnet run --project ./src/Eppie.CLI/Eppie.CLI/Eppie.CLI.csproj -- --Authorization:Gmail:ClientId="<gmail-client-id>" --Authorization:Gmail:ClientSecret="<gmail-client-secret>" --Authorization:Outlook:ClientId="<outlook-client-id>"
 ```
 
+If you download the binaries you can skip this step. We went through Google's and Microsoft's security audits and certification procedures, so it is now a bit more convenient.
+
 ### If downloaded the binaries
 
-Run this while in the project folder
+Go to the project folder:
 
 #### Linux and MacOS
 
+Add execute pemission:
+
 ```console
-./eppie-console
+chmod +x ./eppie-console
 ```
 
-To authorize Eppie with **Gmail** and **Microsoft Outlook**:
+Launch:
 
 ```console
-./eppie-console --Authorization:Gmail:ClientId="<gmail-client-id>" --Authorization:Gmail:ClientSecret="<gmail-client-secret>" --Authorization:Outlook:ClientId="<outlook-client-id>"
+./eppie-console
 ```
 
 #### Windows
 
 ```console
 .\eppie-console.exe
-```
-
-To authorize Eppie with **Gmail** and **Microsoft Outlook**:
-
-```console
-.\eppie-console.exe --Authorization:Gmail:ClientId="<gmail-client-id>" --Authorization:Gmail:ClientSecret="<gmail-client-secret>" --Authorization:Outlook:ClientId="<outlook-client-id>"
 ```
 
 ## Available commands
