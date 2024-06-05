@@ -95,7 +95,7 @@ dotnet run --project ./src/Eppie.CLI/Eppie.CLI/Eppie.CLI.csproj -- --Authorizati
 
 ### If downloaded the binaries
 
-Previously users were required to authorize Eppie with Google and Microsoft and pass the credentials they'd created to the app. This is no longer the case if you download the latest executables. We went through Google's and Microsoft's security audits and certification procedures, so it is now a bit more convenient. Just run this while in the project folder:
+Run this while in the project folder:
 
 #### Linux and MacOS
 
