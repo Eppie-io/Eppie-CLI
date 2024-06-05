@@ -49,7 +49,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
       with:
         fetch-depth: 0
         submodules: recursive
@@ -108,13 +108,13 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
       with:
         fetch-depth: 0
         submodules: recursive
 
     - name: Install .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@4d6c8fcf3c8f7a60068d26b594648e99df24cee3 # v4.0.0
       with:
         dotnet-version: ${{ env.dotnet-version }}
 
@@ -146,8 +146,24 @@ jobs:
         version-full: "${{ steps.version-number.outputs.suffix-githash-version }}"
         version-short: "${{ steps.version-number.outputs.suffix-version }}"
 
+    - name: Sign files with Trusted Signing
+      if: matrix.os == 'windows-latest'
+      uses: azure/trusted-signing-action@e6530f2780a4ab2153b0cea1f87cd8d0a3a4d07a # v0.3.19
+      with:
+        azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+        endpoint: https://neu.codesigning.azure.net/
+        trusted-signing-account-name: ${{ secrets.TRUSTED_SIGNING_ACCOUNT_NAME }}
+        certificate-profile-name: ${{ secrets.CERTIFICATE_PROFILE_NAME }}
+        files-folder: ${{ env.output-path }}
+        files-folder-filter: exe
+        file-digest: SHA256
+        timestamp-rfc3161: http://timestamp.acs.microsoft.com
+        timestamp-digest: SHA256
+
     - name: Upload artifacts
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
       with:
         name: "${{ env.output-name }}-${{ env.runtime }} [${{ env.version-short }}]"
         path: "${{ env.output-path }}"
@@ -169,7 +185,7 @@ jobs:
 
     steps:
     - name: Download All Artifacts
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
       with:
         path: "${{ env.artifacts-root }}"
 
