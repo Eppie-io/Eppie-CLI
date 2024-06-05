@@ -5,7 +5,7 @@
 ![LinuxBadge](https://img.shields.io/badge/Linux-gold?logo=linux&logoColor=black)
 ![macOSBadge](https://img.shields.io/badge/macOS-black?logo=apple)
 [![FrameworkBadge](https://img.shields.io/badge/dynamic/xml?label=framework&query=//TargetFramework[1]&url=https://raw.githubusercontent.com/Eppie-io/Eppie-CLI/main/src/Eppie.CLI/Eppie.CLI/Eppie.CLI.csproj)](https://dotnet.microsoft.com/en-us/download/dotnet)
-[![Build and Test](https://img.shields.io/github/actions/workflow/status/eppie-io/eppie-cli/build-and-test.yml?logo=github)](https://github.com/Eppie-io/Eppie-CLI/actions/workflows/build-and-test.yml)
+[![Build and Test](https://img.shields.io/github/actions/workflow/status/eppie-io/eppie-cli/build-and-test.yml?logo=github&branch=main&event=push)](https://github.com/Eppie-io/Eppie-CLI/actions/workflows/build-and-test.yml?query=branch%3Amain+event%3Apush)
 [![CrowdinBadge](https://badges.crowdin.net/e/8fee200a40ee70ffd3fa6b7d8d23deee/localized.svg)](https://eppie.crowdin.com/eppie)
 [![Release](https://img.shields.io/github/v/release/Eppie-io/Eppie-CLI)](https://github.com/Eppie-io/Eppie-CLI/releases/latest)
 
