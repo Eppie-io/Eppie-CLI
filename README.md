@@ -97,9 +97,17 @@ If you download the binaries you can skip this step. We went through Google's an
 
 ### If downloaded the binaries
 
-Run this while in the project folder:
+Go to the project folder:
 
 #### Linux and MacOS
+
+Add execute pemission:
+
+```console
+chmod +x ./eppie-console
+```
+
+Launch:
 
 ```console
 ./eppie-console
