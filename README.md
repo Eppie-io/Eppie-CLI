@@ -56,26 +56,31 @@ To build the **Eppie.CLI** project, run the following command in the project roo
 dotnet build ./src/Eppie.CLI/
 ```
 
-## Download binary
+## Downloads
+
 You may want to skip the building and download the latest release for your system:
 
-#### Windows
-[Eppie.CLI-win-arm64.zip](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-win-arm64.zip)  
-[Eppie.CLI-win-x64.zip](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-win-x64.zip)  
-[Eppie.CLI-win-x86.zip](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-win-x86.zip)
+### Windows binaries
 
-#### Linux
-[Eppie.CLI-linux-arm.zip](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-linux-arm.zip)  
-[Eppie.CLI-linux-arm64.zip](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-linux-arm64.zip)  
-[Eppie.CLI-linux-x64.zip](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-linux-x64.zip)
+- [Eppie.CLI-win-x64.zip](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-win-x64.zip)
+- [Eppie.CLI-win-x86.zip](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-win-x86.zip)
+- [Eppie.CLI-win-arm64.zip](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-win-arm64.zip)
 
-#### MacOS
-[Eppie.CLI-osx-arm64.zip](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-osx-arm64.zip)  
-[Eppie.CLI-osx-x64.zip](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-osx-x64.zip)
+### Linux binaries
+
+- [Eppie.CLI-linux-x64.tar.gz](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-linux-x64.tar.gz)
+- [Eppie.CLI-linux-arm64.tar.gz](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-linux-arm64.tar.gz)
+- [Eppie.CLI-linux-arm.tar.gz](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-linux-arm.tar.gz)
+
+### MacOS binaries
+
+- [Eppie.CLI-osx-x64.tar.gz](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-osx-x64.tar.gz)
+- [Eppie.CLI-osx-arm64.tar.gz](https://github.com/Eppie-io/Eppie-CLI/releases/latest/download/Eppie.CLI-osx-arm64.tar.gz)
 
 ## Launch
 
 ### If built from the source
+
 To launch **Eppie Console** application, run the following command:
 
 ```console
@@ -89,6 +94,7 @@ dotnet run --project ./src/Eppie.CLI/Eppie.CLI/Eppie.CLI.csproj -- --Authorizati
 ```
 
 ### If downloaded the binaries
+
 Run this while in the project folder
 
 #### Linux and MacOS
