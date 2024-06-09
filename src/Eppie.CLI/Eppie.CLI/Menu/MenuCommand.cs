@@ -38,6 +38,7 @@ namespace Eppie.CLI.Menu
         public const string ListContacts = "list-contacts";
         public const string ShowMessage = "show-message";
         public const string ShowAllMessages = "show-all-messages";
+        public const string SyncFolder = "sync-folder";
         public const string ShowFolderMessages = "show-folder-messages";
         public const string ShowContactMessages = "show-contact-messages";
 
@@ -164,6 +165,34 @@ namespace Eppie.CLI.Menu
             public static int GetPKValue(IAsyncCommand cmd)
             {
                 return GetRequiredOptionValue<int>(cmd, PrimaryKeyOptionNames.First());
+            }
+        }
+
+        public static class CommandSyncFolderOptions
+        {
+            public static readonly IReadOnlyCollection<string> AccountOptionNames = new[] { "-a", "--account", "/Account" };
+            public static readonly IReadOnlyCollection<string> FolderOptionNames = new[] { "-f", "--folder", "/Folder" };
+
+            public static IReadOnlyCollection<IOption> GetSyncFolderOptions(IAsyncParser parser, ResourceLoader resourceLoader)
+            {
+                Debug.Assert(parser is not null);
+                Debug.Assert(resourceLoader is not null);
+
+                return new IOption[]
+                {
+                    parser.CreateOption<string>(AccountOptionNames, isRequired: true, description: resourceLoader.Strings.AccountAddressDescription),
+                    parser.CreateOption<string>(FolderOptionNames, isRequired: true, description: resourceLoader.Strings.AccountFolderDescription)
+                };
+            }
+
+            public static string GetAccountValue(IAsyncCommand cmd)
+            {
+                return GetRequiredOptionValue<string>(cmd, AccountOptionNames.First());
+            }
+
+            public static string GetFolderNameValue(IAsyncCommand cmd)
+            {
+                return GetRequiredOptionValue<string>(cmd, FolderOptionNames.First());
             }
         }
 

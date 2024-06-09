@@ -310,6 +310,10 @@
     <value>The primary key of the message in the database.</value>
     <comment>Description of the 'show-message' command option in the help.</comment>
   </data>
+  <data name="Menu.SyncFolderDescription" xml:space="preserve">
+    <value>Sync messages in specific account folder.</value>
+    <comment>Description of the 'sync-folder' command in the help.</comment>
+  </data>
   <data name="Menu.ShowAllMessagesDescription" xml:space="preserve">
     <value>Show all messages from all accounts.</value>
     <comment>Description of the 'show-all-messages' command in the help.</comment>

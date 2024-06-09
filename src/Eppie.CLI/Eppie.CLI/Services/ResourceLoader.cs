@@ -184,6 +184,9 @@ namespace Eppie.CLI.Services
             private string? _showMessageDescription;
             internal string ShowMessageDescription => _showMessageDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
 
+            private string? _syncFolderDescription;
+            internal string SyncFolderDescription => _syncFolderDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+
             private string? _showAllMessagesDescription;
             internal string ShowAllMessagesDescription => _showAllMessagesDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
 
