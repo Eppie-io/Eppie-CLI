@@ -185,7 +185,7 @@ Launch:
 
 Here is an example session.
 
-![launch](/docs/images/usage/usage1.png)
+![usage](/docs/images/usage/usage1.png)
 
 Go to the project folder and run **eppie-console** as described above. Create your local account with `init` command. Create a password and write down yout **seed-phrase**. Remember, you will _never_ be able to restore it if you lose it.
 
