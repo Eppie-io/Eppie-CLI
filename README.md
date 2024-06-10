@@ -183,7 +183,19 @@ Launch:
 
 ## Usage
 
-WIP
+Here is an example session.
+
+![launch](/docs/images/usage/usage1.png)
+
+Go to the project folder and run **eppie-console** as described above. Create your local account with `init` command. Create a password and write down yout **seed-phrase**. Remember, you will _never_ be able to restore it if you lose it.
+
+To clarify, the password protects your local database. The seed-phrase will be your way to access the decentralized account whenever you want to connect a new device to existing account (that is when the decentralized network is launched for public).
+
+Go ahead and add an email acount with `add-account -t email`. Choose a service and authorize Eppie to access your account in browser. Then fill in IMAP/SMTP settings.
+
+List your connected mailboxes with `list-accounts`. Show all messages with `show-all-messages`.
+
+Send a message with `send -s <sender address> -r <receiver address> -t <subject>`.
 
 ## Planned features
 
