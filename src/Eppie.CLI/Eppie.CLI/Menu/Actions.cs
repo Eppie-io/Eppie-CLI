@@ -241,6 +241,27 @@ namespace Eppie.CLI.Menu
             _application.PrintMessage(message, false);
         }
 
+        internal async Task SyncFolderActionAsync(string accountAddress, string folderName)
+        {
+            _logger.LogMethodCall();
+
+            EmailAddress email = new(accountAddress);
+            Account account = await _coreProvider.TuviMailCore.GetAccountAsync(email).ConfigureAwait(false);
+
+            // TODO: Need to simplify the retrieval of CompositeFolder.
+            IReadOnlyList<CompositeAccount> accounts = await _coreProvider.TuviMailCore.GetCompositeAccountsAsync().ConfigureAwait(false);
+            CompositeAccount compositeAccount = accounts.First(a => a.Email == account.Email);
+            CompositeFolder? folder = compositeAccount.FoldersStructure.FirstOrDefault(x => x.HasSameName(folderName));
+
+            if (folder is null)
+            {
+                _application.WriteUnknownFolderWarning(accountAddress, folderName);
+                return;
+            }
+
+            await _coreProvider.TuviMailCore.CheckForNewMessagesInFolderAsync(folder, CancellationToken.None).ConfigureAwait(false);
+        }
+
         internal async Task ShowAllMessagesActionAsync(int pageSize)
         {
             _logger.LogMethodCall();
