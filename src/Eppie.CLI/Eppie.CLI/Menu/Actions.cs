@@ -47,6 +47,7 @@ namespace Eppie.CLI.Menu
 
         internal void ExitAction()
         {
+            _coreProvider.TuviMailCore.ExceptionOccurred -= OnCoreException;
             _logger.LogMethodCall();
             _application.StopApplication();
         }
@@ -74,6 +75,8 @@ namespace Eppie.CLI.Menu
             }
 
             bool success = await _coreProvider.TuviMailCore.InitializeApplicationAsync(password).ConfigureAwait(false);
+
+            _coreProvider.TuviMailCore.ExceptionOccurred += OnCoreException;
 
             if (success)
             {
@@ -470,6 +473,15 @@ namespace Eppie.CLI.Menu
             Account account = await _coreProvider.TuviMailCore.NewDecentralizedAccountAsync().ConfigureAwait(false);
             account.Type = (int)MailBoxType.Dec;
             await _coreProvider.TuviMailCore.AddAccountAsync(account).ConfigureAwait(false);
+        }
+
+        private void OnCoreException(object? sender, ExceptionEventArgs e)
+        {
+            _logger.LogMethodCall();
+
+            ArgumentNullException.ThrowIfNull(e);
+
+            _application.WriteError(e.Exception);
         }
     }
 }
