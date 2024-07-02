@@ -33,6 +33,7 @@ The decentralized protoccol is still in development and its features are not yet
 - Viewing mailboxes
 - Viewing a single message
 - Writing & sending messages
+- Decentralized messaging (on the test network)
 
 ## Build project
 
@@ -189,7 +190,7 @@ Here is an example session.
 
 Go to the project folder and run **eppie-console** as described above. Create your local account with `init` command. Create a password and write down your **seed-phrase**. Remember, you will _never_ be able to restore it if you lose it. Also, _never_ share the seed-phrase with anybody.
 
-To clarify, the password protects your local database. The seed-phrase will be your way to access the decentralized account whenever you want to connect a new device to existing account (that is when the decentralized network is launched for public).
+To clarify, the password protects your local database. The seed-phrase will be your way to access the decentralized account whenever you want to connect a new device to existing account. That is when the decentralized network is launched. Currently decentralized messaging is available on a small testnet, and you cannot connect multiple devices to the same account.
 
 Go ahead and add an email acount with `add-account -t email`. Choose a service and authorize Eppie to access your account in browser. Then fill in IMAP/SMTP settings.
 
@@ -205,6 +206,7 @@ As the main project matures more features will be added to this CLI, including b
 
 - Creating a decentralized Eppie account
 - Encrypted p2p messaging
+- Connecting multiple devices to single account 
 - Encrypted decentralized backup
 - Connecting existing decentralized identities, e.g. [ENS](https://ens.domains/)
 
