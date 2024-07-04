@@ -309,8 +309,8 @@ jobs:
       contents: write
 
     env:
-      artifacts-root: .artifacts
-      assets-root: .assets
+      artifacts-root: './.artifacts'
+      assets-root: './.assets'
 
     steps:
     - name: Download All Artifacts
@@ -336,10 +336,13 @@ jobs:
               tar -czf "$asset_root/${asset_name}.tar.gz" -C "$item" . && echo "Archiving of the asset '$asset_name' has been completed successfully." || echo "::warning::Failed to archive asset '$asset_name'"
             elif [[ "$asset_name" == *"-win-"* ]]; then
               zip -rjq "$asset_root/${asset_name}.zip" "$item" && echo "Archiving of the asset '$asset_name' has been completed successfully." || echo "::warning::Failed to archive asset '$asset_name'"
-            elif [[ "$asset_name" == *".AppIamge" ]]; then
-              cp "$item/*.AppImage" "$asset_root"
+            elif [[ "$asset_name" == *".AppImage" ]]; then
+              file=$(find "$item" -name "*.AppImage" | head -n 1)
+              echo "package: ${file}"
+              cp "${file}" "$asset_root" && echo "Copying of the asset '$asset_name' has been completed successfully." || echo "::warning::Failed to copy asset '$asset_name'"
+            else
+              echo "::warning::Unknown asset type: '$asset_name'"
             fi
-
           fi
         done
 
