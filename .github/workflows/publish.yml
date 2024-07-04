@@ -99,6 +99,10 @@ jobs:
     strategy:
       matrix: ${{fromJson(needs.prepare.outputs.matrix)}}
 
+    outputs:
+      version-full: "${{ steps.version-number.outputs.suffix-githash-version }}"
+      version-short: "${{ steps.version-number.outputs.suffix-version }}"
+
     env:
       output-name: ${{ needs.prepare.outputs.output-name }}
       project-file: ${{ needs.prepare.outputs.project-file }}
@@ -121,21 +125,21 @@ jobs:
         dotnet-version: ${{ env.dotnet-version }}
 
     - id: version-number
-      uses: finebits/github-actions/version-number@v1
+      uses: finebits/github-actions/version-number@5424db33bef4ae0d027325c568a0a36094bc229e  # v1.5.0
 
-    - uses: finebits/github-actions/pre-build/replace@v1
+    - uses: finebits/github-actions/pre-build/replace@5424db33bef4ae0d027325c568a0a36094bc229e  # v1.5.0
       with:
         file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
         placeholder: '\"<Gmail-ClientId>\"'
         value: "${{ secrets.GMAIL_CLIENT_ID }}"
 
-    - uses: finebits/github-actions/pre-build/replace@v1
+    - uses: finebits/github-actions/pre-build/replace@5424db33bef4ae0d027325c568a0a36094bc229e  # v1.5.0
       with:
         file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
         placeholder: '\"<Gmail-ClientSecret>\"'
         value: "${{ secrets.GMAIL_CLIENT_SECRET }}"
 
-    - uses: finebits/github-actions/pre-build/replace@v1
+    - uses: finebits/github-actions/pre-build/replace@5424db33bef4ae0d027325c568a0a36094bc229e  # v1.5.0
       with:
         file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
         placeholder: '\"<Outlook-ClientId>\"'
@@ -148,8 +152,37 @@ jobs:
         version-full: "${{ steps.version-number.outputs.suffix-githash-version }}"
         version-short: "${{ steps.version-number.outputs.suffix-version }}"
 
+    - name: Check AZURE secrets
+      id: check-azure-secrets
+      shell: bash
+      run: |
+        exist=true
+
+        if [ "${{ secrets.AZURE_TENANT_ID }}" == "" ]; then
+          echo "::warning::'secrets.AZURE_TENANT_ID' is empty"
+          exist=false
+        fi
+        if [ "${{ secrets.AZURE_CLIENT_ID }}" == "" ]; then
+          echo "::warning::'secrets.AZURE_CLIENT_ID' is empty"
+          exist=false
+        fi
+        if [ "${{ secrets.AZURE_CLIENT_SECRET }}" == "" ]; then
+          echo "::warning::'secrets.AZURE_CLIENT_SECRET' is empty"
+          exist=false
+        fi
+        if [ "${{ secrets.TRUSTED_SIGNING_ACCOUNT_NAME }}" == "" ]; then
+          echo "::warning::'secrets.TRUSTED_SIGNING_ACCOUNT_NAME' is empty"
+          exist=false
+        fi
+        if [ "${{ secrets.CERTIFICATE_PROFILE_NAME }}" == "" ]; then
+          echo "::warning::'secrets.CERTIFICATE_PROFILE_NAME' is empty"
+          exist=false
+        fi
+
+        echo "exist=$exist" >> GITHUB_OUTPUT
+
     - name: Sign files with Trusted Signing
-      if: matrix.os == 'windows-latest'
+      if: ${{ matrix.os == 'windows-latest' && env.apply == 'true' }}
       uses: azure/trusted-signing-action@1d39813ad911e92e52c3e8f2c5abc0fbf70f973e # v0.3.20
       with:
         azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -163,6 +196,8 @@ jobs:
         file-digest: SHA256
         timestamp-rfc3161: http://timestamp.acs.microsoft.com
         timestamp-digest: SHA256
+      env:
+        apply: ${{ steps.check-azure-secrets.outputs.exist }}
 
     - name: Upload artifacts
       uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
@@ -174,9 +209,10 @@ jobs:
         version-short: "${{ steps.version-number.outputs.suffix-version }}"
 
   appimage-package:
-    name: Pack the AppImage package
+    name: Pack AppImage
     needs: [ prepare, publish ]
     runs-on: ubuntu-latest
+    if: ${{ needs.prepare.outputs.target-os == 'all' || needs.prepare.outputs.target-os == 'linux' }}
     strategy:
       matrix: 
         include: 
@@ -189,31 +225,38 @@ jobs:
           - target-runtime: 'arm'
             artifact_pattern: '*linux-arm*'
             appimage-arch: armhf
-    if: (( needs.prepare.outputs.target-os == 'all' || needs.prepare.outputs.target-os == 'linux' ) && ( needs.prepare.outputs.target-runtime == 'all' || needs.prepare.outputs.target-runtime == matrix.target-runtime ))
-
     env:
-      artifacts-root: .artifacts
-      output-path: '.publish/output/packages/'
-      package-app-dir: packages/appimage-package/AppDir
-      prepare-script: packages/appimage-package/prepare-AppDir.sh
+      artifacts-root: './.artifacts'
+      output-path: './.publish/output/packages'
+      package-app-dir: './packages/appimage-package/AppDir'
+      prepare-script: './packages/appimage-package/prepare-AppDir.sh'
 
     steps:
+    - name: Check runtime
+      run: |
+        go_on=${{ needs.prepare.outputs.target-runtime == 'all' || needs.prepare.outputs.target-runtime == matrix.target-runtime }}
+        echo "GITHUB_ACTION_GO_PACK=$go_on" >> $GITHUB_ENV
+    
     - name: Checkout
+      if: ${{ env.GITHUB_ACTION_GO_PACK == 'true' }}
       uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
       with:
         fetch-depth: 0
         submodules: recursive
 
     - name: Setup appimagetool
-      uses: finebits/package/appimage/setup-appimagetool@5424db33bef4ae0d027325c568a0a36094bc229e  # v1.5.0
+      if: ${{ env.GITHUB_ACTION_GO_PACK == 'true' }}
+      uses: finebits/github-actions/package/appimage/setup-appimagetool@5424db33bef4ae0d027325c568a0a36094bc229e  # v1.5.0
 
     - name: Download ${{ matrix.artifact_pattern }} Artifacts
+      if: ${{ env.GITHUB_ACTION_GO_PACK == 'true' }}
       uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
       with:
         path: "${{ env.artifacts-root }}"
         pattern: "${{ matrix.artifact_pattern }}"
 
     - name: Prepare Package
+      if: ${{ env.GITHUB_ACTION_GO_PACK == 'true' }}
       shell: bash
       run: |
         item=$(find "${{ env.artifacts-root }}" -name "${{ matrix.artifact_pattern }}" | head -n 1)
@@ -221,16 +264,20 @@ jobs:
           echo "::error::Artifact '${{ matrix.artifact_pattern }}' not found."
           exit 1
         fi
-        $(bash "${{ env.prepare-script }}" "$item")
+
+        echo "$(bash "${{ env.prepare-script }}" "$item")"
+        mkdir -p "${{ env.output-path }}"
 
     - name: Pack appimagetool
-      uses: finebits/package/appimage/pack@5424db33bef4ae0d027325c568a0a36094bc229e  # v1.5.0
+      if: ${{ env.GITHUB_ACTION_GO_PACK == 'true' }}
+      uses: finebits/github-actions/package/appimage/pack@5424db33bef4ae0d027325c568a0a36094bc229e  # v1.5.0
       with:
         package-runtime: ${{ matrix.appimage-arch }}
-        package-app-dir: ${{ env.package-app-dir }}
-        package-output-dir: ${{ env.output-path }}
+        package-app-dir: "${{ env.package-app-dir }}"
+        package-output-dir: "${{ env.output-path }}"
         
     - name: Read name
+      if: ${{ env.GITHUB_ACTION_GO_PACK == 'true' }}
       id: package-name
       shell: bash
       run: |
@@ -244,13 +291,14 @@ jobs:
         echo "name=$item_name" >> $GITHUB_OUTPUT
 
     - name: Upload artifacts
+      if: ${{ env.GITHUB_ACTION_GO_PACK == 'true' }}
       uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
       with:
         name: "${{ env.artifact-name }} [${{ env.version-short }}]"
         path: "${{ env.output-path }}"
       env:
         artifact-name: "${{ steps.package-name.outputs.name }}"
-        version-short: "${{ steps.version-number.outputs.suffix-version }}"
+        version-short: "${{ needs.publish.outputs.version-short }}"
 
   upload-assets:
     name: Upload Assets
@@ -296,7 +344,7 @@ jobs:
         done
 
     - name: Upload All Assets
-      uses: finebits/github-actions/upload-release-asset@v1
+      uses: finebits/github-actions/upload-release-asset@5424db33bef4ae0d027325c568a0a36094bc229e  # v1.5.0
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         tag: ${{ github.event.release.tag_name }}
