@@ -153,6 +153,7 @@ jobs:
         version-short: "${{ steps.version-number.outputs.suffix-version }}"
 
     - name: Check AZURE secrets
+      if: ${{ matrix.os == 'windows-latest' }}
       id: check-azure-secrets
       shell: bash
       run: |
