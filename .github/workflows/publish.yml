@@ -46,6 +46,8 @@ jobs:
       status: ${{ steps.checker.outputs.status }}
       project-file: ${{ steps.publish-config-parser.outputs.project-file }}
       output-name: ${{ steps.publish-config-parser.outputs.output-name }}
+      target-os: ${{ steps.inputs.outputs.target-os }}
+      target-runtime: ${{ steps.inputs.outputs.target-runtime }}
 
     steps:
     - name: Checkout
@@ -104,7 +106,7 @@ jobs:
       framework: ${{ matrix.framework }}
       runtime: ${{ matrix.runtime }}
       publish-options: ${{ matrix.options }}
-      output-path: 'publish/output/${{ matrix.configuration }}/${{ matrix.framework }}/${{ matrix.runtime }}'
+      output-path: '.publish/output/bin/${{ matrix.configuration }}/${{ matrix.framework }}/${{ matrix.runtime }}'
 
     steps:
     - name: Checkout
@@ -165,23 +167,102 @@ jobs:
     - name: Upload artifacts
       uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
       with:
-        name: "${{ env.output-name }}-${{ env.runtime }} [${{ env.version-short }}]"
+        name: "${{ env.artifact-name }}-${{ env.runtime }} [${{ env.version-short }}]"
         path: "${{ env.output-path }}"
       env:
         artifact-name: "${{ env.output-name }}"
         version-short: "${{ steps.version-number.outputs.suffix-version }}"
 
+  appimage-package:
+    name: Pack the AppImage package
+    needs: [ prepare, publish ]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: 
+        include: 
+          - target-runtime: 'x64'
+            artifact_pattern: '*linux-x64*'
+            appimage-arch: x86_64
+          - target-runtime: 'arm64'
+            artifact_pattern: '*linux-arm64*'
+            appimage-arch: aarch64
+          - target-runtime: 'arm'
+            artifact_pattern: '*linux-arm*'
+            appimage-arch: armhf
+    if: (( needs.prepare.outputs.target-os == 'all' || needs.prepare.outputs.target-os == 'linux' ) && ( needs.prepare.outputs.target-runtime == 'all' || needs.prepare.outputs.target-runtime == matrix.target-runtime ))
+
+    env:
+      artifacts-root: .artifacts
+      output-path: '.publish/output/packages/'
+      package-app-dir: packages/appimage-package/AppDir
+      prepare-script: packages/appimage-package/prepare-AppDir.sh
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+      with:
+        fetch-depth: 0
+        submodules: recursive
+
+    - name: Setup appimagetool
+      uses: finebits/package/appimage/setup-appimagetool@5424db33bef4ae0d027325c568a0a36094bc229e  # v1.5.0
+
+    - name: Download ${{ matrix.artifact_pattern }} Artifacts
+      uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+      with:
+        path: "${{ env.artifacts-root }}"
+        pattern: "${{ matrix.artifact_pattern }}"
+
+    - name: Prepare Package
+      shell: bash
+      run: |
+        item=$(find "${{ env.artifacts-root }}" -name "${{ matrix.artifact_pattern }}" | head -n 1)
+        if [ ! -d "$item" ] ; then
+          echo "::error::Artifact '${{ matrix.artifact_pattern }}' not found."
+          exit 1
+        fi
+        $(bash "${{ env.prepare-script }}" "$item")
+
+    - name: Pack appimagetool
+      uses: finebits/package/appimage/pack@5424db33bef4ae0d027325c568a0a36094bc229e  # v1.5.0
+      with:
+        package-runtime: ${{ matrix.appimage-arch }}
+        package-app-dir: ${{ env.package-app-dir }}
+        package-output-dir: ${{ env.output-path }}
+        
+    - name: Read name
+      id: package-name
+      shell: bash
+      run: |
+        item=$(find "${{ env.output-path }}" -name "*.AppImage" | head -n 1)
+        if [ ! -f "$item" ] ; then
+          echo "::error::AppImage Pacakge '$item' not found."
+          exit 1
+        fi
+
+        item_name="${item##*/}"
+        echo "name=$item_name" >> $GITHUB_OUTPUT
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3
+      with:
+        name: "${{ env.artifact-name }} [${{ env.version-short }}]"
+        path: "${{ env.output-path }}"
+      env:
+        artifact-name: "${{ steps.package-name.outputs.name }}"
+        version-short: "${{ steps.version-number.outputs.suffix-version }}"
+
   upload-assets:
     name: Upload Assets
     if: github.event_name == 'release'
-    needs: publish
+    needs: [ publish, appimage-package ]
     runs-on: ubuntu-latest
     permissions:
       contents: write
 
     env:
-      artifacts-root: artifacts
-      assets-root: assets
+      artifacts-root: .artifacts
+      assets-root: .assets
 
     steps:
     - name: Download All Artifacts
@@ -205,8 +286,10 @@ jobs:
 
             if [[ "$asset_name" == *"-osx-"* || "$asset_name" == *"-linux-"* ]]; then
               tar -czf "$asset_root/${asset_name}.tar.gz" -C "$item" . && echo "Archiving of the asset '$asset_name' has been completed successfully." || echo "::warning::Failed to archive asset '$asset_name'"
-            else
+            elif [[ "$asset_name" == *"-win-"* ]]; then
               zip -rjq "$asset_root/${asset_name}.zip" "$item" && echo "Archiving of the asset '$asset_name' has been completed successfully." || echo "::warning::Failed to archive asset '$asset_name'"
+            elif [[ "$asset_name" == *".AppIamge" ]]; then
+              cp "$item/*.AppImage" "$asset_root"
             fi
 
           fi
