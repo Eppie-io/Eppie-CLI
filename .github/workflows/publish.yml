@@ -125,21 +125,21 @@ jobs:
         dotnet-version: ${{ env.dotnet-version }}
 
     - id: version-number
-      uses: finebits/github-actions/version-number@5424db33bef4ae0d027325c568a0a36094bc229e  # v1.5.0
+      uses: finebits/github-actions/version-number@780c350dba7f1ddc4ec0e648a059234f37c748ee  # v1.5.1
 
-    - uses: finebits/github-actions/pre-build/replace@5424db33bef4ae0d027325c568a0a36094bc229e  # v1.5.0
+    - uses: finebits/github-actions/pre-build/replace@780c350dba7f1ddc4ec0e648a059234f37c748ee  # v1.5.1
       with:
         file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
         placeholder: '\"<Gmail-ClientId>\"'
         value: "${{ secrets.GMAIL_CLIENT_ID }}"
 
-    - uses: finebits/github-actions/pre-build/replace@5424db33bef4ae0d027325c568a0a36094bc229e  # v1.5.0
+    - uses: finebits/github-actions/pre-build/replace@780c350dba7f1ddc4ec0e648a059234f37c748ee  # v1.5.1
       with:
         file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
         placeholder: '\"<Gmail-ClientSecret>\"'
         value: "${{ secrets.GMAIL_CLIENT_SECRET }}"
 
-    - uses: finebits/github-actions/pre-build/replace@5424db33bef4ae0d027325c568a0a36094bc229e  # v1.5.0
+    - uses: finebits/github-actions/pre-build/replace@780c350dba7f1ddc4ec0e648a059234f37c748ee  # v1.5.1
       with:
         file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
         placeholder: '\"<Outlook-ClientId>\"'
@@ -247,7 +247,7 @@ jobs:
 
     - name: Setup appimagetool
       if: ${{ env.GITHUB_ACTION_GO_PACK == 'true' }}
-      uses: finebits/github-actions/package/appimage/setup-appimagetool@5424db33bef4ae0d027325c568a0a36094bc229e  # v1.5.0
+      uses: finebits/github-actions/package/appimage/setup-appimagetool@780c350dba7f1ddc4ec0e648a059234f37c748ee  # v1.5.1
 
     - name: Download ${{ matrix.artifact_pattern }} Artifacts
       if: ${{ env.GITHUB_ACTION_GO_PACK == 'true' }}
@@ -271,7 +271,7 @@ jobs:
 
     - name: Pack appimagetool
       if: ${{ env.GITHUB_ACTION_GO_PACK == 'true' }}
-      uses: finebits/github-actions/package/appimage/pack@5424db33bef4ae0d027325c568a0a36094bc229e  # v1.5.0
+      uses: finebits/github-actions/package/appimage/pack@780c350dba7f1ddc4ec0e648a059234f37c748ee  # v1.5.1
       with:
         package-runtime: ${{ matrix.appimage-arch }}
         package-app-dir: "${{ env.package-app-dir }}"
@@ -348,7 +348,7 @@ jobs:
         done
 
     - name: Upload All Assets
-      uses: finebits/github-actions/upload-release-asset@5424db33bef4ae0d027325c568a0a36094bc229e  # v1.5.0
+      uses: finebits/github-actions/upload-release-asset@780c350dba7f1ddc4ec0e648a059234f37c748ee  # v1.5.1
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         tag: ${{ github.event.release.tag_name }}
