@@ -166,6 +166,10 @@ Launch:
 
   Shows details of a specific message.
 
+- **`sync-folder`**
+
+  Sync messages in specific account folder.
+
 - **`send`**
 
   Sends a message.
