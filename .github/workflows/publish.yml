@@ -180,10 +180,10 @@ jobs:
           exist=false
         fi
 
-        echo "secrets-exist=$exist" >> GITHUB_OUTPUT
+        echo "exist=$exist" >> $GITHUB_OUTPUT
 
     - name: Sign files with Trusted Signing
-      if: ${{ matrix.os == 'windows-latest' && steps.check-azure-secrets.outputs.secrets-exist == 'true' }}
+      if: ${{ matrix.os == 'windows-latest' && env.apply == 'true' }}
       uses: azure/trusted-signing-action@1d39813ad911e92e52c3e8f2c5abc0fbf70f973e # v0.3.20
       with:
         azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -197,6 +197,8 @@ jobs:
         file-digest: SHA256
         timestamp-rfc3161: http://timestamp.acs.microsoft.com
         timestamp-digest: SHA256
+      env:
+        apply: ${{ steps.check-azure-secrets.outputs.exist }}
 
     - name: Upload artifacts
       uses: actions/upload-artifact@0b2256b8c012f0828dc542b3febcab082c67f72b # v4.3.4
