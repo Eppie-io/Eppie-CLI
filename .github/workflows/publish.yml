@@ -180,7 +180,7 @@ jobs:
           exist=false
         fi
 
-        echo "secrets-exist=$exist" >> GITHUB_OUTPUT
+        echo "secrets-exist=$exist" >> $GITHUB_OUTPUT
 
     - name: Sign files with Trusted Signing
       if: ${{ matrix.os == 'windows-latest' && steps.check-azure-secrets.outputs.secrets-exist == 'true' }}
