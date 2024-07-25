@@ -49,10 +49,12 @@ namespace Eppie.CLI.Options
         {
             return new GmailAuthOptions()
             {
-                // Locally, you can set the secrets by running the commands from the project directory:
+                // For Eppie client launching in 'Development' environment,
+                // you can set the secrets by running the commands from the project directory:
                 //      > dotnet user-secrets set "Authorization:Gmail:ClientId" "<client-id>"
                 //      > dotnet user-secrets set "Authorization:Gmail:ClientSecret" "<client-secret>"
-                // Or run eppie client with arguments:
+                //
+                // Or run eppie client in any environment with arguments:
                 // --Authorization:Gmail:ClientId="<client-id>" --Authorization:Gmail:ClientSecret="<client-secret>"
 
                 ClientId = "<Gmail-ClientId>",
@@ -80,9 +82,10 @@ namespace Eppie.CLI.Options
         {
             return new OutlookAuthOptions()
             {
-                // Locally, you can set the secrets by running the command from the project directory:
+                // For Eppie client launching in 'Development' environment,
+                // you can set the secret by running the command from the project directory:
                 //      > dotnet user-secrets set "Authorization:Outlook:ClientId" "<client-id>"
-                // Or run eppie client with arguments: --Authorization:Outlook:ClientId="<client-id>"
+                // Or run eppie client in any environment with the argument: --Authorization:Outlook:ClientId="<client-id>"
 
                 ClientId = "<Outlook-ClientId>",
             };
