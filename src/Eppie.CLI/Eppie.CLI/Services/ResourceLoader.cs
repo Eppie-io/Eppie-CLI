@@ -91,11 +91,37 @@ namespace Eppie.CLI.Services
             private string? _askMailboxPassword;
             internal string AskMailboxPassword => _askMailboxPassword ??= _localizer.LoadString(GetStringResourceName());
 
-            private string? _askIMAPServer;
-            internal string AskIMAPServer => _askIMAPServer ??= _localizer.LoadString(GetStringResourceName());
+            private string GetServerAddressQuestionText(string resourceName, string? defaultServer)
+            {
+                string defaultServerTemplate = string.Empty;
 
-            private string? _askSMTPServer;
-            internal string AskSMTPServer => _askSMTPServer ??= _localizer.LoadString(GetStringResourceName());
+                if (!string.IsNullOrEmpty(defaultServer))
+                {
+                    defaultServerTemplate = _localizer.LoadFormattedString(GetStringResourceName(category: "Message", name: "DefaultServerTemplate"), defaultServer);
+                }
+
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Message", name: resourceName), defaultServerTemplate);
+            }
+
+            internal string GetSMTPServerQuestionText(string? defaultServer)
+            {
+                return GetServerAddressQuestionText("AskSMTPServer", defaultServer);
+            }
+
+            internal string GetIMAPServerQuestionText(string defaultServer)
+            {
+                return GetServerAddressQuestionText("AskIMAPServer", defaultServer);
+            }
+
+            internal string GetSMTPPortQuestionText(int defaultPort)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Message", name: "AskSMTPPort"), defaultPort);
+            }
+
+            internal string GetIMAPPortQuestionText(int defaultPort)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Message", name: "AskIMAPPort"), defaultPort);
+            }
 
             private string? _headerAccountList;
             internal string HeaderAccountList => _headerAccountList ??= _localizer.LoadString(GetStringResourceName());

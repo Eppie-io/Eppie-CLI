@@ -199,12 +199,14 @@
     <comment>This message prompts the user to enter the service account password.</comment>
   </data>
   <data name="Message.AskIMAPServer" xml:space="preserve">
-    <value>Enter IMAP server: </value>
-    <comment>This message prompts the user to enter the IMAP server address.</comment>
+    <value>Enter IMAP server{0}: </value>
+    <comment>This message prompts the user to enter the IMAP server address.
+{0} is a parameter that can contain a default parameter as "Message.DefaultServerTemplate".</comment>
   </data>
   <data name="Message.AskSMTPServer" xml:space="preserve">
-    <value>Enter SMTP server: </value>
-    <comment>This message prompts the user to enter the SMTP server address.</comment>
+    <value>Enter SMTP server{0}: </value>
+    <comment>This message prompts the user to enter the SMTP server address.
+{0} is a parameter that can contain a default parameter as "Message.DefaultServerTemplate".</comment>
   </data>
   <data name="Menu.AddAccountDescription" xml:space="preserve">
     <value>Add a service account.</value>
@@ -451,5 +453,20 @@
   <data name="Message.AskTwoFactorCode" xml:space="preserve">
     <value>Enter two-factor code: </value>
     <comment>This message asks the user to enter the two-factor code.</comment>
+  </data>
+  <data name="Message.AskIMAPPort" xml:space="preserve">
+    <value>IMAP Port (default is {0}): </value>
+    <comment>This message prompts the user to enter the IMAP server port.
+{0} is a parameter containing the default value.</comment>
+  </data>
+  <data name="Message.AskSMTPPort" xml:space="preserve">
+    <value>SMTP Port (default is {0}): </value>
+    <comment>This message prompts the user to enter the SMTP server port.
+{0} is a parameter containing the default value.</comment>
+  </data>
+  <data name="Message.DefaultServerTemplate" xml:space="preserve">
+    <value> (default is {0})</value>
+    <comment>This is the text template for the default server address.
+{0} is a parameter containing the default server address.</comment>
   </data>
 </root>

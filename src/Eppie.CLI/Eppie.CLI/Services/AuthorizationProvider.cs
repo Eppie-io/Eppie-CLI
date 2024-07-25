@@ -18,7 +18,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-using Eppie.CLI.Entities;
+using Eppie.CLI.Common;
 using Eppie.CLI.Options;
 using Eppie.CLI.Tools;
 
@@ -43,16 +43,16 @@ namespace Eppie.CLI.Services
         private readonly ILogger<AuthorizationProvider> _logger = logger;
         private readonly IServiceProvider _serviceProvider = serviceProvider;
 
-        internal IAuthorizationClient CreateAuthorizationClient(MailService mailService)
+        internal IAuthorizationClient CreateAuthorizationClient(MailServer mailServer)
         {
             _logger.LogMethodCall();
-            return _serviceProvider.GetRequiredKeyedService<IAuthorizationClient>(mailService);
+            return _serviceProvider.GetRequiredKeyedService<IAuthorizationClient>(mailServer);
         }
 
-        internal IRefreshable CreateRefreshTokenClient(MailService mailService)
+        internal IRefreshable CreateRefreshTokenClient(MailServer mailServer)
         {
             _logger.LogMethodCall();
-            return _serviceProvider.GetRequiredKeyedService<IRefreshable>(mailService);
+            return _serviceProvider.GetRequiredKeyedService<IRefreshable>(mailServer);
         }
     }
 
@@ -67,10 +67,10 @@ namespace Eppie.CLI.Services
                           .AddSingleton<ITokenRefresher, TokenRefresher>()
                           .AddSingleton<IWebBrowserLauncher, WebBrowserLauncher>()
                           .AddTransient<IAuthenticationBroker, DesktopAuthenticationBroker>()
-                          .AddKeyedTransient<IAuthorizationClient>(MailService.Gmail, (services, key) => CreateGoogleAuthClient(services))
-                          .AddKeyedTransient<IAuthorizationClient>(MailService.Outlook, (services, key) => CreateOutlookAuthClient(services))
-                          .AddKeyedTransient<IRefreshable>(MailService.Gmail, (services, key) => CreateGoogleAuthClient(services))
-                          .AddKeyedTransient<IRefreshable>(MailService.Outlook, (services, key) => CreateOutlookAuthClient(services))
+                          .AddKeyedTransient<IAuthorizationClient>(MailServer.Gmail, (services, key) => CreateGoogleAuthClient(services))
+                          .AddKeyedTransient<IAuthorizationClient>(MailServer.Outlook, (services, key) => CreateOutlookAuthClient(services))
+                          .AddKeyedTransient<IRefreshable>(MailServer.Gmail, (services, key) => CreateGoogleAuthClient(services))
+                          .AddKeyedTransient<IRefreshable>(MailServer.Outlook, (services, key) => CreateOutlookAuthClient(services))
                 : throw new InvalidOperationException("DesktopAuthenticationBroker is not supported");
         }
 

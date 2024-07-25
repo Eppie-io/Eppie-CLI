@@ -68,6 +68,7 @@ namespace Eppie.CLI
             ArgumentNullException.ThrowIfNull(ctx);
 
             services.ConfigureOptions<ConsoleOptions>(ctx.Configuration, new BinderOptions { BindNonPublicProperties = true });
+            services.ConfigureOptions<MailOptions>(ctx.Configuration, new BinderOptions { BindNonPublicProperties = true });
             services.ConfigureOptions<AuthorizationOptions>(ctx.Configuration, new BinderOptions { BindNonPublicProperties = true });
 
             services.AddLocalization()
