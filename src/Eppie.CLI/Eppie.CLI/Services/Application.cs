@@ -206,14 +206,17 @@ namespace Eppie.CLI.Services
 
             if (accounts is null || accounts.Count == 0)
             {
+                _logger.LogDebug("Print Account: There are no accounts yet.");
                 Console.WriteLine(_resourceLoader.Strings.EmptyAccountList);
                 return;
             }
 
             Console.WriteLine(_resourceLoader.Strings.HeaderAccountList);
+            int i = 0;
             foreach (Account account in accounts)
             {
-                Console.WriteLine($"{account.Id}. {account.Email.Address}");
+                _logger.LogDebug("Print Account: {Id}", account.Id);
+                Console.WriteLine($"{++i}. {account.Email.Address}");
             }
 
             Console.WriteLine();
@@ -223,54 +226,34 @@ namespace Eppie.CLI.Services
         {
             ArgumentNullException.ThrowIfNull(message);
 
-            var msg = new
-            {
-                message.Pk,
-                message.Id,
-
-                message.Date,
-                Folder = message.Folder.FullName,
-                From = string.Join(';', message.From),
-                To = string.Join(';', message.To),
-                Cc = string.Join(';', message.Cc),
-                Bcc = string.Join(';', message.Bcc),
-
-                message.Subject,
-                message.PreviewText,
-
-                TextBodyLength = message.TextBody?.Length,
-                HtmlBodyLength = message.HtmlBody?.Length,
-
-                Attachments = message.Attachments.Count
-            };
-
-            _logger.LogDebug("Print message {@Message}", msg);
+            _logger.LogDebug("Print message: Id - {Id}, Key - {Pk}", message.Id, message.Pk);
 
             if (compact)
             {
                 string to = message.To.FirstOrDefault()?.Address ?? string.Empty;
                 string from = message.From.FirstOrDefault()?.Address ?? string.Empty;
 
-                Console.WriteLine(_resourceLoader.Strings.GetMessageDetailsText(msg.Id, msg.Pk, msg.Date, Truncate(to), Truncate(from), msg.Folder, msg.Subject));
+                Console.WriteLine(_resourceLoader.Strings.GetMessageDetailsText(message.Id, message.Pk, message.Date, Truncate(to), Truncate(from),
+                                                                                message.Folder.FullName, message.Subject));
             }
             else
             {
                 Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine(_resourceLoader.Strings.GetMessageIDPropertyText(msg.Id));
-                Console.WriteLine(_resourceLoader.Strings.GetMessagePKPropertyText(msg.Pk));
-                Console.WriteLine(_resourceLoader.Strings.GetMessageDatePropertyText(msg.Date));
-                Console.WriteLine(_resourceLoader.Strings.GetMessageToPropertyText(msg.To));
-                Console.WriteLine(_resourceLoader.Strings.GetMessageFromPropertyText(msg.From));
-                Console.WriteLine(_resourceLoader.Strings.GetMessageCcPropertyText(msg.Cc));
-                Console.WriteLine(_resourceLoader.Strings.GetMessageBccPropertyText(msg.Bcc));
-                Console.WriteLine(_resourceLoader.Strings.GetMessageFolderText(msg.Folder));
-                Console.WriteLine(_resourceLoader.Strings.GetMessageSubjectPropertyText(msg.Subject));
+                Console.WriteLine(_resourceLoader.Strings.GetMessageIDPropertyText(message.Id));
+                Console.WriteLine(_resourceLoader.Strings.GetMessagePKPropertyText(message.Pk));
+                Console.WriteLine(_resourceLoader.Strings.GetMessageDatePropertyText(message.Date));
+                Console.WriteLine(_resourceLoader.Strings.GetMessageToPropertyText(string.Join(';', message.To)));
+                Console.WriteLine(_resourceLoader.Strings.GetMessageFromPropertyText(string.Join(';', message.From)));
+                Console.WriteLine(_resourceLoader.Strings.GetMessageCcPropertyText(string.Join(';', message.Cc)));
+                Console.WriteLine(_resourceLoader.Strings.GetMessageBccPropertyText(string.Join(';', message.Bcc)));
+                Console.WriteLine(_resourceLoader.Strings.GetMessageFolderText(message.Folder.FullName));
+                Console.WriteLine(_resourceLoader.Strings.GetMessageSubjectPropertyText(message.Subject));
 
                 Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine(message.TextBody ?? message.HtmlBody ?? string.Empty);
 
                 Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine(_resourceLoader.Strings.GetMessageAttachmentsCountText(msg.Attachments));
+                Console.WriteLine(_resourceLoader.Strings.GetMessageAttachmentsCountText(message.Attachments.Count));
 
                 Console.ResetColor();
             }
@@ -467,19 +450,7 @@ namespace Eppie.CLI.Services
         {
             ArgumentNullException.ThrowIfNull(contact);
 
-            var contactDetails = new
-            {
-                contact.Id,
-                contact.Email.Address,
-                contact.EmailId,
-                contact.FullName,
-                contact.HasAvatar,
-                contact.AvatarInfoId,
-                contact.UnreadCount,
-                contact.LastMessageDataId,
-            };
-
-            _logger.LogDebug("Print contact {@Contact}", contactDetails);
+            _logger.LogDebug("Print contact: {Id}", contact.Id);
 
             Console.WriteLine(_resourceLoader.Strings.GetContactDetailsText(contact.Id, contact.Email.Address, contact.FullName, contact.UnreadCount));
         }
