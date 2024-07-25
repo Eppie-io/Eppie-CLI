@@ -19,11 +19,14 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
+using Eppie.CLI.Common;
 using Eppie.CLI.Exceptions;
+using Eppie.CLI.Options;
 using Eppie.CLI.Tools;
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 using Tuvi.Core.Entities;
 using Tuvi.Toolkit.Cli;
@@ -34,11 +37,13 @@ namespace Eppie.CLI.Services
     internal class Application(
        ILogger<Application> logger,
        IHostApplicationLifetime lifetime,
+       IOptions<MailOptions> mailOptions,
        ResourceLoader resourceLoader)
     {
         private readonly ResourceLoader _resourceLoader = resourceLoader;
         private readonly ILogger<Application> _logger = logger;
         private readonly IHostApplicationLifetime _lifetime = lifetime;
+        private readonly IOptions<MailOptions> _mailOptions = mailOptions;
 
         internal void StopApplication()
         {
@@ -95,43 +100,58 @@ namespace Eppie.CLI.Services
             return ReadSecretValue(_resourceLoader.Strings.AskMailboxPassword);
         }
 
-        internal string AskIMAPServer()
+        internal string AskIMAPServer(MailServer mailServer)
         {
             _logger.LogMethodCall();
 
-            return ReadValue(_resourceLoader.Strings.AskIMAPServer);
+            MailServerConfiguration config = GetMailServerConfiguration(mailServer);
+            return AskQuestionWithDefault(_resourceLoader.Strings.GetIMAPServerQuestionText(config.IMAP), config.IMAP);
         }
 
-        internal int AskIMAPServerPort(int defaultPort)
+        internal string AskSMTPServer(MailServer mailServer)
         {
             _logger.LogMethodCall();
 
-            //ToDo: Move string to resources
-            return AskServerPort($"IMAP Port (default is {defaultPort}): ", defaultPort);
+            MailServerConfiguration config = GetMailServerConfiguration(mailServer);
+            return AskQuestionWithDefault(_resourceLoader.Strings.GetSMTPServerQuestionText(config.SMTP), config.SMTP);
         }
 
-        internal int AskSMTPServerPort(int defaultPort)
+        internal int AskIMAPServerPort(MailServer mailServer)
         {
             _logger.LogMethodCall();
 
-            //ToDo: Move string to resources
-            return AskServerPort($"SMTP Port (default is {defaultPort}): ", defaultPort);
+            MailServerConfiguration config = GetMailServerConfiguration(mailServer);
+            return AskQuestionWithDefault(_resourceLoader.Strings.GetIMAPPortQuestionText(config.IMAPPort), config.IMAPPort);
         }
 
-        internal int AskServerPort(string text, int defaultPort)
+        internal int AskSMTPServerPort(MailServer mailServer)
+        {
+            _logger.LogMethodCall();
+
+            MailServerConfiguration config = GetMailServerConfiguration(mailServer);
+            return AskQuestionWithDefault(_resourceLoader.Strings.GetSMTPPortQuestionText(config.SMTPPort), config.SMTPPort);
+        }
+
+        internal int AskQuestionWithDefault(string text, int defaultValue)
         {
             _logger.LogMethodCall();
 
             return int.TryParse(ReadValue(text), out int port) && port > 0
                 ? port
-                : defaultPort;
+                : defaultValue;
         }
 
-        internal string AskSMTPServer()
+        internal string AskQuestionWithDefault(string text, string defaultValue)
         {
             _logger.LogMethodCall();
 
-            return ReadValue(_resourceLoader.Strings.AskSMTPServer);
+            string answer = ReadValue(text);
+            return string.IsNullOrEmpty(answer) ? defaultValue : answer;
+        }
+
+        private MailServerConfiguration GetMailServerConfiguration(MailServer mailServer)
+        {
+            return _mailOptions.Value.Servers.GetValueOrDefault(mailServer) ?? new MailServerConfiguration();
         }
 
         internal string AskSeedPhrase()

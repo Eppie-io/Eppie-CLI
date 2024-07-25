@@ -16,9 +16,9 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
-namespace Eppie.CLI.Entities
+namespace Eppie.CLI.Common
 {
-    internal enum MailService
+    internal enum MailServer
     {
         Other,
         Gmail,

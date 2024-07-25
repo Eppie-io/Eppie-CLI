@@ -18,7 +18,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-using Eppie.CLI.Entities;
+using Eppie.CLI.Common;
 using Eppie.CLI.Tools;
 
 using Finebits.Authorization.OAuth2.Abstractions;
@@ -45,11 +45,11 @@ namespace Eppie.CLI.Services
 
             _logger.LogMethodCall();
 
-            MailService mailService = GetMailService(mailServiceName);
+            MailServer mailServer = GetMailServer(mailServiceName);
 
-            IRefreshable refresher = _authorizationProvider.CreateRefreshTokenClient(mailService);
+            IRefreshable refresher = _authorizationProvider.CreateRefreshTokenClient(mailServer);
 
-            _logger.LogDebug("Refreshing token [hash code: {RefreshTokenHash}] (mail service: {MailService})", refreshToken.GetHashCode(StringComparison.Ordinal), mailService);
+            _logger.LogDebug("Refreshing token [hash code: {RefreshTokenHash}] (mail service: {MailServer})", refreshToken.GetHashCode(StringComparison.Ordinal), mailServer);
             AuthorizationToken freshToken = await refresher.RefreshTokenAsync(CreateToken(refreshToken), cancellationToken).ConfigureAwait(false);
 
             return new AuthToken()
@@ -60,10 +60,10 @@ namespace Eppie.CLI.Services
             };
         }
 
-        private static MailService GetMailService(string mailServiceName)
+        private static MailServer GetMailServer(string mailServerName)
         {
-            return Enum.TryParse(mailServiceName, out MailService mailService) && mailService != MailService.Other
-                ? mailService
+            return Enum.TryParse(mailServerName, out MailServer mailServer) && mailServer != MailServer.Other
+                ? mailServer
                 : throw new AuthenticationException("Unsupported Mail service");
         }
 
