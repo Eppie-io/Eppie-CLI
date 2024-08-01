@@ -184,7 +184,7 @@ jobs:
 
     - name: Sign files with Trusted Signing
       if: ${{ matrix.os == 'windows-latest' && steps.check-azure-secrets.outputs.secrets-exist == 'true' }}
-      uses: azure/trusted-signing-action@1d39813ad911e92e52c3e8f2c5abc0fbf70f973e # v0.3.20
+      uses: azure/trusted-signing-action@acc6d03023f35c22bfc9ac05d2981db9dc008330 # v0.4.0
       with:
         azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
