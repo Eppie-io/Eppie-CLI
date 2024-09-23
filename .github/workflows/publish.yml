@@ -205,7 +205,7 @@ jobs:
         path: "${{ env.output-path }}"
       env:
         artifact-name: "${{ env.output-name }}"
-        version-short: "${{ steps.version-number.outputs.suffix-version }}"
+        version-short: "${{ steps.version-number.outputs.preset-suffix }}"
 
   appimage-package:
     name: Pack AppImage
