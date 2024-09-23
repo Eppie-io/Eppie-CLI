@@ -100,8 +100,8 @@ jobs:
       matrix: ${{fromJson(needs.prepare.outputs.matrix)}}
 
     outputs:
-      version-full: "${{ steps.version-number.outputs.suffix-githash-version }}"
-      version-short: "${{ steps.version-number.outputs.suffix-version }}"
+      version-full: "${{ steps.version-number.outputs.preset-suffix-githash }}"
+      version-short: "${{ steps.version-number.outputs.preset-suffix }}"
 
     env:
       output-name: ${{ needs.prepare.outputs.output-name }}
@@ -125,21 +125,21 @@ jobs:
         dotnet-version: ${{ env.dotnet-version }}
 
     - id: version-number
-      uses: finebits/github-actions/version-number@780c350dba7f1ddc4ec0e648a059234f37c748ee  # v1.5.1
+      uses: finebits/github-actions/toolset/find-out-version@4a126d80a11c5fdc83ce884d3d23dffb30bc4495 # v2.0.0
 
-    - uses: finebits/github-actions/pre-build/replace@780c350dba7f1ddc4ec0e648a059234f37c748ee  # v1.5.1
+    - uses: finebits/github-actions/toolset/file/replace-text@4a126d80a11c5fdc83ce884d3d23dffb30bc4495 # v2.0.0
       with:
         file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
         placeholder: '\"<Gmail-ClientId>\"'
         value: "${{ secrets.GMAIL_CLIENT_ID }}"
 
-    - uses: finebits/github-actions/pre-build/replace@780c350dba7f1ddc4ec0e648a059234f37c748ee  # v1.5.1
+    - uses: finebits/github-actions/file/replace-text@4a126d80a11c5fdc83ce884d3d23dffb30bc4495 # v2.0.0
       with:
         file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
         placeholder: '\"<Gmail-ClientSecret>\"'
         value: "${{ secrets.GMAIL_CLIENT_SECRET }}"
 
-    - uses: finebits/github-actions/pre-build/replace@780c350dba7f1ddc4ec0e648a059234f37c748ee  # v1.5.1
+    - uses: finebits/github-actions/file/replace-text@4a126d80a11c5fdc83ce884d3d23dffb30bc4495 # v2.0.0
       with:
         file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
         placeholder: '\"<Outlook-ClientId>\"'
@@ -149,8 +149,8 @@ jobs:
       run: |
         dotnet publish "${{ env.project-file }}" --output "${{ env.output-path }}" --configuration "${{ env.configuration }}" --framework "${{ env.framework }}" --runtime "${{ env.runtime }}" --property:Version="${{ env.version-full }}" ${{ env.publish-options }} 
       env:
-        version-full: "${{ steps.version-number.outputs.suffix-githash-version }}"
-        version-short: "${{ steps.version-number.outputs.suffix-version }}"
+        version-full: "${{ steps.version-number.outputs.preset-suffix-githash }}"
+        version-short: "${{ steps.version-number.outputs.preset-suffix }}"
 
     - name: Check AZURE secrets
       if: ${{ matrix.os == 'windows-latest' }}
@@ -245,7 +245,7 @@ jobs:
 
     - name: Setup appimagetool
       if: ${{ env.GITHUB_ACTION_GO_PACK == 'true' }}
-      uses: finebits/github-actions/package/appimage/setup-appimagetool@780c350dba7f1ddc4ec0e648a059234f37c748ee  # v1.5.1
+      uses: finebits/github-actions/package/appimage/setup-appimagetool@4a126d80a11c5fdc83ce884d3d23dffb30bc4495 # v2.0.0
 
     - name: Download ${{ matrix.artifact_pattern }} Artifacts
       if: ${{ env.GITHUB_ACTION_GO_PACK == 'true' }}
@@ -269,7 +269,7 @@ jobs:
 
     - name: Pack appimagetool
       if: ${{ env.GITHUB_ACTION_GO_PACK == 'true' }}
-      uses: finebits/github-actions/package/appimage/pack@780c350dba7f1ddc4ec0e648a059234f37c748ee  # v1.5.1
+      uses: finebits/github-actions/package/appimage/pack@4a126d80a11c5fdc83ce884d3d23dffb30bc4495 # v2.0.0
       with:
         package-runtime: ${{ matrix.appimage-arch }}
         package-app-dir: "${{ env.package-app-dir }}"
@@ -346,7 +346,7 @@ jobs:
         done
 
     - name: Upload All Assets
-      uses: finebits/github-actions/upload-release-asset@780c350dba7f1ddc4ec0e648a059234f37c748ee  # v1.5.1
+      uses: finebits/github-actions/toolset/github/upload-release-asset@4a126d80a11c5fdc83ce884d3d23dffb30bc4495 # v2.0.0
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         tag: ${{ github.event.release.tag_name }}
