@@ -1,13 +1,14 @@
 # Command line client for Eppie &#8212; an encrypted p2p email
 
-[![LicenseBadge](https://img.shields.io/github/license/Eppie-io/Eppie-CLI.svg)](https://raw.githubusercontent.com/Eppie-io/Eppie-CLI/main/LICENSE)
-![WindowsBadge](https://img.shields.io/badge/Windows-blue?logo=windows)
-![LinuxBadge](https://img.shields.io/badge/Linux-gold?logo=linux&logoColor=black)
-![macOSBadge](https://img.shields.io/badge/macOS-black?logo=apple)
-[![FrameworkBadge](https://img.shields.io/badge/dynamic/xml?label=framework&query=//TargetFramework[1]&url=https://raw.githubusercontent.com/Eppie-io/Eppie-CLI/main/src/Eppie.CLI/Eppie.CLI/Eppie.CLI.csproj)](https://dotnet.microsoft.com/en-us/download/dotnet)
-[![Build and Test](https://img.shields.io/github/actions/workflow/status/eppie-io/eppie-cli/build-and-test.yml?logo=github&branch=main&event=push)](https://github.com/Eppie-io/Eppie-CLI/actions/workflows/build-and-test.yml?query=branch%3Amain+event%3Apush)
-[![CrowdinBadge](https://badges.crowdin.net/e/8fee200a40ee70ffd3fa6b7d8d23deee/localized.svg)](https://eppie.crowdin.com/eppie)
-[![Release](https://img.shields.io/github/v/release/Eppie-io/Eppie-CLI)](https://github.com/Eppie-io/Eppie-CLI/releases/latest)
+[![LicenseBadge][license-badge]](https://raw.githubusercontent.com/Eppie-io/Eppie-CLI/main/LICENSE)
+![WindowsBadge][windows-badge]
+![LinuxBadge][linux-badge]
+![macOSBadge][mac-badge]
+[![FrameworkBadge][framework-badge]](https://dotnet.microsoft.com/en-us/download/dotnet)
+[![Build and Test][build-workflow-badge]](https://github.com/Eppie-io/Eppie-CLI/actions/workflows/build-and-test.yml?query=branch%3Amain+event%3Apush)
+[![CodeQL][codeql-workflow-badge]](https://github.com/Eppie-io/Eppie-CLI/actions/workflows/codeql.yml?query=branch%3Amain+event%3Aschedule)
+[![CrowdinBadge][crowdin-badge]](https://eppie.crowdin.com/eppie)
+[![Release][release-badge]](https://github.com/Eppie-io/Eppie-CLI/releases/latest)
 
 ## Intro
 
@@ -210,7 +211,7 @@ As the main project matures more features will be added to this CLI, including b
 
 - Creating a decentralized Eppie account
 - Encrypted p2p messaging
-- Connecting multiple devices to single account 
+- Connecting multiple devices to single account
 - Encrypted decentralized backup
 - Connecting existing decentralized identities, e.g. [ENS](https://ens.domains/)
 
@@ -227,3 +228,17 @@ If you decide to contribute, please create an issue first, or find an existing o
 Eppie is a next generation email and decentralized identity provider. It features open protocol, serverless architecture, cryptocurrency-grade privacy with full account ownership, ease of use, and SMTP-to-web3 messaging capability.
 
 Eppie is developped to store the data using [IPFS](https://github.com/ipfs/ipfs) infrastructure, and the transport layer will work through [SBBS](https://github.com/BeamMW/beam/wiki/Secure-bulletin-board-system-%28SBBS%29). But the architecture allows to easily plug in multiple storage and transport technologies. Eppie's e2e encryption is based on [Elliptic-curve](https://en.wikipedia.org/wiki/Elliptic-curve_cryptography) cryptography. GUI application is being written in C# with [Uno](https://github.com/unoplatform/uno), and CLI is pure C#. Eppie targets Windows, macOS, Linux, iOS, and Android platforms.
+
+<!-- badges -->
+
+[windows-badge]: https://img.shields.io/badge/Windows-blue?logo=windows
+[linux-badge]: https://img.shields.io/badge/Linux-gold?logo=linux&logoColor=black
+[mac-badge]: https://img.shields.io/badge/macOS-black?logo=apple
+
+[license-badge]: https://img.shields.io/github/license/Eppie-io/Eppie-CLI.svg
+[framework-badge]: https://img.shields.io/badge/dynamic/xml?label=framework&query=//TargetFramework[1]&url=https://raw.githubusercontent.com/Eppie-io/Eppie-CLI/main/src/Eppie.CLI/Eppie.CLI/Eppie.CLI.csproj
+[release-badge]: https://img.shields.io/github/v/release/Eppie-io/Eppie-CLI
+[crowdin-badge]: https://badges.crowdin.net/e/8fee200a40ee70ffd3fa6b7d8d23deee/localized.svg
+
+[build-workflow-badge]:https://img.shields.io/github/actions/workflow/status/eppie-io/eppie-cli/build-and-test.yml?logo=github&branch=main&event=push
+[codeql-workflow-badge]: https://img.shields.io/github/actions/workflow/status/eppie-io/eppie-cli/codeql.yml?logo=github&label=CodeQL&branch=main&event=schedule
