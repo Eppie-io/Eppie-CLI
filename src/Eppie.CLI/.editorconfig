@@ -585,3 +585,6 @@ dotnet_diagnostic.IDE2003.severity = warning        # IDE2003: Allow statement i
 dotnet_diagnostic.IDE2004.severity = warning        # IDE2004: Allow blank line after colon in constructor initializer
 dotnet_diagnostic.IDE2005.severity = warning        # IDE2005: Allow blank line after token in conditional expression
 dotnet_diagnostic.IDE2006.severity = warning        # IDE2006: Allow blank line after token in arrow expression
+
+## Performance
+dotnet_diagnostic.CA1848.severity = suggestion      # CA1848: Use the LoggerMessage delegates
