@@ -10,6 +10,8 @@ root = true
 #### All files ####
 [*]
 
+charset = utf-8
+
 ## Indentation and spacing
 indent_style = space
 tab_width = 4
@@ -17,31 +19,20 @@ indent_size = 4
 trim_trailing_whitespace = true
 
 ## New line preferences
-end_of_line = unset
+end_of_line = crlf
 insert_final_newline = true
 
 
 #### Specific files ####
 
-## Code files
-[*.{cs,csx,vb,vbx}]
-indent_size = 4
-insert_final_newline = true
-charset = utf-8-bom
-
-## C++ Files
-[*.{cpp,h,in}]
-indent_size = 4
-curly_bracket_next_line = true
-indent_brace_style = Allman
-
-## Xml project files
-[*.{csproj,vbproj,vcxproj,vcxproj.filters,proj,nativeproj,locproj}]
+## Yaml files
+[*.{yml,yaml}]
 indent_size = 2
 
-## Xml build files
-[*.builds]
+## Json files
+[*.{json,slnf}]
 indent_size = 2
+end_of_line = lf
 
 ## Xml files
 [*.{xml,stylecop,resx,ruleset}]
@@ -49,6 +40,24 @@ indent_size = 2
 
 ## Xml config files
 [*.{props,targets,config,nuspec}]
+indent_size = 2
+
+## Json config files
+[.vsconfig]
+indent_size = 2
+end_of_line = lf
+
+## Solution files
+[*.sln]
+indent_style = tab
+indent_size = 2
+
+## Xml project files
+[*.{csproj,vbproj,vcxproj,vcxproj.filters,proj,nativeproj,locproj}]
+indent_size = 2
+
+## Xml build files
+[*.builds]
 indent_size = 2
 
 ## Shell scripts
@@ -62,6 +71,17 @@ end_of_line = crlf
 [*.md]
 # Double trailing spaces can be used for BR tags, and other instances are enforced by Markdownlint
 trim_trailing_whitespace = false
+
+## C++ Files
+[*.{cpp,h,in}]
+curly_bracket_next_line = true
+indent_brace_style = Allman
+end_of_line = unset
+
+## C# Files
+[*.{cs,csx}]
+# EOL should be normalized by Git. See https://github.com/dotnet/format/issues/1099
+end_of_line = unset
 
 ## Generated files
 #[*{.generated.cs,.g.cs}]
@@ -141,7 +161,8 @@ csharp_prefer_braces = true:warning                                 # IDE0011: A
 csharp_style_namespace_declarations = block_scoped:warning          # IDE0160: Use block-scoped namespace, IDE0161: Use file-scoped namespace
 csharp_style_prefer_method_group_conversion = true:warning          # IDE0200: Remove unnecessary lambda expression
 csharp_style_prefer_top_level_statements = true:silent              # IDE0210: Convert to top-level statements, IDE0211: Convert to 'Program.Main' style program
-csharp_style_prefer_primary_constructors = true:error               # IDE0290  Use primary constructor [note: C# 12 feature]
+csharp_style_prefer_primary_constructors = true:error               # IDE0290: Use primary constructor [note: C# 12+ feature]
+csharp_prefer_system_threading_lock = true:error                    # IDE0330: Prefer 'System.Threading.Lock' [note: C# 13+ feature]
 
 ## Expression-bodied members
 csharp_style_expression_bodied_methods = false:warning              # IDE0022: Use expression body for methods
@@ -229,6 +250,7 @@ dotnet_style_prefer_inferred_tuple_names = true:warning                         
 dotnet_style_prefer_inferred_anonymous_type_member_names = true:warning                     # IDE0037: Use inferred member names
 dotnet_style_prefer_compound_assignment = true:warning                                      # IDE0054: Use compound assignment, IDE0074: Use coalesce compound assignment
 dotnet_style_prefer_simplified_interpolation = true:warning                                 # IDE0071: Simplify interpolation
+dotnet_style_prefer_collection_expression = when_types_loosely_match:warning                # IDE0300: Use collection expression for array [note: .NET 9+ feature]
 dotnet_style_namespace_match_folder = true:warning                                          # IDE0130: Namespace does not match folder structure
 dotnet_style_prefer_foreach_explicit_cast_in_source = when_strongly_typed:warning           # IDE0220: Add explicit cast in foreach loop
 
