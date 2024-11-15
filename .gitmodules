@@ -1,15 +1,6 @@
 [submodule "gitmodules/TuviCore"]
 	path = gitmodules/TuviCore
 	url = ../../Eppie-io/TuviCore.git
-[submodule "gitmodules/TuviPgpLib"]
-	path = gitmodules/TuviPgpLib
-	url = ../../Eppie-io/TuviPgpLib.git
-[submodule "gitmodules/proton-cs-client"]
-	path = gitmodules/proton-cs-client
-	url = ../../Eppie-io/proton-cs-client.git
-[submodule "gitmodules/TuviBase32EConverterLib"]
-	path = gitmodules/TuviBase32EConverterLib
-	url = ../../Eppie-io/TuviBase32EConverterLib.git
 [submodule "gitmodules/console-toolkit"]
 	path = gitmodules/console-toolkit
 	url = ../../Eppie-io/console-toolkit.git
