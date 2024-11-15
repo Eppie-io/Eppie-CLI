@@ -51,17 +51,17 @@ namespace Eppie.CLI.Menu
                 Proton,
             }
 
-            public static readonly IReadOnlyCollection<string> TypeOptionNames = new[] { "-t", "--type", "/Type" };
+            public static readonly IReadOnlyCollection<string> TypeOptionNames = ["-t", "--type", "/Type"];
 
             public static IReadOnlyCollection<IOption> GetOptions(IAsyncParser parser, ResourceLoader resourceLoader)
             {
                 Debug.Assert(parser is not null);
                 Debug.Assert(resourceLoader is not null);
 
-                return new IOption[]
-                {
+                return
+                [
                     parser.CreateOption<AccountType>(TypeOptionNames, isRequired: true, description: resourceLoader.Strings.AccountTypeDescription)
-                };
+                ];
             }
 
             public static AccountType GetTypeValue(IAsyncCommand cmd)
@@ -72,21 +72,21 @@ namespace Eppie.CLI.Menu
 
         public static class CommandSendOptions
         {
-            public static readonly IReadOnlyCollection<string> SenderOptionNames = new[] { "-s", "--sender", "/Sender" };
-            public static readonly IReadOnlyCollection<string> ReceiverOptionNames = new[] { "-r", "--receiver", "/Receiver" };
-            public static readonly IReadOnlyCollection<string> SubjectOptionNames = new[] { "-t", "--subject", "/Subject" };
+            public static readonly IReadOnlyCollection<string> SenderOptionNames = ["-s", "--sender", "/Sender"];
+            public static readonly IReadOnlyCollection<string> ReceiverOptionNames = ["-r", "--receiver", "/Receiver"];
+            public static readonly IReadOnlyCollection<string> SubjectOptionNames = ["-t", "--subject", "/Subject"];
 
             public static IReadOnlyCollection<IOption> GetOptions(IAsyncParser parser, ResourceLoader resourceLoader)
             {
                 Debug.Assert(parser is not null);
                 Debug.Assert(resourceLoader is not null);
 
-                return new IOption[]
-                {
+                return
+                [
                     parser.CreateOption<string>(SenderOptionNames, isRequired: true, description: resourceLoader.Strings.SenderDescription),
                     parser.CreateOption<string>(ReceiverOptionNames, isRequired: true, description: resourceLoader.Strings.ReceiverDescription),
                     parser.CreateOption<string>(SubjectOptionNames, isRequired: true, description: resourceLoader.Strings.SubjectDescription),
-                };
+                ];
             }
 
             public static string GetSubjectValue(IAsyncCommand cmd)
@@ -107,17 +107,17 @@ namespace Eppie.CLI.Menu
 
         public static class CommandImportOptions
         {
-            public static readonly IReadOnlyCollection<string> FileOptionNames = new[] { "-f", "--file", "/File" };
+            public static readonly IReadOnlyCollection<string> FileOptionNames = ["-f", "--file", "/File"];
 
             public static IReadOnlyCollection<IOption> GetOptions(IAsyncParser parser, ResourceLoader resourceLoader)
             {
                 Debug.Assert(parser is not null);
                 Debug.Assert(resourceLoader is not null);
 
-                return new IOption[]
-                {
+                return
+                [
                     parser.CreateOption<FileInfo>(FileOptionNames, isRequired: true, description: resourceLoader.Strings.KeyBundleFileDescription)
-                };
+                ];
             }
 
             public static FileInfo GetFileValue(IAsyncCommand cmd)
@@ -128,23 +128,23 @@ namespace Eppie.CLI.Menu
 
         public static class CommandShowMessageOptions
         {
-            public static readonly IReadOnlyCollection<string> AccountOptionNames = new[] { "-a", "--account", "/Account" };
-            public static readonly IReadOnlyCollection<string> FolderOptionNames = new[] { "-f", "--folder", "/Folder" };
-            public static readonly IReadOnlyCollection<string> IdOptionNames = new[] { "-i", "--message-id", "/MessageId" };
-            public static readonly IReadOnlyCollection<string> PrimaryKeyOptionNames = new[] { "-k", "--primary-key", "/PrimaryKey" };
+            public static readonly IReadOnlyCollection<string> AccountOptionNames = ["-a", "--account", "/Account"];
+            public static readonly IReadOnlyCollection<string> FolderOptionNames = ["-f", "--folder", "/Folder"];
+            public static readonly IReadOnlyCollection<string> IdOptionNames = ["-i", "--message-id", "/MessageId"];
+            public static readonly IReadOnlyCollection<string> PrimaryKeyOptionNames = ["-k", "--primary-key", "/PrimaryKey"];
 
             public static IReadOnlyCollection<IOption> GetOptions(IAsyncParser parser, ResourceLoader resourceLoader)
             {
                 Debug.Assert(parser is not null);
                 Debug.Assert(resourceLoader is not null);
 
-                return new IOption[]
-                {
+                return
+                [
                     parser.CreateOption<string>(AccountOptionNames, isRequired: true, description: resourceLoader.Strings.AccountAddressDescription),
                     parser.CreateOption<string>(FolderOptionNames, isRequired: true, description: resourceLoader.Strings.AccountFolderDescription),
                     parser.CreateOption<uint>(IdOptionNames, isRequired: true, description: resourceLoader.Strings.MessageIDDescription),
                     parser.CreateOption<int>(PrimaryKeyOptionNames, isRequired: true, description: resourceLoader.Strings.MessagePKDescription)
-                };
+                ];
             }
 
             public static string GetAccountValue(IAsyncCommand cmd)
@@ -170,19 +170,19 @@ namespace Eppie.CLI.Menu
 
         public static class CommandSyncFolderOptions
         {
-            public static readonly IReadOnlyCollection<string> AccountOptionNames = new[] { "-a", "--account", "/Account" };
-            public static readonly IReadOnlyCollection<string> FolderOptionNames = new[] { "-f", "--folder", "/Folder" };
+            public static readonly IReadOnlyCollection<string> AccountOptionNames = ["-a", "--account", "/Account"];
+            public static readonly IReadOnlyCollection<string> FolderOptionNames = ["-f", "--folder", "/Folder"];
 
             public static IReadOnlyCollection<IOption> GetSyncFolderOptions(IAsyncParser parser, ResourceLoader resourceLoader)
             {
                 Debug.Assert(parser is not null);
                 Debug.Assert(resourceLoader is not null);
 
-                return new IOption[]
-                {
+                return
+                [
                     parser.CreateOption<string>(AccountOptionNames, isRequired: true, description: resourceLoader.Strings.AccountAddressDescription),
                     parser.CreateOption<string>(FolderOptionNames, isRequired: true, description: resourceLoader.Strings.AccountFolderDescription)
-                };
+                ];
             }
 
             public static string GetAccountValue(IAsyncCommand cmd)
@@ -200,20 +200,20 @@ namespace Eppie.CLI.Menu
         {
             private const int DefaultPageSize = 20;
 
-            public static readonly IReadOnlyCollection<string> PageSizeOptionNames = new[] { "-s", "--page-size", "/PageSize" };
-            public static readonly IReadOnlyCollection<string> AccountOptionNames = new[] { "-a", "--account", "/Account" };
-            public static readonly IReadOnlyCollection<string> FolderOptionNames = new[] { "-f", "--folder", "/Folder" };
-            public static readonly IReadOnlyCollection<string> ContactOptionNames = new[] { "-c", "--contact-address", "/ContactAddress" };
+            public static readonly IReadOnlyCollection<string> PageSizeOptionNames = ["-s", "--page-size", "/PageSize"];
+            public static readonly IReadOnlyCollection<string> AccountOptionNames = ["-a", "--account", "/Account"];
+            public static readonly IReadOnlyCollection<string> FolderOptionNames = ["-f", "--folder", "/Folder"];
+            public static readonly IReadOnlyCollection<string> ContactOptionNames = ["-c", "--contact-address", "/ContactAddress"];
 
             public static IReadOnlyCollection<IOption> GetShowMessagesOptions(IAsyncParser parser, ResourceLoader resourceLoader)
             {
                 Debug.Assert(parser is not null);
                 Debug.Assert(resourceLoader is not null);
 
-                return new IOption[]
-                {
+                return
+                [
                     parser.CreateOption<int>(PageSizeOptionNames, getDefaultValue: () => DefaultPageSize, description: resourceLoader.Strings.PageSizeDescription),
-                };
+                ];
             }
 
             public static IReadOnlyCollection<IOption> GetShowFolderMessagesOptions(IAsyncParser parser, ResourceLoader resourceLoader)
@@ -221,12 +221,12 @@ namespace Eppie.CLI.Menu
                 Debug.Assert(parser is not null);
                 Debug.Assert(resourceLoader is not null);
 
-                return new IOption[]
-                {
+                return
+                [
                     parser.CreateOption<string>(AccountOptionNames, isRequired: true, description: resourceLoader.Strings.AccountAddressDescription),
                     parser.CreateOption<string>(FolderOptionNames, isRequired: true, description: resourceLoader.Strings.AccountFolderDescription),
                     parser.CreateOption<int>(PageSizeOptionNames, getDefaultValue: () => DefaultPageSize, description: resourceLoader.Strings.PageSizeDescription),
-                };
+                ];
             }
 
             public static IReadOnlyCollection<IOption> GetShowContactMessagesOptions(IAsyncParser parser, ResourceLoader resourceLoader)
@@ -234,11 +234,11 @@ namespace Eppie.CLI.Menu
                 Debug.Assert(parser is not null);
                 Debug.Assert(resourceLoader is not null);
 
-                return new IOption[]
-                {
+                return
+                [
                     parser.CreateOption<string>(ContactOptionNames, isRequired: true, description: resourceLoader.Strings.ContactAddressDescription),
                     parser.CreateOption<int>(PageSizeOptionNames, getDefaultValue: () => DefaultPageSize, description: resourceLoader.Strings.PageSizeDescription),
-                };
+                ];
             }
 
             public static int GetPageSizeValue(IAsyncCommand cmd)
@@ -266,17 +266,17 @@ namespace Eppie.CLI.Menu
         {
             private const int DefaultPageSize = 20;
 
-            public static readonly IReadOnlyCollection<string> PageSizeOptionNames = new[] { "-s", "--page-size", "/PageSize" };
+            public static readonly IReadOnlyCollection<string> PageSizeOptionNames = ["-s", "--page-size", "/PageSize"];
 
             public static IReadOnlyCollection<IOption> GetOptions(IAsyncParser parser, ResourceLoader resourceLoader)
             {
                 Debug.Assert(parser is not null);
                 Debug.Assert(resourceLoader is not null);
 
-                return new IOption[]
-                {
+                return
+                [
                     parser.CreateOption<int>(PageSizeOptionNames, getDefaultValue: () => DefaultPageSize, description: resourceLoader.Strings.PageSizeDescription),
-                };
+                ];
             }
 
             public static int GetPageSizeValue(IAsyncCommand cmd)

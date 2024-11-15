@@ -162,7 +162,7 @@ namespace Eppie.CLI.Menu
                 await _coreProvider.ResetAsync().ConfigureAwait(false);
             }
 
-            string[] seedPhrase = _application.AskSeedPhrase().Split(new char[] { ' ', ';' });
+            string[] seedPhrase = _application.AskSeedPhrase().Split([' ', ';']);
             string password = _application.AskNewPassword();
             if (password.Length == 0 || password != _application.ConfirmPassword())
             {
