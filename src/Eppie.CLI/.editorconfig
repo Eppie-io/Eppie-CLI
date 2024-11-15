@@ -483,6 +483,8 @@ dotnet_diagnostic.IDE0077.severity = warning        # IDE0077: Avoid legacy form
 
 ## Compiler
 # dotnet_diagnostic.IDE0043.severity = none         # IDE0043: Format string contains invalid placeholder [note: Deprecate IDE0043 in favor of CA2241]
+# CA1848: Use the LoggerMessage delegates
+dotnet_diagnostic.CA1848.severity = none                # CA1848: Use the LoggerMessage delegates
 
 ## Style
 dotnet_diagnostic.IDE0001.severity = suggestion     # IDE0001: Simplify name
