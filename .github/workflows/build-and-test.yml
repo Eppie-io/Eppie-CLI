@@ -34,7 +34,7 @@ env:
   project: src/Eppie.CLI/Eppie.CLI/Eppie.CLI.csproj
   test-project: ${{ null }}
   test-report-root: src/Eppie.CLI/TestResults
-  dotnet-version: 8.x
+  dotnet-version: 9.x
 
 jobs:
 

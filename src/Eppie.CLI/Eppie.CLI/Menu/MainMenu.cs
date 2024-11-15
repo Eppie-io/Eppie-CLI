@@ -79,8 +79,8 @@ namespace Eppie.CLI.Menu
             ICommand root = parser.CreateRoot(
                 description: _resourceLoader.Strings.GetMenuDescription(_resourceLoader.AssemblyStrings.Title,
                                                                         _resourceLoader.AssemblyStrings.Version),
-                subcommands: new[]
-                {
+                subcommands:
+                [
                     CreateCommand(parser, MenuCommand.Exit, _resourceLoader.Strings.ExitDescription,
                                   action: (cmd) => _actions.ExitAction()),
                     CreateAsyncCommand(parser, MenuCommand.Initialize, _resourceLoader.Strings.InitDescription,
@@ -129,7 +129,7 @@ namespace Eppie.CLI.Menu
                     CreateAsyncCommand(parser, MenuCommand.Import, _resourceLoader.Strings.ImportDescription,
                                        action: (cmd) => _actions.ImportKeyBundleFromFileAsync(MenuCommand.CommandImportOptions.GetFileValue(cmd)),
                                        options: MenuCommand.CommandImportOptions.GetOptions(parser, _resourceLoader)),
-                }
+                ]
             );
 
             parser.Bind(root);

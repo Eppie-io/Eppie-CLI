@@ -347,7 +347,7 @@ namespace Eppie.CLI.Services
 
             private static string GetStringResourceName(string category = "Message", [CallerMemberName] string name = "")
             {
-                return string.Join('.', new string?[] { category, name });
+                return string.Join('.', [category, name]);
             }
         }
 
