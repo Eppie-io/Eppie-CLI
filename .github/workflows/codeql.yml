@@ -20,6 +20,9 @@ on:
   schedule:
     - cron: '43 22 * * 6'
 
+env:
+  dotnet-version: 9.x
+
 jobs:
   analyze:
     name: Analyze
@@ -44,6 +47,11 @@ jobs:
       with:
         fetch-depth: 0
         submodules: recursive
+
+    - name: Install dotnet
+      uses: actions/setup-dotnet@3e891b0cb619bf60e2c25674b222b8940e2c1c25 # v4.1.0
+      with:
+        dotnet-version: ${{ env.dotnet-version }}
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
