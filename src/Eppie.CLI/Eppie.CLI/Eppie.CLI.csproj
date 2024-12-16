@@ -28,10 +28,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Finebits.Authorization.OAuth2" Version="0.3.1-alpha" />
-    <PackageReference Include="Finebits.Authorization.OAuth2.AuthenticationBroker.Desktop" Version="0.3.1-alpha" />
-    <PackageReference Include="Finebits.Authorization.OAuth2.Google" Version="0.3.1-alpha" />
-    <PackageReference Include="Finebits.Authorization.OAuth2.Outlook" Version="0.3.1-alpha" />
+    <PackageReference Include="Finebits.Authorization.OAuth2" Version="0.4.0-preview.1" />
+    <PackageReference Include="Finebits.Authorization.OAuth2.AuthenticationBroker.Desktop" Version="0.4.0-preview.1" />
+    <PackageReference Include="Finebits.Authorization.OAuth2.Google" Version="0.4.0-preview.1" />
+    <PackageReference Include="Finebits.Authorization.OAuth2.Outlook" Version="0.4.0-preview.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Localization" Version="8.0.7" />
@@ -46,6 +46,7 @@
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.3.0" />
   </ItemGroup>
 
   <ItemGroup>

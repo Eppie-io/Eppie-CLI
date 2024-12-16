@@ -50,13 +50,13 @@ namespace Eppie.CLI.Services
             IRefreshable refresher = _authorizationProvider.CreateRefreshTokenClient(mailServer);
 
             _logger.LogDebug("Refreshing token [hash code: {RefreshTokenHash}] (mail service: {MailServer})", refreshToken.GetHashCode(StringComparison.Ordinal), mailServer);
-            AuthorizationToken freshToken = await refresher.RefreshTokenAsync(CreateToken(refreshToken), cancellationToken).ConfigureAwait(false);
+            AuthCredential fresh = await refresher.RefreshAsync(CreateToken(refreshToken), cancellationToken).ConfigureAwait(false);
 
             return new AuthToken()
             {
-                AccessToken = freshToken.AccessToken,
-                RefreshToken = freshToken.RefreshToken,
-                ExpiresIn = freshToken.ExpiresIn,
+                AccessToken = fresh.AccessToken,
+                RefreshToken = fresh.RefreshToken,
+                ExpiresIn = fresh.ExpiresIn,
             };
         }
 
@@ -67,13 +67,14 @@ namespace Eppie.CLI.Services
                 : throw new AuthenticationException("Unsupported Mail service");
         }
 
-        private static AuthorizationToken CreateToken(string refreshToken)
+        private static AuthCredential CreateToken(string refreshToken)
         {
-            return new AuthorizationToken(accessToken: string.Empty,
-                                          refreshToken: refreshToken,
-                                          tokenType: Token.BearerType,
-                                          expiresIn: TimeSpan.Zero,
-                                          scope: string.Empty);
+            return new AuthCredential(tokenType: Credential.BearerType,
+                                      accessToken: string.Empty,
+                                      refreshToken: refreshToken,
+                                      idToken: string.Empty,
+                                      expiresIn: TimeSpan.Zero,
+                                      scope: string.Empty);
         }
     }
 }
