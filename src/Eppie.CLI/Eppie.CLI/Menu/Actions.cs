@@ -403,20 +403,21 @@ namespace Eppie.CLI.Menu
 
                 //ToDo: Move string to resources
                 Console.WriteLine($"Authorization to {mailServer} service. Press Ctrl+C to cancel the operation.");
-                AuthorizationToken token = await authClient.LoginAsync(cancellationLogin.Token).ConfigureAwait(false);
+                AuthCredential authCredential = await authClient.LoginAsync(cancellationLogin.Token).ConfigureAwait(false);
 
-                if (authClient is IProfileReader profileReader)
+                string? email = await ReadEmailAddressAsync(authCredential).ConfigureAwait(false);
+
+                if (!string.IsNullOrEmpty(email))
                 {
-                    IUserProfile profile = await profileReader.ReadProfileAsync(token).ConfigureAwait(false);
                     //ToDo: Move string to resources
-                    Console.WriteLine($"Authorization of account '{profile.Email}' completed successfully.");
+                    Console.WriteLine($"Authorization of account '{email}' completed successfully.");
 
                     Account account = Account.Default;
-                    account.Email = new EmailAddress(profile.Email);
+                    account.Email = new EmailAddress(email);
 
                     OAuth2Data oauthData = new()
                     {
-                        RefreshToken = token.RefreshToken,
+                        RefreshToken = authCredential.RefreshToken,
                         AuthAssistantId = mailServer.ToString()
                     };
                     account.AuthData = oauthData;
@@ -482,6 +483,19 @@ namespace Eppie.CLI.Menu
             ArgumentNullException.ThrowIfNull(e);
 
             _application.WriteError(e.Exception);
+        }
+
+        private static async Task<string?> ReadEmailAddressAsync(AuthCredential authCredential)
+        {
+            ArgumentNullException.ThrowIfNull(authCredential);
+
+            if (authCredential is IProfileReader profileReader)
+            {
+                IUserProfile profile = await profileReader.ReadProfileAsync(authCredential).ConfigureAwait(false);
+                return profile.Email;
+            }
+
+            return authCredential.ReadEmailAddress();
         }
     }
 }

@@ -39,6 +39,7 @@ namespace Eppie.CLI.Options
         public Collection<string>? Scope => ScopeList ??
             [
                 "https://mail.google.com/",
+                "openid",
                 "profile",
                 "email"
             ];
@@ -70,10 +71,12 @@ namespace Eppie.CLI.Options
         public Uri? RedirectUri { get; init; }
         public Collection<string>? Scope => ScopeList ??
             [
-                "https://outlook.office.com/user.read",
+                "offline_access",
+                "openid",
+                "profile",
+                "email",
                 "https://outlook.office.com/IMAP.AccessAsUser.All",
                 "https://outlook.office.com/SMTP.Send",
-                "offline_access"
             ];
 
         private Collection<string>? ScopeList { get; init; }
