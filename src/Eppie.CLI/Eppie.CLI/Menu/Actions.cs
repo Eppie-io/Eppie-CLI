@@ -405,7 +405,7 @@ namespace Eppie.CLI.Menu
                 Console.WriteLine($"Authorization to {mailServer} service. Press Ctrl+C to cancel the operation.");
                 AuthCredential authCredential = await authClient.LoginAsync(cancellationLogin.Token).ConfigureAwait(false);
 
-                string? email = await ReadEmailAddressAsync(authCredential).ConfigureAwait(false);
+                string? email = await ReadEmailAddressAsync(authClient, authCredential).ConfigureAwait(false);
 
                 if (!string.IsNullOrEmpty(email))
                 {
@@ -485,17 +485,18 @@ namespace Eppie.CLI.Menu
             _application.WriteError(e.Exception);
         }
 
-        private static async Task<string?> ReadEmailAddressAsync(AuthCredential authCredential)
+        private static async Task<string?> ReadEmailAddressAsync(IAuthorizationClient client, AuthCredential credential)
         {
-            ArgumentNullException.ThrowIfNull(authCredential);
+            ArgumentNullException.ThrowIfNull(client);
+            ArgumentNullException.ThrowIfNull(credential);
 
-            if (authCredential is IProfileReader profileReader)
+            if (client is IProfileReader profileReader)
             {
-                IUserProfile profile = await profileReader.ReadProfileAsync(authCredential).ConfigureAwait(false);
+                IUserProfile profile = await profileReader.ReadProfileAsync(credential).ConfigureAwait(false);
                 return profile.Email;
             }
 
-            return authCredential.ReadEmailAddress();
+            return credential.ReadEmailAddress();
         }
     }
 }
