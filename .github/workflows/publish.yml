@@ -41,7 +41,6 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      status: ${{ steps.checker.outputs.status }}
       target-os: ${{ steps.inputs.outputs.target-os }}
       target-runtime: ${{ steps.inputs.outputs.target-runtime }}
       matrix: ${{ steps.select-config.outputs.matrix }}
@@ -88,20 +87,16 @@ jobs:
     - name: Check profiles
       id: checker
       run: |
-        profiles='${{ steps.publish-config-parser.outputs.profiles }}'
-        length=$( echo $profiles | jq '.include | length' )
+        length=$( echo '${{ steps.select-config.outputs.config-json }}' | jq '. | length' )
 
-        if(( $length > 0 )); then
-          echo "status=success" >> $GITHUB_OUTPUT
-        else
-          echo "status=failure" >> $GITHUB_OUTPUT
-          echo "::error::No suitable publish profile found"
+        if(( $length == 0 )); then
+          echo "::error::No suitable publish configuration found"
+          exit 1
         fi
 
   publish:
     name: Publish
     needs: prepare
-    if: needs.prepare.outputs.status == 'success'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix: ${{fromJson(needs.prepare.outputs.matrix)}}
