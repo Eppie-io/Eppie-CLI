@@ -30,5 +30,5 @@ runs:
         echo "project-file=$(jq -r ' ."project-file" ' $config )" >> $GITHUB_OUTPUT
         echo "output-name=$(jq -r ' ."output-name" ' $config )" >> $GITHUB_OUTPUT
 
-        profiles=$(jq -r --arg tags "${{ inputs.tags }}" '($tags / ",") as $tags | [ .profiles[] | (.tags) as $profile_tags | select(all($tags[]; IN($profile_tags[]))) | {os,runtime,configuration,framework,options,dotnet-version} ]' $config)
+        profiles=$(jq -r --arg tags "${{ inputs.tags }}" '($tags / ",") as $tags | [ .profiles[] | (.tags) as $profile_tags | select(all($tags[]; IN($profile_tags[]))) | {os,runtime,configuration,framework,options,dotnet} ]' $config)
         echo "profiles={\"include\":$(echo $profiles)}" >> $GITHUB_OUTPUT

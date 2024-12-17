@@ -87,7 +87,7 @@ jobs:
           echo "status=success" >> $GITHUB_OUTPUT
         else
           echo "status=failure" >> $GITHUB_OUTPUT
-          echo "No suitable publish profile found"
+          echo "::error::No suitable publish profile found"
         fi
 
   publish:
@@ -103,7 +103,7 @@ jobs:
       version-short: "${{ steps.version-number.outputs.preset-suffix }}"
 
     env:
-      dotnet-version: ${{ matrix.dotnet-version }}
+      dotnet-version: ${{ matrix.dotnet }}
       output-name: ${{ needs.prepare.outputs.output-name }}
       project-file: ${{ needs.prepare.outputs.project-file }}
       configuration: ${{ matrix.configuration }}

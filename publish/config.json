@@ -11,7 +11,7 @@
       "configuration": "release",
       "framework": "net9.0",
       "options" : "--self-contained --property:PublishSingleFile=true --property:DebugSymbols=false --property:DebugType=None --property:GenerateDocumentationFile=fasle",
-      "dotnet-version": "9.x"
+      "dotnet": "9.x"
     },
 
     {
@@ -21,7 +21,7 @@
       "configuration": "release",
       "framework": "net9.0",
       "options" : "--self-contained --property:PublishSingleFile=true --property:DebugSymbols=false --property:DebugType=None --property:GenerateDocumentationFile=fasle",
-      "dotnet-version": "9.x"
+      "dotnet": "9.x"
     },
 
     {
@@ -31,7 +31,7 @@
       "configuration": "release",
       "framework": "net9.0",
       "options" : "--self-contained --property:PublishSingleFile=true --property:DebugSymbols=false --property:DebugType=None --property:GenerateDocumentationFile=fasle",
-      "dotnet-version": "9.x"
+      "dotnet": "9.x"
     },
 
     {
@@ -41,7 +41,7 @@
       "configuration": "release",
       "framework": "net9.0",
       "options" : "--self-contained --property:PublishSingleFile=true --property:DebugSymbols=false --property:DebugType=None --property:GenerateDocumentationFile=fasle",
-      "dotnet-version": "9.x"
+      "dotnet": "9.x"
     },
 
     {
@@ -51,7 +51,7 @@
       "configuration": "release",
       "framework": "net9.0",
       "options" : "--self-contained --property:PublishSingleFile=true --property:DebugSymbols=false --property:DebugType=None --property:GenerateDocumentationFile=fasle",
-      "dotnet-version": "9.x"
+      "dotnet": "9.x"
     },
 
     {
@@ -61,7 +61,7 @@
       "configuration": "release",
       "framework": "net9.0",
       "options" : "--self-contained --property:PublishSingleFile=true --property:DebugSymbols=false --property:DebugType=None --property:GenerateDocumentationFile=fasle",
-      "dotnet-version": "9.x"
+      "dotnet": "9.x"
     },
 
     {
@@ -71,7 +71,7 @@
       "configuration": "release",
       "framework": "net9.0",
       "options" : "--self-contained --property:PublishSingleFile=true --property:DebugSymbols=false --property:DebugType=None --property:GenerateDocumentationFile=fasle",
-      "dotnet-version": "9.x"
+      "dotnet": "9.x"
     },
 
     {
@@ -81,7 +81,7 @@
       "configuration": "release",
       "framework": "net9.0",
       "options" : "--self-contained --property:PublishSingleFile=true --property:DebugSymbols=false --property:DebugType=None --property:GenerateDocumentationFile=fasle",
-      "dotnet-version": "9.x"
+      "dotnet": "9.x"
     }
   ]
 }
