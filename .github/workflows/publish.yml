@@ -41,12 +41,12 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      matrix: ${{ steps.publish-config-parser.outputs.profiles }}
       status: ${{ steps.checker.outputs.status }}
-      project-file: ${{ steps.publish-config-parser.outputs.project-file }}
-      output-name: ${{ steps.publish-config-parser.outputs.output-name }}
       target-os: ${{ steps.inputs.outputs.target-os }}
       target-runtime: ${{ steps.inputs.outputs.target-runtime }}
+      matrix: ${{ steps.select-config.outputs.matrix }}
+      project-file: ${{ fromJSON(steps.read-config.outputs.content).project-file }}
+      output-name: ${{ fromJSON(steps.read-config.outputs.content).output-name }}
 
     steps:
     - name: Checkout
@@ -66,12 +66,19 @@ jobs:
         echo "target-os=${target_os:=${{ env.default-target-os }}}" >> $GITHUB_OUTPUT
         echo "target-runtime=${target_runtime:=${{ env.default-target-runtime }}}" >> $GITHUB_OUTPUT
 
-    - name: Parse configuration "${{ github.event.inputs.config-file }}"
-      id: publish-config-parser
-      uses: ./.github/actions/publish-config-parser
+    - name: Read configuration "${{ github.event.inputs.config-file }}"
+      id: read-config
+      uses: finebits/github-actions/toolset/file/read@4a126d80a11c5fdc83ce884d3d23dffb30bc4495 # v2.0.0
       with:
-        config-file: ${{ env.config-file }}
-        tags: "${{ env.target-os }},${{ env.target-runtime }}"
+        file: ${{ steps.inputs.outputs.config-file }}
+
+    - name: Select configuration "${{ github.event.inputs.config-file }}"
+      id: select-config
+      uses: finebits/github-actions/toolset/select-configuration@4a126d80a11c5fdc83ce884d3d23dffb30bc4495 # v2.0.0
+      with:
+        json-file: ${{ env.config-file }}
+        keywords: "${{ env.target-os }},${{ env.target-runtime }}"
+        configs-set-jsonpath: ".profiles"
       env:
         config-file: ${{ steps.inputs.outputs.config-file }}
         target-os: ${{ steps.inputs.outputs.target-os }}
