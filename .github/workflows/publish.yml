@@ -27,6 +27,11 @@ on:
         - arm
         - arm64
         - all
+
+      trusted-signing:
+        type: boolean
+        default: true
+
   release:
     types: [published]
 
@@ -34,6 +39,7 @@ env:
   default-config-file: "./publish/config.json"
   default-target-os: all
   default-target-runtime: all
+  default-trusted-signing: true
 
 jobs:
   prepare:
@@ -43,6 +49,7 @@ jobs:
     outputs:
       target-os: ${{ steps.inputs.outputs.target-os }}
       target-runtime: ${{ steps.inputs.outputs.target-runtime }}
+      trusted-signing: ${{ steps.inputs.outputs.trusted-signing }}
       matrix: ${{ steps.select-config.outputs.matrix }}
       project-file: ${{ fromJSON(steps.read-options.outputs.content).project-file }}
       output-name: ${{ fromJSON(steps.read-options.outputs.content).output-name }}
@@ -60,10 +67,12 @@ jobs:
         config_file='${{ github.event.inputs.config-file }}'
         target_os='${{ github.event.inputs.target-os }}'
         target_runtime='${{ github.event.inputs.target-runtime }}'
+        trusted_signing='${{ github.event.inputs.target-runtime }}'
 
         echo "config-file=${config_file:=${{ env.default-config-file }}}" >> $GITHUB_OUTPUT
         echo "target-os=${target_os:=${{ env.default-target-os }}}" >> $GITHUB_OUTPUT
         echo "target-runtime=${target_runtime:=${{ env.default-target-runtime }}}" >> $GITHUB_OUTPUT
+        echo "trusted-signing=${trusted_signing:=${{ env.default-trusted-signing }}}" >> $GITHUB_OUTPUT
 
     - name: Read options "${{ github.event.inputs.config-file }}"
       id: read-options
@@ -117,7 +126,7 @@ jobs:
 
     steps:
     - name: Support longpaths
-      if: ${{ matrix.os == 'windows-latest'}}
+      if: ${{ runner.os == 'Windows'}}
       run: git config --system core.longpaths true
 
     - name: Checkout
@@ -160,7 +169,7 @@ jobs:
         version-short: "${{ steps.version-number.outputs.preset-suffix }}"
 
     - name: Check AZURE secrets
-      if: ${{ matrix.os == 'windows-latest' }}
+      if: ${{ runner.os == 'Windows' && needs.prepare.outputs.trusted-signing == 'true' }}
       id: check-azure-secrets
       shell: bash
       run: |
@@ -190,7 +199,7 @@ jobs:
         echo "secrets-exist=$exist" >> $GITHUB_OUTPUT
 
     - name: Sign files with Trusted Signing
-      if: ${{ matrix.os == 'windows-latest' && steps.check-azure-secrets.outputs.secrets-exist == 'true' }}
+      if: ${{ runner.os == 'Windows' && needs.prepare.outputs.trusted-signing == 'true' && steps.check-azure-secrets.outputs.secrets-exist == 'true' }}
       uses: azure/trusted-signing-action@07c81171dd46a04e1b9f382b6c693815828bbbf7 # v0.5.0
       with:
         azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
