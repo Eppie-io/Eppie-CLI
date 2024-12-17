@@ -31,7 +31,6 @@ on:
     types: [published]
 
 env:
-  dotnet-version: 9.x
   default-config-file: "./publish/config.json"
   default-target-os: all
   default-target-runtime: all
@@ -104,6 +103,7 @@ jobs:
       version-short: "${{ steps.version-number.outputs.preset-suffix }}"
 
     env:
+      dotnet-version: ${{ matrix.dotnet-version }}
       output-name: ${{ needs.prepare.outputs.output-name }}
       project-file: ${{ needs.prepare.outputs.project-file }}
       configuration: ${{ matrix.configuration }}
