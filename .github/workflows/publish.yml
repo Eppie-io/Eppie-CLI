@@ -44,8 +44,8 @@ jobs:
       target-os: ${{ steps.inputs.outputs.target-os }}
       target-runtime: ${{ steps.inputs.outputs.target-runtime }}
       matrix: ${{ steps.select-config.outputs.matrix }}
-      project-file: ${{ fromJSON(steps.read-config.outputs.content).project-file }}
-      output-name: ${{ fromJSON(steps.read-config.outputs.content).output-name }}
+      project-file: ${{ fromJSON(steps.read-options.outputs.content).project-file }}
+      output-name: ${{ fromJSON(steps.read-options.outputs.content).output-name }}
 
     steps:
     - name: Checkout
@@ -65,8 +65,8 @@ jobs:
         echo "target-os=${target_os:=${{ env.default-target-os }}}" >> $GITHUB_OUTPUT
         echo "target-runtime=${target_runtime:=${{ env.default-target-runtime }}}" >> $GITHUB_OUTPUT
 
-    - name: Read configuration "${{ github.event.inputs.config-file }}"
-      id: read-config
+    - name: Read options "${{ github.event.inputs.config-file }}"
+      id: read-options
       uses: finebits/github-actions/toolset/file/read@4a126d80a11c5fdc83ce884d3d23dffb30bc4495 # v2.0.0
       with:
         file: ${{ steps.inputs.outputs.config-file }}
