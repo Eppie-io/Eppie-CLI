@@ -79,6 +79,7 @@ jobs:
         json-file: ${{ env.config-file }}
         keywords: "${{ env.target-os }},${{ env.target-runtime }}"
         configs-set-jsonpath: ".profiles"
+        keywords-set-jsonpath: ".tags"
       env:
         config-file: ${{ steps.inputs.outputs.config-file }}
         target-os: ${{ steps.inputs.outputs.target-os }}
