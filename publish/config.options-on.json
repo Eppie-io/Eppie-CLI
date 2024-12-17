@@ -9,8 +9,9 @@
       "os": "windows-latest",
       "runtime": "win-x86",
       "configuration": "release",
-      "framework": "net8.0",
-      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:PublishReadyToRun=true --property:DebugType=None"
+      "framework": "net9.0",
+      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:PublishReadyToRun=true --property:DebugType=None",
+      "dotnet": "9.x"
     },
 
     {
@@ -18,8 +19,9 @@
       "os": "windows-latest",
       "runtime": "win-x64",
       "configuration": "release",
-      "framework": "net8.0",
-      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:PublishReadyToRun=true --property:DebugType=None"
+      "framework": "net9.0",
+      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:PublishReadyToRun=true --property:DebugType=None",
+      "dotnet": "9.x"
     },
 
     {
@@ -27,8 +29,9 @@
       "os": "windows-latest",
       "runtime": "win-arm64",
       "configuration": "release",
-      "framework": "net8.0",
-      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:PublishReadyToRun=true --property:DebugType=None"
+      "framework": "net9.0",
+      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:PublishReadyToRun=true --property:DebugType=None",
+      "dotnet": "9.x"
     },
 
     {
@@ -36,8 +39,9 @@
       "os": "ubuntu-latest",
       "runtime": "linux-x64",
       "configuration": "release",
-      "framework": "net8.0",
-      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:PublishReadyToRun=true --property:DebugType=None"
+      "framework": "net9.0",
+      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:PublishReadyToRun=true --property:DebugType=None",
+      "dotnet": "9.x"
     },
 
     {
@@ -45,8 +49,9 @@
       "os": "ubuntu-latest",
       "runtime": "linux-arm",
       "configuration": "release",
-      "framework": "net8.0",
-      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:PublishReadyToRun=true --property:DebugType=None"
+      "framework": "net9.0",
+      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:PublishReadyToRun=true --property:DebugType=None",
+      "dotnet": "9.x"
     },
 
     {
@@ -54,8 +59,9 @@
       "os": "ubuntu-latest",
       "runtime": "linux-arm64",
       "configuration": "release",
-      "framework": "net8.0",
-      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:PublishReadyToRun=true --property:DebugType=None"
+      "framework": "net9.0",
+      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:PublishReadyToRun=true --property:DebugType=None",
+      "dotnet": "9.x"
     },
 
     {
@@ -63,8 +69,9 @@
       "os": "macos-latest",
       "runtime": "osx-x64",
       "configuration": "release",
-      "framework": "net8.0",
-      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:PublishReadyToRun=true --property:DebugType=None"      
+      "framework": "net9.0",
+      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:PublishReadyToRun=true --property:DebugType=None",
+      "dotnet": "9.x"
     },
 
     {
@@ -72,8 +79,9 @@
       "os": "macos-latest",
       "runtime": "osx-arm64",
       "configuration": "release",
-      "framework": "net8.0",
-      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:PublishReadyToRun=true --property:DebugType=None"      
+      "framework": "net9.0",
+      "options" : "--self-contained --property:PublishSingleFile=true --property:PublishTrimmed=true --property:TrimMode=partial --property:PublishReadyToRun=true --property:DebugType=None",
+      "dotnet": "9.x"
     }
   ]
 }

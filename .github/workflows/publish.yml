@@ -31,7 +31,6 @@ on:
     types: [published]
 
 env:
-  dotnet-version: 9.x
   default-config-file: "./publish/config.json"
   default-target-os: all
   default-target-runtime: all
@@ -42,12 +41,11 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      matrix: ${{ steps.publish-config-parser.outputs.profiles }}
-      status: ${{ steps.checker.outputs.status }}
-      project-file: ${{ steps.publish-config-parser.outputs.project-file }}
-      output-name: ${{ steps.publish-config-parser.outputs.output-name }}
       target-os: ${{ steps.inputs.outputs.target-os }}
       target-runtime: ${{ steps.inputs.outputs.target-runtime }}
+      matrix: ${{ steps.select-config.outputs.matrix }}
+      project-file: ${{ fromJSON(steps.read-options.outputs.content).project-file }}
+      output-name: ${{ fromJSON(steps.read-options.outputs.content).output-name }}
 
     steps:
     - name: Checkout
@@ -67,12 +65,20 @@ jobs:
         echo "target-os=${target_os:=${{ env.default-target-os }}}" >> $GITHUB_OUTPUT
         echo "target-runtime=${target_runtime:=${{ env.default-target-runtime }}}" >> $GITHUB_OUTPUT
 
-    - name: Parse configuration "${{ github.event.inputs.config-file }}"
-      id: publish-config-parser
-      uses: ./.github/actions/publish-config-parser
+    - name: Read options "${{ github.event.inputs.config-file }}"
+      id: read-options
+      uses: finebits/github-actions/toolset/file/read@4a126d80a11c5fdc83ce884d3d23dffb30bc4495 # v2.0.0
       with:
-        config-file: ${{ env.config-file }}
-        tags: "${{ env.target-os }},${{ env.target-runtime }}"
+        file: ${{ steps.inputs.outputs.config-file }}
+
+    - name: Select configuration "${{ github.event.inputs.config-file }}"
+      id: select-config
+      uses: finebits/github-actions/toolset/select-configuration@4a126d80a11c5fdc83ce884d3d23dffb30bc4495 # v2.0.0
+      with:
+        json-file: ${{ env.config-file }}
+        keywords: "${{ env.target-os }},${{ env.target-runtime }}"
+        configs-set-jsonpath: ".profiles"
+        keywords-set-jsonpath: ".tags"
       env:
         config-file: ${{ steps.inputs.outputs.config-file }}
         target-os: ${{ steps.inputs.outputs.target-os }}
@@ -81,20 +87,16 @@ jobs:
     - name: Check profiles
       id: checker
       run: |
-        profiles='${{ steps.publish-config-parser.outputs.profiles }}'
-        length=$( echo $profiles | jq '.include | length' )
+        length=$( echo '${{ steps.select-config.outputs.config-json }}' | jq '. | length' )
 
-        if(( $length > 0 )); then
-          echo "status=success" >> $GITHUB_OUTPUT
-        else
-          echo "status=failure" >> $GITHUB_OUTPUT
-          echo "No suitable publish profile found"
+        if(( $length == 0 )); then
+          echo "::error::No suitable publish configuration found"
+          exit 1
         fi
 
   publish:
     name: Publish
     needs: prepare
-    if: needs.prepare.outputs.status == 'success'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix: ${{fromJson(needs.prepare.outputs.matrix)}}
@@ -104,6 +106,7 @@ jobs:
       version-short: "${{ steps.version-number.outputs.preset-suffix }}"
 
     env:
+      dotnet-version: ${{ matrix.dotnet }}
       output-name: ${{ needs.prepare.outputs.output-name }}
       project-file: ${{ needs.prepare.outputs.project-file }}
       configuration: ${{ matrix.configuration }}
@@ -134,20 +137,20 @@ jobs:
     - uses: finebits/github-actions/toolset/file/replace-text@4a126d80a11c5fdc83ce884d3d23dffb30bc4495 # v2.0.0
       with:
         file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
-        placeholder: '\"<Gmail-ClientId>\"'
-        value: "${{ secrets.GMAIL_CLIENT_ID }}"
+        find-what: '\"<Gmail-ClientId>\"'
+        replace-with: "${{ secrets.GMAIL_CLIENT_ID }}"
 
     - uses: finebits/github-actions/toolset/file/replace-text@4a126d80a11c5fdc83ce884d3d23dffb30bc4495 # v2.0.0
       with:
         file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
-        placeholder: '\"<Gmail-ClientSecret>\"'
-        value: "${{ secrets.GMAIL_CLIENT_SECRET }}"
+        find-what: '\"<Gmail-ClientSecret>\"'
+        replace-with: "${{ secrets.GMAIL_CLIENT_SECRET }}"
 
     - uses: finebits/github-actions/toolset/file/replace-text@4a126d80a11c5fdc83ce884d3d23dffb30bc4495 # v2.0.0
       with:
         file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
-        placeholder: '\"<Outlook-ClientId>\"'
-        value: "${{ secrets.OUTLOOK_CLIENT_ID }}"
+        find-what: '\"<Outlook-ClientId>\"'
+        replace-with: "${{ secrets.OUTLOOK_CLIENT_ID }}"
 
     - name: Publish ${{ env.output-name }} [${{ env.version-short }}]
       run: |
