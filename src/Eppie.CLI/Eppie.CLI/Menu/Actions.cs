@@ -213,7 +213,7 @@ namespace Eppie.CLI.Menu
         {
             _logger.LogMethodCall();
 
-            List<Contact> contacts = (await _coreProvider.TuviMailCore.GetContactsAsync().ConfigureAwait(true)).ToList();
+            List<Contact> contacts = [.. await _coreProvider.TuviMailCore.GetContactsAsync().ConfigureAwait(true)];
             _application.PrintContacts(pageSize, contacts);
         }
 
