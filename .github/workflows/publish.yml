@@ -76,18 +76,20 @@ jobs:
 
     - name: Read options "${{ github.event.inputs.config-file }}"
       id: read-options
-      uses: finebits/github-actions/toolset/file/read@4a126d80a11c5fdc83ce884d3d23dffb30bc4495 # v2.0.0
+      uses: finebits/github-actions/toolset/file/read@39ec051fda4f00ab2ac5ffb6336ab0ea1ad9ad0f # v3.0.0
       with:
         file: ${{ steps.inputs.outputs.config-file }}
 
     - name: Select configuration "${{ github.event.inputs.config-file }}"
       id: select-config
-      uses: finebits/github-actions/toolset/select-configuration@4a126d80a11c5fdc83ce884d3d23dffb30bc4495 # v2.0.0
+      uses: finebits/github-actions/toolset/select-configuration@39ec051fda4f00ab2ac5ffb6336ab0ea1ad9ad0f # v3.0.0
       with:
         json-file: ${{ env.config-file }}
-        keywords: "${{ env.target-os }},${{ env.target-runtime }}"
         configs-set-jsonpath: ".profiles"
         keywords-set-jsonpath: ".tags"
+        keywords: |
+          ${{ env.target-os }}
+          ${{ env.target-runtime }}
       env:
         config-file: ${{ steps.inputs.outputs.config-file }}
         target-os: ${{ steps.inputs.outputs.target-os }}
