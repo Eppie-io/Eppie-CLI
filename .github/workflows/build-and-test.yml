@@ -99,7 +99,7 @@ jobs:
 
     - name: Generate test coverage badge
       if: ${{ env.test-project != '' && runner.os == 'Linux' && env.gist-id != '' && env.gist-auth-token != '' }}
-      uses: finebits/github-actions/badges/coverlet-coverage-badge@4a126d80a11c5fdc83ce884d3d23dffb30bc4495 # v2.0.0
+      uses: finebits/github-actions/badges/coverlet-coverage-badge@39ec051fda4f00ab2ac5ffb6336ab0ea1ad9ad0f # v3.0.0
       with:
         label: "coverage"
         report-root: "${{ env.test-report-root }}/**/"
