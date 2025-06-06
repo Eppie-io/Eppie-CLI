@@ -341,19 +341,20 @@ namespace Eppie.CLI.Menu
             {
                 Account account = await CreateAccountAsync().ConfigureAwait(false);
 
-                ICredentialsProvider credentialsProvider = _coreProvider.TuviMailCore.CredentialsManager.CreateCredentialsProvider(account);
+                ICredentialsProvider outgoingCredentialsProvider = _coreProvider.TuviMailCore.CredentialsManager.CreateOutgoingCredentialsProvider(account);
                 await _coreProvider.TuviMailCore.TestMailServerAsync(
                     account.OutgoingServerAddress,
                     account.OutgoingServerPort,
                     account.OutgoingMailProtocol,
-                    credentialsProvider
+                    outgoingCredentialsProvider
                     ).ConfigureAwait(false);
 
+                ICredentialsProvider incomingCredentialsProvider = _coreProvider.TuviMailCore.CredentialsManager.CreateIncomingCredentialsProvider(account);
                 await _coreProvider.TuviMailCore.TestMailServerAsync(
                     account.IncomingServerAddress,
                     account.IncomingServerPort,
                     account.IncomingMailProtocol,
-                    credentialsProvider).ConfigureAwait(false);
+                    incomingCredentialsProvider).ConfigureAwait(false);
 
                 await _coreProvider.TuviMailCore.AddAccountAsync(account).ConfigureAwait(false);
             }

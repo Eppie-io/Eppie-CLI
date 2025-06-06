@@ -434,9 +434,12 @@ namespace Eppie.CLI.Services
                 int count = 0;
                 foreach (Message item in items)
                 {
-                    PrintMessage(item, true);
-                    lastItem = item;
-                    ++count;
+                    if (item != null)
+                    {
+                        PrintMessage(item, true);
+                        lastItem = item;
+                        ++count;
+                    }
                 }
 
                 if (count < pageSize || !ReadBoolValue(_resourceLoader.Strings.AskMoreMessages))
