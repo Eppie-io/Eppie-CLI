@@ -55,7 +55,14 @@ namespace Eppie.CLI.Services
         {
             _logger.LogMethodCall();
 
-            return ReadSecretValue(_resourceLoader.Strings.AskPassword);
+            try
+            {
+                return ReadSecretValue(_resourceLoader.Strings.AskPassword);
+            }
+            catch (Exception ex) when (ex is IOException or InvalidOperationException)
+            {
+                return ReadValue(_resourceLoader.Strings.AskPassword);
+            }
         }
 
         internal string AskNewPassword()
