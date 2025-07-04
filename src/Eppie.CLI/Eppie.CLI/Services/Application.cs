@@ -55,14 +55,7 @@ namespace Eppie.CLI.Services
         {
             _logger.LogMethodCall();
 
-            try
-            {
-                return ReadSecretValue(_resourceLoader.Strings.AskPassword);
-            }
-            catch (Exception ex) when (ex is IOException or InvalidOperationException)
-            {
-                return ReadValue(_resourceLoader.Strings.AskPassword);
-            }
+            return ReadSecretValue(_resourceLoader.Strings.AskPassword);
         }
 
         internal string AskNewPassword()
@@ -418,7 +411,15 @@ namespace Eppie.CLI.Services
         private string ReadSecretValue(string message, ConsoleColor foreground = ConsoleColor.Gray)
         {
             _logger.LogMethodCall();
-            return ConsoleExtension.ReadValue(message, (message) => ConsoleExtension.Write(message, foreground), () => ConsoleExtension.ReadSecretLine()) ?? throw new ReadValueCanceledException();
+
+            try
+            {
+                return ConsoleExtension.ReadValue(message, (message) => ConsoleExtension.Write(message, foreground), () => ConsoleExtension.ReadSecretLine()) ?? throw new ReadValueCanceledException();
+            }
+            catch (Exception ex) when (ex is IOException or InvalidOperationException)
+            {
+                return ReadValue(message, foreground);
+            }
         }
 
         private bool ReadBoolValue(string message, ConsoleColor foreground = ConsoleColor.Gray)
