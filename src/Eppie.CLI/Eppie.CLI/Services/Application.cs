@@ -197,7 +197,7 @@ namespace Eppie.CLI.Services
         {
             _logger.LogMethodCall();
 
-            return ReadValue(_resourceLoader.Strings.AskMessageBody);
+            return ConsoleExtension.ReadMultiLine(_resourceLoader.Strings.AskMessageBody, "EOF") ?? throw new ReadValueCanceledException();
         }
 
         internal void PrintAccounts(IReadOnlyCollection<Account> accounts)
