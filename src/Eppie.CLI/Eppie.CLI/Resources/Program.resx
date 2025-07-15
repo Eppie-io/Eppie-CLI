@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -275,7 +275,7 @@
 {1} is a parameter containing the version of the application.</comment>
   </data>
   <data name="Message.AskMessageBody" xml:space="preserve">
-    <value>Enter a text message: </value>
+    <value>Enter a text message (end input with 'EOF' on a new line or Ctrl+C for cancel): </value>
     <comment>This message prompts the user to enter a text message.</comment>
   </data>
   <data name="Menu.ImportDescription" xml:space="preserve">
