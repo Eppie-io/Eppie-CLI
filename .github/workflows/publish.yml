@@ -210,7 +210,7 @@ jobs:
 
     - name: Sign files with Trusted Signing
       if: ${{ runner.os == 'Windows' && needs.prepare.outputs.trusted-signing == 'true' && steps.check-azure-secrets.outputs.secrets-exist == 'true' }}
-      uses: azure/trusted-signing-action@0d74250c661747df006298d0fb49944c10f16e03 # v0.5.1
+      uses: azure/trusted-signing-action@bb15ca63eb5548cc306f4f335c5617bb414abcad # v0.5.9
       with:
         azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
         azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
