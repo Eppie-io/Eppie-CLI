@@ -27,7 +27,6 @@ using Finebits.Authorization.OAuth2.Types;
 
 using Microsoft.Extensions.Logging;
 
-using Tuvi;
 using Tuvi.Core;
 using Tuvi.Core.Entities;
 
@@ -457,7 +456,7 @@ namespace Eppie.CLI.Menu
             Account account = Account.Default;
 
             account.Email = new EmailAddress(email);
-            account.Type = (int)MailBoxType.Proton;
+            account.Type = MailBoxType.Proton;
             account.AuthData = new ProtonAuthData()
             {
                 UserId = userId,
@@ -472,8 +471,19 @@ namespace Eppie.CLI.Menu
         {
             _logger.LogMethodCall();
 
-            Account account = await _coreProvider.TuviMailCore.NewDecentralizedAccountAsync().ConfigureAwait(false);
-            account.Type = (int)MailBoxType.Dec;
+            (string emailName, int index) = await _coreProvider.TuviMailCore.GetSecurityManager().GetNextDecAccountPublicKeyAsync(default).ConfigureAwait(false);
+
+            EmailAddress email = EmailAddress.CreateDecentralizedAddress(emailName, $"{index}");
+
+            Account account = new()
+            {
+                Email = email,
+                IsBackupAccountSettingsEnabled = true,
+                IsBackupAccountMessagesEnabled = true,
+                Type = MailBoxType.Dec,
+                DecentralizedAccountIndex = index
+            };
+
             await _coreProvider.TuviMailCore.AddAccountAsync(account).ConfigureAwait(false);
         }
 
