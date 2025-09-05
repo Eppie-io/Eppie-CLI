@@ -474,7 +474,7 @@ namespace Eppie.CLI.Menu
             const NetworkType NetworkType = NetworkType.Eppie;
             (string emailName, int index) = await _coreProvider.TuviMailCore.GetSecurityManager().GetNextDecAccountPublicKeyAsync(NetworkType, default).ConfigureAwait(false);
 
-            EmailAddress email = EmailAddress.CreateDecentralizedAddress(NetworkType, emailName, $"{index}");
+            EmailAddress email = EmailAddress.CreateDecentralizedAddress(NetworkType, emailName);
 
             Account account = new()
             {
