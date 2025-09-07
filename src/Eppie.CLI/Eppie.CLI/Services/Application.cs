@@ -308,6 +308,24 @@ namespace Eppie.CLI.Services
             Console.WriteLine(_resourceLoader.Strings.AppRestored);
         }
 
+        internal void WriteAuthorizationCanceledMessage()
+        {
+            _logger.LogDebug("Authorization operation was canceled.");
+            Console.WriteLine(_resourceLoader.Strings.AuthorizationCanceled);
+        }
+
+        internal void WriteAuthorizationToServiceMessage(string serviceName)
+        {
+            _logger.LogDebug("Authorization to {ServiceName} service starting.", serviceName);
+            Console.WriteLine(_resourceLoader.Strings.GetAuthorizationToServiceText(serviceName));
+        }
+
+        internal void WriteAuthorizationCompletedMessage()
+        {
+            _logger.LogDebug("Authorization completed successfully.");
+            Console.WriteLine(_resourceLoader.Strings.AuthorizationCompleted);
+        }
+
         internal void WriteInvalidPasswordWarning()
         {
             LogCommandWarning("Invalid Password");
