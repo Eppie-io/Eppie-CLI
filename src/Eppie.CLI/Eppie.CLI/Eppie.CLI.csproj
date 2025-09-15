@@ -32,12 +32,12 @@
     <PackageReference Include="Finebits.Authorization.OAuth2.AuthenticationBroker.Desktop" Version="0.4.0-preview.1" />
     <PackageReference Include="Finebits.Authorization.OAuth2.Google" Version="0.4.0-preview.1" />
     <PackageReference Include="Finebits.Authorization.OAuth2.Outlook" Version="0.4.0-preview.1" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.4" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.4" />
-    <PackageReference Include="Microsoft.Extensions.Localization" Version="9.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Localization" Version="9.0.9" />
     <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
     <PackageReference Include="Serilog.Enrichers.Process" Version="3.0.0" />
-    <PackageReference Include="Serilog.Enrichers.Sensitive" Version="1.7.3" />
+    <PackageReference Include="Serilog.Enrichers.Sensitive" Version="2.1.0" />
     <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
     <PackageReference Include="Serilog.Expressions" Version="5.0.0" />
     <PackageReference Include="Serilog.Extensions.Hosting" Version="9.0.0" />
