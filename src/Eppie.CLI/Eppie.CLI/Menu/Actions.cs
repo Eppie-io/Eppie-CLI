@@ -446,6 +446,7 @@ namespace Eppie.CLI.Menu
                 _application.AskAccountPassword(),
                 (ct) => Task.FromResult(_application.AskTwoFactorCode()),
                 (ct) => Task.FromResult(_application.AskMailboxPassword()),
+                null, // captcha does not supported in CLI
                 default).ConfigureAwait(false);
 
             Account account = Account.Default;
