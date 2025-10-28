@@ -84,6 +84,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tuvi.Core.Dec.Bitcoin", "..
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tuvi.Core.Dec.Impl", "..\..\gitmodules\TuviCore\Sources\Tuvi.Core.Dec.Impl\Tuvi.Core.Dec.Impl.csproj", "{B34E82B2-B9CD-FCA0-9B47-F94A54300D5E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tuvi.Core.Dec.Ethereum", "..\..\gitmodules\TuviCore\Sources\Tuvi.Core.Dec.Ethereum\Tuvi.Core.Dec.Ethereum.csproj", "{4278EEF1-9839-CDB1-AC69-5E45FD1263D3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -218,6 +220,10 @@ Global
 		{B34E82B2-B9CD-FCA0-9B47-F94A54300D5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B34E82B2-B9CD-FCA0-9B47-F94A54300D5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B34E82B2-B9CD-FCA0-9B47-F94A54300D5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4278EEF1-9839-CDB1-AC69-5E45FD1263D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4278EEF1-9839-CDB1-AC69-5E45FD1263D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4278EEF1-9839-CDB1-AC69-5E45FD1263D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4278EEF1-9839-CDB1-AC69-5E45FD1263D3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -254,6 +260,7 @@ Global
 		{85AACD14-0FF0-4043-8AA0-F29FE2651191} = {24A7F842-B7CD-4579-94C2-F17B01E9263C}
 		{F2B0DFEF-98F4-D9C0-575C-966221CA4F12} = {29DAA1F1-3E69-41F6-87BB-59E11FC69AE2}
 		{B34E82B2-B9CD-FCA0-9B47-F94A54300D5E} = {29DAA1F1-3E69-41F6-87BB-59E11FC69AE2}
+		{4278EEF1-9839-CDB1-AC69-5E45FD1263D3} = {29DAA1F1-3E69-41F6-87BB-59E11FC69AE2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5BB09B35-0735-4BAD-AC4E-C3556F3B72D1}
