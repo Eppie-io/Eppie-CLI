@@ -58,38 +58,27 @@ namespace Eppie.CLI.Services
                 return _localizer.LoadFormattedString(GetStringResourceName(category: "Header", name: "LogoFormat"), name, version);
             }
 
-            private string? _description;
-            internal string Description => _description ??= _localizer.LoadString(GetStringResourceName(category: "Header"));
+            internal string Description => field ??= _localizer.LoadString(GetStringResourceName(category: "Header"));
 
-            private string? _goodbye;
-            internal string Goodbye => _goodbye ??= _localizer.LoadString(GetStringResourceName());
+            internal string Goodbye => field ??= _localizer.LoadString(GetStringResourceName());
 
-            private string? _seedPhraseHeader;
-            internal string SeedPhraseHeader => _seedPhraseHeader ??= _localizer.LoadString(GetStringResourceName());
+            internal string SeedPhraseHeader => field ??= _localizer.LoadString(GetStringResourceName());
 
-            private string? _seedPhraseFooter;
-            internal string SeedPhraseFooter => _seedPhraseFooter ??= _localizer.LoadString(GetStringResourceName());
+            internal string SeedPhraseFooter => field ??= _localizer.LoadString(GetStringResourceName());
 
-            private string? _askPassword;
-            internal string AskPassword => _askPassword ??= _localizer.LoadString(GetStringResourceName());
+            internal string AskPassword => field ??= _localizer.LoadString(GetStringResourceName());
 
-            private string? _askNewPassword;
-            internal string AskNewPassword => _askNewPassword ??= _localizer.LoadString(GetStringResourceName());
+            internal string AskNewPassword => field ??= _localizer.LoadString(GetStringResourceName());
 
-            private string? _confirmPassword;
-            internal string ConfirmPassword => _confirmPassword ??= _localizer.LoadString(GetStringResourceName());
+            internal string ConfirmPassword => field ??= _localizer.LoadString(GetStringResourceName());
 
-            private string? _askAccountAddress;
-            internal string AskAccountAddress => _askAccountAddress ??= _localizer.LoadString(GetStringResourceName());
+            internal string AskAccountAddress => field ??= _localizer.LoadString(GetStringResourceName());
 
-            private string? _askAccountPassword;
-            internal string AskAccountPassword => _askAccountPassword ??= _localizer.LoadString(GetStringResourceName());
+            internal string AskAccountPassword => field ??= _localizer.LoadString(GetStringResourceName());
 
-            private string? _askTwoFactorCode;
-            internal string AskTwoFactorCode => _askTwoFactorCode ??= _localizer.LoadString(GetStringResourceName());
+            internal string AskTwoFactorCode => field ??= _localizer.LoadString(GetStringResourceName());
 
-            private string? _askMailboxPassword;
-            internal string AskMailboxPassword => _askMailboxPassword ??= _localizer.LoadString(GetStringResourceName());
+            internal string AskMailboxPassword => field ??= _localizer.LoadString(GetStringResourceName());
 
             private string GetServerAddressQuestionText(string resourceName, string? defaultServer)
             {
@@ -123,53 +112,37 @@ namespace Eppie.CLI.Services
                 return _localizer.LoadFormattedString(GetStringResourceName(category: "Message", name: "AskIMAPPort"), defaultPort);
             }
 
-            private string? _headerAccountList;
-            internal string HeaderAccountList => _headerAccountList ??= _localizer.LoadString(GetStringResourceName());
+            internal string HeaderAccountList => field ??= _localizer.LoadString(GetStringResourceName());
 
-            private string? _emptyAccountList;
-            internal string EmptyAccountList => _emptyAccountList ??= _localizer.LoadString(GetStringResourceName());
+            internal string EmptyAccountList => field ??= _localizer.LoadString(GetStringResourceName());
 
-            private string? _emptyContactList;
-            internal string EmptyContactList => _emptyContactList ??= _localizer.LoadString(GetStringResourceName());
+            internal string EmptyContactList => field ??= _localizer.LoadString(GetStringResourceName());
 
-            private string? _appReset;
-            internal string AppReset => _appReset ??= _localizer.LoadString(GetStringResourceName());
+            internal string AppReset => field ??= _localizer.LoadString(GetStringResourceName());
 
-            private string? _appOpened;
-            internal string AppOpened => _appOpened ??= _localizer.LoadString(GetStringResourceName());
+            internal string AppOpened => field ??= _localizer.LoadString(GetStringResourceName());
 
-            private string? _appRestored;
-            internal string AppRestored => _appRestored ??= _localizer.LoadString(GetStringResourceName());
+            internal string AppRestored => field ??= _localizer.LoadString(GetStringResourceName());
 
-            private string? _confirmReset;
-            internal string ConfirmReset => _confirmReset ??= _localizer.LoadString(GetStringResourceName());
+            internal string ConfirmReset => field ??= _localizer.LoadString(GetStringResourceName());
 
-            private string? _askSeedPhrase;
-            internal string AskSeedPhrase => _askSeedPhrase ??= _localizer.LoadString(GetStringResourceName());
+            internal string AskSeedPhrase => field ??= _localizer.LoadString(GetStringResourceName());
 
-            private string? _askRestorePath;
-            internal string AskRestorePath => _askRestorePath ??= _localizer.LoadString(GetStringResourceName());
+            internal string AskRestorePath => field ??= _localizer.LoadString(GetStringResourceName());
 
-            private string? _askMessageBody;
-            internal string AskMessageBody => _askMessageBody ??= _localizer.LoadString(GetStringResourceName());
+            internal string AskMessageBody => field ??= _localizer.LoadString(GetStringResourceName());
 
-            private string? _authorizationCanceled;
-            internal string AuthorizationCanceled => _authorizationCanceled ??= _localizer.LoadString(GetStringResourceName());
+            internal string AuthorizationCanceled => field ??= _localizer.LoadString(GetStringResourceName());
 
-            private string? _authorizationCompleted;
-            internal string AuthorizationCompleted => _authorizationCompleted ??= _localizer.LoadString(GetStringResourceName());
+            internal string AuthorizationCompleted => field ??= _localizer.LoadString(GetStringResourceName());
 
-            private string? _invalidPassword;
-            internal string InvalidPassword => _invalidPassword ??= _localizer.LoadString(GetStringResourceName(category: "Warning"));
+            internal string InvalidPassword => field ??= _localizer.LoadString(GetStringResourceName(category: "Warning"));
 
-            private string? _secondInitialization;
-            internal string SecondInitialization => _secondInitialization ??= _localizer.LoadString(GetStringResourceName(category: "Warning"));
+            internal string SecondInitialization => field ??= _localizer.LoadString(GetStringResourceName(category: "Warning"));
 
-            private string? _uninitialized;
-            internal string Uninitialized => _uninitialized ??= _localizer.LoadString(GetStringResourceName(category: "Warning"));
+            internal string Uninitialized => field ??= _localizer.LoadString(GetStringResourceName(category: "Warning"));
 
-            private string? _impossibleInitialization;
-            internal string ImpossibleInitialization => _impossibleInitialization ??= _localizer.LoadString(GetStringResourceName(category: "Error"));
+            internal string ImpossibleInitialization => field ??= _localizer.LoadString(GetStringResourceName(category: "Error"));
 
             internal string GetUnknownFolderWarning(string address, string folder)
             {
@@ -186,95 +159,65 @@ namespace Eppie.CLI.Services
                 return _localizer.LoadFormattedString(GetStringResourceName(category: "Menu", name: "Description"), name, version);
             }
 
-            private string? _exitDescription;
-            internal string ExitDescription => _exitDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+            internal string ExitDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
 
-            private string? _initDescription;
-            internal string InitDescription => _initDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+            internal string InitDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
 
-            private string? _openDescription;
-            internal string OpenDescription => _openDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+            internal string OpenDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
 
-            private string? _resetDescription;
-            internal string ResetDescription => _resetDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+            internal string ResetDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
 
-            private string? _addAccountDescription;
-            internal string AddAccountDescription => _addAccountDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+            internal string AddAccountDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
 
-            private string? _listAccountsDescription;
-            internal string ListAccountsDescription => _listAccountsDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+            internal string ListAccountsDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
 
-            private string? _restoreDescription;
-            internal string RestoreDescription => _restoreDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+            internal string RestoreDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
 
-            private string? _sendDescription;
-            internal string SendDescription => _sendDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+            internal string SendDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
 
-            private string? _importDescription;
-            internal string ImportDescription => _importDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+            internal string ImportDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
 
-            private string? _showMessageDescription;
-            internal string ShowMessageDescription => _showMessageDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+            internal string ShowMessageDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
 
-            private string? _syncFolderDescription;
-            internal string SyncFolderDescription => _syncFolderDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+            internal string SyncFolderDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
 
-            private string? _showAllMessagesDescription;
-            internal string ShowAllMessagesDescription => _showAllMessagesDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+            internal string ShowAllMessagesDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
 
-            private string? _showFolderMessagesDescription;
-            internal string ShowFolderMessagesDescription => _showFolderMessagesDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+            internal string ShowFolderMessagesDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
 
-            private string? _showContactMessagesDescription;
-            internal string ShowContactMessagesDescription => _showContactMessagesDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+            internal string ShowContactMessagesDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
 
-            private string? _listContactsDescription;
-            internal string ListContactsDescription => _listContactsDescription ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+            internal string ListContactsDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
 
-            private string? _accountTypeDescription;
-            internal string AccountTypeDescription => _accountTypeDescription ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+            internal string AccountTypeDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
 
-            private string? _senderDescription;
-            internal string SenderDescription => _senderDescription ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+            internal string SenderDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
 
-            private string? _receiverDescription;
-            internal string ReceiverDescription => _receiverDescription ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+            internal string ReceiverDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
 
-            private string? _subjectDescription;
-            internal string SubjectDescription => _subjectDescription ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+            internal string SubjectDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
 
-            private string? _keyBundleFileDescription;
-            internal string KeyBundleFileDescription => _keyBundleFileDescription ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+            internal string KeyBundleFileDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
 
-            private string? _accountAddressDescription;
-            internal string AccountAddressDescription => _accountAddressDescription ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+            internal string AccountAddressDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
 
-            private string? _contactAddressDescription;
-            internal string ContactAddressDescription => _contactAddressDescription ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+            internal string ContactAddressDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
 
-            private string? _accountFolderDescription;
-            internal string AccountFolderDescription => _accountFolderDescription ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+            internal string AccountFolderDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
 
-            private string? _pageSizeDescription;
-            internal string PageSizeDescription => _pageSizeDescription ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+            internal string PageSizeDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
 
-            private string? _messageIDDescription;
-            internal string MessageIDDescription => _messageIDDescription ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+            internal string MessageIDDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
 
-            private string? _messagePKDescription;
-            internal string MessagePKDescription => _messagePKDescription ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+            internal string MessagePKDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
 
-            private string? _printAllMessagesHeader;
-            internal string PrintAllMessagesHeader => _printAllMessagesHeader ??= _localizer.LoadString(GetStringResourceName(category: "Information"));
+            internal string PrintAllMessagesHeader => field ??= _localizer.LoadString(GetStringResourceName(category: "Information"));
 
-            private string? _askMoreMessages;
-            internal string AskMoreMessages => _askMoreMessages ??= _localizer.LoadString(GetStringResourceName());
+            internal string AskMoreMessages => field ??= _localizer.LoadString(GetStringResourceName());
 
-            private string? _askMoreContacts;
-            internal string AskMoreContacts => _askMoreContacts ??= _localizer.LoadString(GetStringResourceName());
+            internal string AskMoreContacts => field ??= _localizer.LoadString(GetStringResourceName());
 
-            private string? _selectOptionHeader;
-            internal string SelectOptionHeader => _selectOptionHeader ??= _localizer.LoadString(GetStringResourceName());
+            internal string SelectOptionHeader => field ??= _localizer.LoadString(GetStringResourceName());
 
             internal string GetPrintFolderMessagesHeader(string accountAddress, string folder)
             {
@@ -376,20 +319,15 @@ namespace Eppie.CLI.Services
                 ExecutingAssembly = Assembly.GetExecutingAssembly();
             }
 
-            private string? _name;
-            internal string Name => _name ??= ExecutingAssembly.GetName().Name ?? DefaultApplicationTitle;
+            internal string Name => field ??= ExecutingAssembly.GetName().Name ?? DefaultApplicationTitle;
 
-            private string? _version;
-            internal string Version => _version ??= ExecutingAssembly.GetName().Version?.ToString() ?? DefaultApplicationVersion;
+            internal string Version => field ??= ExecutingAssembly.GetName().Version?.ToString() ?? DefaultApplicationVersion;
 
-            private string? _title;
-            internal string Title => _title ??= ReadAssemblyAttribute<AssemblyTitleAttribute>(ExecutingAssembly)?.Title ?? DefaultApplicationTitle;
+            internal string Title => field ??= ReadAssemblyAttribute<AssemblyTitleAttribute>(ExecutingAssembly)?.Title ?? DefaultApplicationTitle;
 
-            private string? _fileVersion;
-            internal string FileVersion => _fileVersion ??= ReadAssemblyAttribute<AssemblyFileVersionAttribute>(ExecutingAssembly)?.Version ?? DefaultApplicationVersion;
+            internal string FileVersion => field ??= ReadAssemblyAttribute<AssemblyFileVersionAttribute>(ExecutingAssembly)?.Version ?? DefaultApplicationVersion;
 
-            private string? _informationalVersion;
-            internal string InformationalVersion => _informationalVersion ??= ReadAssemblyAttribute<AssemblyInformationalVersionAttribute>(ExecutingAssembly)?.InformationalVersion ?? DefaultApplicationVersion;
+            internal string InformationalVersion => field ??= ReadAssemblyAttribute<AssemblyInformationalVersionAttribute>(ExecutingAssembly)?.InformationalVersion ?? DefaultApplicationVersion;
 
             private static TAttribute? ReadAssemblyAttribute<TAttribute>(Assembly assembly)
                 where TAttribute : Attribute

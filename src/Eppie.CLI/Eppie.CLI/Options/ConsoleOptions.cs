@@ -39,13 +39,12 @@ namespace Eppie.CLI.Options
         /// Gets a configuration value that can be read from the '--Console:Encoding' or '/Console:Encoding' command-line argument,
         /// or from the '$.Console.Encoding' parameter in the 'appsettings.json' or 'appsettings.[<see cref="IHostEnvironment.EnvironmentName"/>].json' file.
         /// </summary>
-        public Encoding Encoding => _encoding ??= OptionConverter.ConvertValue(
+        public Encoding Encoding => field ??= OptionConverter.ConvertValue(
             value: EncodingName,
             defaultValue: Encoding.Unicode,
             converter: Encoding.GetEncoding,
             ignore: (exception) => exception is ArgumentException or NotSupportedException);
 
         private string? EncodingName { get; init; }
-        private Encoding? _encoding;
     }
 }
