@@ -284,13 +284,15 @@ jobs:
       if: ${{ env.GITHUB_ACTION_GO_PACK == 'true' }}
       shell: bash
       run: |
-        item=$(find "${{ env.artifacts-root }}" -name "${{ matrix.artifact_pattern }}" | head -n 1)
-        if [ ! -d "$item" ] ; then
-          echo "::error::Artifact '${{ matrix.artifact_pattern }}' not found."
+
+        bin="${{ env.artifacts-root }}"
+
+        if [ -z "$( ls -A "$bin" )" ] ; then
+          echo "::error::Binary files not found."
           exit 1
         fi
 
-        echo "$(bash "${{ env.prepare-script }}" "$item")"
+        echo "$(bash "${{ env.prepare-script }}" "$bin")"
         mkdir -p "${{ env.output-path }}"
 
     - name: Pack appimagetool
