@@ -21,7 +21,7 @@ on:
     - cron: '43 22 * * 6'
 
 env:
-  dotnet-version: 9.x
+  dotnet-version: 10.x
 
 jobs:
   analyze:
