@@ -46,11 +46,8 @@ namespace Eppie.CLI.Services
 
             await TuviMailCore.ResetApplicationAsync().ConfigureAwait(false);
 
-            if (_tuviMailCore is not null)
-            {
-                _tuviMailCore.Dispose();
-                _tuviMailCore = null;
-            }
+            _tuviMailCore?.Dispose();
+            _tuviMailCore = null;
         }
 
         private ITuviMail CreateTuviMail()
