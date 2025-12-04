@@ -444,9 +444,9 @@ namespace Eppie.CLI.Menu
             (string userId, string refreshToken, string saltedKeyPass) = await Tuvi.Proton.ClientAuth.LoginFullAsync(
                 email,
                 _application.AskAccountPassword(),
-                (ct) => Task.FromResult(_application.AskTwoFactorCode()),
-                (ct) => Task.FromResult(_application.AskMailboxPassword()),
-                null, // captcha does not supported in CLI
+                (ex, ct) => Task.FromResult((true, _application.AskTwoFactorCode(ex is null))),
+                (ex, ct) => Task.FromResult((true, _application.AskMailboxPassword(ex is null))),
+                null, // human verification does not supported in CLI
                 default).ConfigureAwait(false);
 
             Account account = Account.Default;

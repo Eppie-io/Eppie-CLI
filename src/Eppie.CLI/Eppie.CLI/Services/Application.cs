@@ -86,16 +86,26 @@ namespace Eppie.CLI.Services
             return ReadSecretValue(_resourceLoader.Strings.AskAccountPassword);
         }
 
-        internal string AskTwoFactorCode()
+        internal string AskTwoFactorCode(bool firstAttempt)
         {
             _logger.LogMethodCall();
+
+            if (!firstAttempt)
+            {
+                WriteUnsuccessfulAttemptWarning();
+            }
 
             return ReadValue(_resourceLoader.Strings.AskTwoFactorCode);
         }
 
-        internal string AskMailboxPassword()
+        internal string AskMailboxPassword(bool firstAttempt)
         {
             _logger.LogMethodCall();
+
+            if (!firstAttempt)
+            {
+                WriteUnsuccessfulAttemptWarning();
+            }
 
             return ReadSecretValue(_resourceLoader.Strings.AskMailboxPassword);
         }
@@ -350,6 +360,15 @@ namespace Eppie.CLI.Services
 
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine(_resourceLoader.Strings.Uninitialized);
+            Console.ResetColor();
+        }
+
+        internal void WriteUnsuccessfulAttemptWarning()
+        {
+            LogCommandWarning("The attempt was unsuccessful.");
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(_resourceLoader.Strings.UnsuccessfulAttempt);
             Console.ResetColor();
         }
 

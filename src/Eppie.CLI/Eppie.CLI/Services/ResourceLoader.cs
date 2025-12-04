@@ -142,6 +142,8 @@ namespace Eppie.CLI.Services
 
             internal string Uninitialized => field ??= _localizer.LoadString(GetStringResourceName(category: "Warning"));
 
+            internal string UnsuccessfulAttempt => field ??= _localizer.LoadString(GetStringResourceName(category: "Warning"));
+
             internal string ImpossibleInitialization => field ??= _localizer.LoadString(GetStringResourceName(category: "Error"));
 
             internal string GetUnknownFolderWarning(string address, string folder)
