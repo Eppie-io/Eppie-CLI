@@ -190,6 +190,10 @@
     <value>Warning: The application hasn't been initialized yet.</value>
     <comment>This message warns the user that the application hasn't been initialized yet.</comment>
   </data>
+  <data name="Warning.UnsuccessfulAttempt" xml:space="preserve">
+    <value>Warning: The operation was unsuccessful. Please try again. Press 'Ctrl+C' to abort.</value>
+    <comment>This message warns the user that the operation was unsuccessful and suggests to try again.</comment>
+  </data>
   <data name="Message.AskAccountAddress" xml:space="preserve">
     <value>Enter account address: </value>
     <comment>This message prompts the user to enter the service account address.</comment>
