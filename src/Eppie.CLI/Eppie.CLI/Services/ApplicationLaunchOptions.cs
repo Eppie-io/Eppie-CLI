@@ -46,10 +46,8 @@ namespace Eppie.CLI.Services
 
             string? value = configuration[key];
 
-            // Command-line flags may be provided without an explicit value, which is treated as enabled.
-            return value is not null
-                && (string.IsNullOrWhiteSpace(value)
-                    || (bool.TryParse(value, out bool parsedValue) && parsedValue));
+            // Command-line flags are expected to provide an explicit boolean value, for example: --unlock-password-stdin=true.
+            return bool.TryParse(value, out bool parsedValue) && parsedValue;
         }
     }
 }
