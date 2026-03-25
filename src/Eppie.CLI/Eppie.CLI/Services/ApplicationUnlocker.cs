@@ -18,17 +18,42 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-using Eppie.CLI.Common;
+using Eppie.CLI.Tools;
 
-namespace Eppie.CLI.Options
+using Microsoft.Extensions.Logging;
+
+namespace Eppie.CLI.Services
 {
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal class MailOptions : IConfigurationSectionOptions
+    internal sealed class ApplicationUnlocker(
+        ILogger<ApplicationUnlocker> logger,
+        Application application,
+        CoreProvider coreProvider) : IApplicationUnlocker
     {
-        public string SectionName => nameof(MailOptions);
+        private readonly ILogger<ApplicationUnlocker> _logger = logger;
+        private readonly Application _application = application;
+        private readonly CoreProvider _coreProvider = coreProvider;
 
-        public IReadOnlyDictionary<MailServer, MailServerConfiguration> Servers { get; init; } = new Dictionary<MailServer, MailServerConfiguration>();
+        public async Task<bool> UnlockAsync(CancellationToken cancellationToken)
+        {
+            _logger.LogMethodCall();
+
+            bool isFirstTime = await _coreProvider.TuviMailCore.IsFirstApplicationStartAsync(cancellationToken).ConfigureAwait(false);
+
+            if (isFirstTime)
+            {
+                _application.WriteUninitializedAppWarning();
+                return false;
+            }
+
+            bool success = await _coreProvider.TuviMailCore.InitializeApplicationAsync(_application.AskPassword(), cancellationToken).ConfigureAwait(false);
+
+            if (!success)
+            {
+                _application.WriteInvalidPasswordWarning();
+            }
+
+            return success;
+        }
     }
-
-    internal record MailServerConfiguration(string SMTP = "", int SMTPPort = 0, string IMAP = "", int IMAPPort = 0);
 }

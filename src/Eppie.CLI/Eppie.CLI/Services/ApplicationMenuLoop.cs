@@ -1,6 +1,6 @@
 // ---------------------------------------------------------------------------- //
 //                                                                              //
-//   Copyright 2024 Eppie (https://eppie.io)                                    //
+//   Copyright 2026 Eppie (https://eppie.io)                                    //
 //                                                                              //
 //   Licensed under the Apache License, Version 2.0 (the "License"),            //
 //   you may not use this file except in compliance with the License.           //
@@ -18,7 +18,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-using Eppie.CLI.Menu;
 using Eppie.CLI.Tools;
 
 using Microsoft.Extensions.Hosting;
@@ -30,21 +29,29 @@ namespace Eppie.CLI.Services
     internal partial class ApplicationMenuLoop(
         ILogger<ApplicationMenuLoop> logger,
         IHostApplicationLifetime lifetime,
-        MainMenu mainMenu) : BackgroundService
+        IStartupCommandRunner startupCommandRunner,
+        Menu.IApplicationMenu applicationMenu) : BackgroundService
     {
         private readonly ILogger<ApplicationMenuLoop> _logger = logger;
         private readonly IHostApplicationLifetime _lifetime = lifetime;
-        private readonly MainMenu _mainMenu = mainMenu;
+        private readonly IStartupCommandRunner _startupCommandRunner = startupCommandRunner;
+        private readonly Menu.IApplicationMenu _applicationMenu = applicationMenu;
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _logger.LogMethodCall();
             await Task.Yield();
 
+            if (!stoppingToken.IsCancellationRequested && await _startupCommandRunner.TryRunAsync(stoppingToken).ConfigureAwait(false))
+            {
+                _lifetime.StopApplication();
+                return;
+            }
+
             if (!stoppingToken.IsCancellationRequested)
             {
                 using CancellationTokenSource cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, _lifetime.ApplicationStopping);
-                await _mainMenu.LoopAsync(cancellationTokenSource.Token).ConfigureAwait(false);
+                await _applicationMenu.LoopAsync(cancellationTokenSource.Token).ConfigureAwait(false);
             }
         }
     }

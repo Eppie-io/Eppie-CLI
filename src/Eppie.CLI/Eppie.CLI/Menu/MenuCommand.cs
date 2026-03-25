@@ -1,6 +1,6 @@
 // ---------------------------------------------------------------------------- //
 //                                                                              //
-//   Copyright 2024 Eppie (https://eppie.io)                                    //
+//   Copyright 2026 Eppie (https://eppie.io)                                    //
 //                                                                              //
 //   Licensed under the Apache License, Version 2.0 (the "License"),            //
 //   you may not use this file except in compliance with the License.           //
@@ -26,21 +26,64 @@ namespace Eppie.CLI.Menu
 {
     internal static class MenuCommand
     {
-        public const string Exit = "exit";
-        public const string Initialize = "init";
-        public const string Open = "open";
-        public const string Reset = "reset";
-        public const string Restore = "restore";
-        public const string Send = "send";
-        public const string Import = "import";
-        public const string ListAccounts = "list-accounts";
-        public const string AddAccount = "add-account";
-        public const string ListContacts = "list-contacts";
-        public const string ShowMessage = "show-message";
-        public const string ShowAllMessages = "show-all-messages";
-        public const string SyncFolder = "sync-folder";
-        public const string ShowFolderMessages = "show-folder-messages";
-        public const string ShowContactMessages = "show-contact-messages";
+        internal readonly record struct Command(string Name, bool RequiresUnlockedApplication)
+        {
+            public static implicit operator string(Command command)
+            {
+                return command.Name;
+            }
+
+            public override string ToString()
+            {
+                return Name;
+            }
+        }
+
+        public static readonly Command Exit = new("exit", RequiresUnlockedApplication: false);
+        public static readonly Command Initialize = new("init", RequiresUnlockedApplication: false);
+        public static readonly Command Open = new("open", RequiresUnlockedApplication: false);
+        public static readonly Command Reset = new("reset", RequiresUnlockedApplication: false);
+        public static readonly Command Restore = new("restore", RequiresUnlockedApplication: false);
+        public static readonly Command Send = new("send", RequiresUnlockedApplication: true);
+        public static readonly Command Import = new("import", RequiresUnlockedApplication: true);
+        public static readonly Command ListAccounts = new("list-accounts", RequiresUnlockedApplication: true);
+        public static readonly Command AddAccount = new("add-account", RequiresUnlockedApplication: true);
+        public static readonly Command ListContacts = new("list-contacts", RequiresUnlockedApplication: true);
+        public static readonly Command ShowMessage = new("show-message", RequiresUnlockedApplication: true);
+        public static readonly Command ShowAllMessages = new("show-all-messages", RequiresUnlockedApplication: true);
+        public static readonly Command SyncFolder = new("sync-folder", RequiresUnlockedApplication: true);
+        public static readonly Command ShowFolderMessages = new("show-folder-messages", RequiresUnlockedApplication: true);
+        public static readonly Command ShowContactMessages = new("show-contact-messages", RequiresUnlockedApplication: true);
+
+        private static readonly IReadOnlyList<Command> StartupCommands =
+        [
+            Exit,
+            Initialize,
+            Open,
+            Reset,
+            Restore,
+            Send,
+            Import,
+            ListAccounts,
+            AddAccount,
+            ListContacts,
+            ShowMessage,
+            ShowAllMessages,
+            SyncFolder,
+            ShowFolderMessages,
+            ShowContactMessages,
+        ];
+
+        private static readonly IReadOnlyDictionary<string, Command> StartupCommandsByName = StartupCommands
+            .ToDictionary(static command => command.Name, StringComparer.Ordinal);
+
+        internal static bool RequiresUnlockedApplication(string commandName)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(commandName);
+
+            return StartupCommandsByName.TryGetValue(commandName, out Command command)
+                && command.RequiresUnlockedApplication;
+        }
 
         public static class CommandAddAccountOptions
         {

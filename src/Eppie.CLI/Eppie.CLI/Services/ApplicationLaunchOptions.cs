@@ -18,17 +18,38 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-using Eppie.CLI.Common;
+using Microsoft.Extensions.Configuration;
 
-namespace Eppie.CLI.Options
+namespace Eppie.CLI.Services
 {
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal class MailOptions : IConfigurationSectionOptions
+    internal sealed class ApplicationLaunchOptions(IConfiguration configuration)
     {
-        public string SectionName => nameof(MailOptions);
+        private const string StartupCommandConfigurationKey = "command";
+        private const string UnlockPasswordFromStandardInputConfigurationKey = "unlock-password-stdin";
 
-        public IReadOnlyDictionary<MailServer, MailServerConfiguration> Servers { get; init; } = new Dictionary<MailServer, MailServerConfiguration>();
+        internal string? StartupCommand { get; } = ReadStartupCommand(configuration);
+
+        internal bool UnlockPasswordFromStandardInput { get; } = ReadFlagOption(configuration, UnlockPasswordFromStandardInputConfigurationKey);
+
+        private static string? ReadStartupCommand(IConfiguration configuration)
+        {
+            ArgumentNullException.ThrowIfNull(configuration);
+
+            string? startupCommand = configuration[StartupCommandConfigurationKey];
+            return string.IsNullOrWhiteSpace(startupCommand) ? null : startupCommand;
+        }
+
+        private static bool ReadFlagOption(IConfiguration configuration, string key)
+        {
+            ArgumentNullException.ThrowIfNull(configuration);
+
+            string? value = configuration[key];
+
+            // Command-line flags may be provided without an explicit value, which is treated as enabled.
+            return value is not null
+                && (string.IsNullOrWhiteSpace(value)
+                    || (bool.TryParse(value, out bool parsedValue) && parsedValue));
+        }
     }
-
-    internal record MailServerConfiguration(string SMTP = "", int SMTPPort = 0, string IMAP = "", int IMAPPort = 0);
 }

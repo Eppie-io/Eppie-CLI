@@ -1,6 +1,6 @@
 // ---------------------------------------------------------------------------- //
 //                                                                              //
-//   Copyright 2024 Eppie (https://eppie.io)                                    //
+//   Copyright 2026 Eppie (https://eppie.io)                                    //
 //                                                                              //
 //   Licensed under the Apache License, Version 2.0 (the "License"),            //
 //   you may not use this file except in compliance with the License.           //
@@ -30,7 +30,7 @@ using Tuvi.Toolkit.Cli.CommandLine;
 namespace Eppie.CLI.Menu
 {
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal class MainMenu
+    internal class MainMenu : IApplicationMenu
     {
         private const string CommandMark = ">>>";
 
@@ -38,6 +38,7 @@ namespace Eppie.CLI.Menu
         private readonly Actions _actions;
         private readonly Application _application;
         private readonly ResourceLoader _resourceLoader;
+        private IAsyncParser? _commandParser;
 
         public MainMenu(
             ILoggerFactory loggerFactory,
@@ -55,19 +56,29 @@ namespace Eppie.CLI.Menu
         public async Task LoopAsync(CancellationToken stoppingToken)
         {
             _logger.LogMethodCall();
-            IAsyncParser commandParser = Create();
 
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
-                    await InvokeCommandAsync(commandParser, _application.ReadValue($"{CommandMark} ")).ConfigureAwait(false);
+                    await InvokeCommandAsync(GetCommandParser(), _application.ReadValue($"{CommandMark} ")).ConfigureAwait(false);
                 }
                 catch (ReadValueCanceledException)
                 {
                     OnCancelCommand();
                 }
             }
+        }
+
+        public Task InvokeCommandAsync(string commandText)
+        {
+            _logger.LogMethodCall();
+            return InvokeCommandAsync(GetCommandParser(), commandText);
+        }
+
+        private IAsyncParser GetCommandParser()
+        {
+            return _commandParser ??= Create();
         }
 
         private IAsyncParser Create()
