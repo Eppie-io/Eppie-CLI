@@ -561,7 +561,7 @@ namespace Eppie.CLI.Menu
 
         private void WriteUninitializedAppWarning()
         {
-            _logger.LogWarning("The command failed. (Reason: The application hasn't been initialized yet.).");
+            _logger.LogWarning("The command failed. (Reason: The application hasn't been initialized yet).");
             _outputWriter.Write(new UninitializedAppWarningOutput());
         }
 
