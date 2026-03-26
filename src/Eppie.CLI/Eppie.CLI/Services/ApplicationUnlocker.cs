@@ -28,13 +28,15 @@ namespace Eppie.CLI.Services
     internal sealed class ApplicationUnlocker(
         ILogger<ApplicationUnlocker> logger,
         Application application,
+        IApplicationOutputWriter outputWriter,
         CoreProvider coreProvider) : IApplicationUnlocker
     {
         private readonly ILogger<ApplicationUnlocker> _logger = logger;
         private readonly Application _application = application;
+        private readonly IApplicationOutputWriter _outputWriter = outputWriter;
         private readonly CoreProvider _coreProvider = coreProvider;
 
-        public async Task<bool> UnlockAsync(CancellationToken cancellationToken)
+        public async Task<bool> UnlockAsync(CancellationToken cancellationToken, bool readPasswordFromStandardInput = false)
         {
             _logger.LogMethodCall();
 
@@ -42,15 +44,21 @@ namespace Eppie.CLI.Services
 
             if (isFirstTime)
             {
-                _application.WriteUninitializedAppWarning();
+                _logger.LogWarning("The command failed. (Reason: The application hasn't been initialized yet.).");
+                _outputWriter.Write(new UninitializedAppWarningOutput());
                 return false;
             }
 
-            bool success = await _coreProvider.TuviMailCore.InitializeApplicationAsync(_application.AskPassword(), cancellationToken).ConfigureAwait(false);
+            string password = readPasswordFromStandardInput
+                ? _application.ReadPasswordFromStandardInput()
+                : _application.AskPassword();
+
+            bool success = await _coreProvider.TuviMailCore.InitializeApplicationAsync(password, cancellationToken).ConfigureAwait(false);
 
             if (!success)
             {
-                _application.WriteInvalidPasswordWarning();
+                _logger.LogWarning("The command failed. (Reason: Invalid Password).");
+                _outputWriter.Write(new InvalidPasswordWarningOutput());
             }
 
             return success;

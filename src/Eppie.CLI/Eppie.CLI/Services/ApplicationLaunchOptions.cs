@@ -23,31 +23,59 @@ using Microsoft.Extensions.Configuration;
 namespace Eppie.CLI.Services
 {
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal sealed class ApplicationLaunchOptions(IConfiguration configuration)
+    internal sealed class ApplicationLaunchOptions(IConfiguration configuration, ApplicationCommandLineArguments commandLineArguments)
     {
-        private const string StartupCommandConfigurationKey = "command";
-        private const string UnlockPasswordFromStandardInputConfigurationKey = "unlock-password-stdin";
+        internal const string NonInteractiveConfigurationKey = "non-interactive";
+        internal const string OutputConfigurationKey = "output";
+        internal const string UnlockPasswordFromStandardInputConfigurationKey = "unlock-password-stdin";
+        internal const string YesConfigurationKey = "yes";
 
-        internal string? StartupCommand { get; } = ReadStartupCommand(configuration);
+        internal bool NonInteractive { get; } = ReadBooleanOption(configuration, commandLineArguments, NonInteractiveConfigurationKey);
+        internal ApplicationOutputFormat OutputFormat { get; } = ReadOutputFormat(configuration, commandLineArguments, OutputConfigurationKey);
+        internal bool UnlockPasswordFromStandardInput { get; } = ReadBooleanOption(configuration, commandLineArguments, UnlockPasswordFromStandardInputConfigurationKey);
+        internal bool Yes { get; } = ReadBooleanOption(configuration, commandLineArguments, YesConfigurationKey);
 
-        internal bool UnlockPasswordFromStandardInput { get; } = ReadFlagOption(configuration, UnlockPasswordFromStandardInputConfigurationKey);
-
-        private static string? ReadStartupCommand(IConfiguration configuration)
+        private static ApplicationOutputFormat ReadOutputFormat(IConfiguration configuration, ApplicationCommandLineArguments commandLineArguments, string key)
         {
             ArgumentNullException.ThrowIfNull(configuration);
+            ArgumentNullException.ThrowIfNull(commandLineArguments);
 
-            string? startupCommand = configuration[StartupCommandConfigurationKey];
-            return string.IsNullOrWhiteSpace(startupCommand) ? null : startupCommand;
+            return ApplicationLaunchCommandLine.TryReadOptionValue(commandLineArguments, key, out string? optionValue)
+                ? ReadOutputFormatValue(optionValue)
+                : ReadOutputFormatValue(configuration[key]);
         }
 
-        private static bool ReadFlagOption(IConfiguration configuration, string key)
+        private static bool ReadBooleanOption(IConfiguration configuration, ApplicationCommandLineArguments commandLineArguments, string key)
         {
             ArgumentNullException.ThrowIfNull(configuration);
+            ArgumentNullException.ThrowIfNull(commandLineArguments);
 
-            string? value = configuration[key];
-
-            // Command-line flags are expected to provide an explicit boolean value, for example: --unlock-password-stdin=true.
-            return bool.TryParse(value, out bool parsedValue) && parsedValue;
+            return ApplicationLaunchCommandLine.TryReadOptionValue(commandLineArguments, key, out string? optionValue)
+                ? ReadBooleanValue(optionValue, true)
+                : ReadBooleanValue(configuration[key]);
         }
+
+        private static bool ReadBooleanValue(string? value, bool defaultValue = false)
+        {
+            return value is null
+                ? defaultValue
+                : value.Length == 0 || (bool.TryParse(value, out bool parsedValue) ? parsedValue : defaultValue);
+        }
+
+        private static ApplicationOutputFormat ReadOutputFormatValue(string? value)
+        {
+            return IsJsonOutputValue(value) ? ApplicationOutputFormat.Json : ApplicationOutputFormat.Text;
+        }
+
+        private static bool IsJsonOutputValue(string? value)
+        {
+            return string.Equals(value, "json", StringComparison.OrdinalIgnoreCase);
+        }
+    }
+
+    internal enum ApplicationOutputFormat
+    {
+        Text,
+        Json,
     }
 }

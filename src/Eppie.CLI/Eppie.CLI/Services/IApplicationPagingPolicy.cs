@@ -18,8 +18,10 @@
 
 namespace Eppie.CLI.Services
 {
-    internal interface IApplicationUnlocker
+    internal interface IApplicationPagingPolicy
     {
-        Task<bool> UnlockAsync(CancellationToken cancellationToken, bool readPasswordFromStandardInput = false);
+        bool ShouldAggregatePagesBeforeWrite { get; }
+
+        bool ShouldContinue(bool hasMore, Func<bool> askMore);
     }
 }

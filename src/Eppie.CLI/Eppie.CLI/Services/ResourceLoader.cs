@@ -144,11 +144,49 @@ namespace Eppie.CLI.Services
 
             internal string UnsuccessfulAttempt => field ??= _localizer.LoadString(GetStringResourceName(category: "Warning"));
 
+            internal string NonInteractiveDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+
+            internal string OutputDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+
+            internal string UnlockPasswordFromStandardInputDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+
+            internal string YesDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+
+            internal string GetStartupCommandRequiresUnlockPasswordFromStandardInputWarning(string commandName)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Warning", name: "StartupCommandRequiresUnlockPasswordFromStandardInput"), commandName);
+            }
+
+            internal string GetCommandRequiresYesInNonInteractiveModeWarning(string commandName)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Warning", name: "CommandRequiresYesInNonInteractiveMode"), commandName);
+            }
+
+            internal string GetNonInteractiveOperationNotSupportedError(string operation)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Error", name: "NonInteractiveOperationNotSupported"), operation);
+            }
+
             internal string ImpossibleInitialization => field ??= _localizer.LoadString(GetStringResourceName(category: "Error"));
 
             internal string GetUnknownFolderWarning(string address, string folder)
             {
                 return _localizer.LoadFormattedString(GetStringResourceName(category: "Warning", name: "UnknownFolder"), folder, address);
+            }
+
+            internal string GetAccountAddedText(string address, string accountType)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Message", name: "AccountAdded"), address, accountType);
+            }
+
+            internal string GetMessageSentText(string subject, string to, string from)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Message", name: "MessageSent"), subject, to, from);
+            }
+
+            internal string GetFolderSyncedText(string account, string folder)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Message", name: "FolderSynced"), account, folder);
             }
 
             internal string GetUnhandledException(Exception exception)

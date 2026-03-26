@@ -28,12 +28,16 @@ namespace Eppie.CLI.Services
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
     internal sealed class StartupCommandRunner(
         ILogger<StartupCommandRunner> logger,
+        ApplicationCommandLineArguments commandLineArguments,
         ApplicationLaunchOptions launchOptions,
+        IApplicationOutputWriter outputWriter,
         IApplicationUnlocker applicationUnlocker,
         IApplicationMenu applicationMenu) : IStartupCommandRunner
     {
         private readonly ILogger<StartupCommandRunner> _logger = logger;
+        private readonly ApplicationCommandLineArguments _commandLineArguments = commandLineArguments;
         private readonly ApplicationLaunchOptions _launchOptions = launchOptions;
+        private readonly IApplicationOutputWriter _outputWriter = outputWriter;
         private readonly IApplicationUnlocker _applicationUnlocker = applicationUnlocker;
         private readonly IApplicationMenu _applicationMenu = applicationMenu;
 
@@ -41,38 +45,56 @@ namespace Eppie.CLI.Services
         {
             _logger.LogMethodCall();
 
-            if (_launchOptions.StartupCommand is not string startupCommand)
+            string[] startupCommandArguments = GetStartupCommandArguments();
+
+            if (startupCommandArguments.Length == 0)
             {
                 return false;
             }
 
-            if (ShouldUnlockBeforeExecutingCommand(startupCommand)
-                && !await _applicationUnlocker.UnlockAsync(cancellationToken).ConfigureAwait(false))
+            string commandName = startupCommandArguments[0];
+
+            if (MenuCommand.RequiresUnlockedApplication(commandName))
             {
-                return true;
+                if (_launchOptions.NonInteractive && !_launchOptions.UnlockPasswordFromStandardInput)
+                {
+                    WriteUnlockPasswordFromStandardInputHint(commandName);
+                    return true;
+                }
+
+                if (!await _applicationUnlocker.UnlockAsync(cancellationToken, readPasswordFromStandardInput: _launchOptions.NonInteractive).ConfigureAwait(false))
+                {
+                    return true;
+                }
             }
 
-            await _applicationMenu.InvokeCommandAsync(startupCommand).ConfigureAwait(false);
+            await _applicationMenu.InvokeCommandAsync(startupCommandArguments).ConfigureAwait(false);
             return true;
         }
 
-        private bool ShouldUnlockBeforeExecutingCommand(string commandText)
+        private string[] GetStartupCommandArguments()
         {
-            return _launchOptions.UnlockPasswordFromStandardInput && MenuCommand.RequiresUnlockedApplication(GetCommandName(commandText));
+            List<string> commandArguments = [];
+
+            for (int i = 0; i < _commandLineArguments.Values.Count; i++)
+            {
+                int optionArgumentCount = ApplicationLaunchCommandLine.GetOptionArgumentCount(_commandLineArguments.Values, i);
+
+                if (optionArgumentCount > 0)
+                {
+                    i += optionArgumentCount - 1;
+                    continue;
+                }
+
+                commandArguments.Add(_commandLineArguments.Values[i]);
+            }
+
+            return [.. commandArguments];
         }
 
-        private static string GetCommandName(string commandText)
+        private void WriteUnlockPasswordFromStandardInputHint(string commandName)
         {
-            ArgumentException.ThrowIfNullOrWhiteSpace(commandText);
-
-            // TODO: Remove manual command-name parsing after extending parser API to expose command parsing without execution.
-
-            ReadOnlySpan<char> commandTextSpan = commandText.AsSpan().TrimStart();
-            int separatorIndex = commandTextSpan.IndexOfAny(" \t\r\n");
-
-            return separatorIndex >= 0
-                ? commandTextSpan[..separatorIndex].ToString()
-                : commandTextSpan.ToString();
+            _outputWriter.Write(new StartupCommandRequiresUnlockPasswordFromStandardInputWarningOutput(commandName));
         }
     }
 }

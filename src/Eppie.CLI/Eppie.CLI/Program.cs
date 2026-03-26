@@ -50,7 +50,7 @@ namespace Eppie.CLI
 
                 Host.CreateDefaultBuilder(args)
                     .UseContentRoot(AppContext.BaseDirectory)
-                    .ConfigureServices(ConfigureServices)
+                    .ConfigureServices((context, services) => ConfigureServices(context, services, args))
                     .UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration), preserveStaticLogger: true)
                     .Build()
                     .Run();
@@ -67,7 +67,7 @@ namespace Eppie.CLI
             }
         }
 
-        private static void ConfigureServices(HostBuilderContext ctx, IServiceCollection services)
+        private static void ConfigureServices(HostBuilderContext ctx, IServiceCollection services, string[] args)
         {
             ArgumentNullException.ThrowIfNull(ctx);
 
@@ -78,7 +78,15 @@ namespace Eppie.CLI
             services.AddLocalization()
                     .AddHttpClient()
                     .AddAuthorizationProvider()
+                    .AddSingleton(new ApplicationCommandLineArguments(args))
                     .AddSingleton<ApplicationLaunchOptions>()
+                     .AddSingleton<TextApplicationOutputWriter>()
+                     .AddSingleton<JsonApplicationOutputWriter>()
+                     .AddSingleton<IApplicationOutputWriter>(serviceProvider => serviceProvider.GetRequiredService<ApplicationLaunchOptions>().OutputFormat == ApplicationOutputFormat.Json
+                         ? serviceProvider.GetRequiredService<JsonApplicationOutputWriter>()
+                         : serviceProvider.GetRequiredService<TextApplicationOutputWriter>())
+                     .AddSingleton<IApplicationPagingPolicy, ApplicationPagingPolicy>()
+                     .AddSingleton<IApplicationOutputCoordinator, ApplicationOutputCoordinator>()
                     .AddSingleton<IApplicationMenu>(serviceProvider => serviceProvider.GetRequiredService<MainMenu>())
                     .AddSingleton<IApplicationUnlocker, ApplicationUnlocker>()
                     .AddSingleton<IStartupCommandRunner, StartupCommandRunner>()

@@ -16,10 +16,22 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace Eppie.CLI.Services
 {
-    internal interface IApplicationUnlocker
+    [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
+    internal sealed class ApplicationPagingPolicy(ApplicationLaunchOptions launchOptions) : IApplicationPagingPolicy
     {
-        Task<bool> UnlockAsync(CancellationToken cancellationToken, bool readPasswordFromStandardInput = false);
+        private readonly ApplicationLaunchOptions _launchOptions = launchOptions;
+
+        public bool ShouldAggregatePagesBeforeWrite => _launchOptions.OutputFormat == ApplicationOutputFormat.Json;
+
+        public bool ShouldContinue(bool hasMore, Func<bool> askMore)
+        {
+            ArgumentNullException.ThrowIfNull(askMore);
+
+            return hasMore && (ShouldAggregatePagesBeforeWrite || (!_launchOptions.NonInteractive && askMore()));
+        }
     }
 }

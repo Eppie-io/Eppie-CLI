@@ -36,11 +36,17 @@ namespace Eppie.CLI.Menu
     internal class Actions(
         ILogger<Actions> logger,
         Application application,
+        ApplicationLaunchOptions launchOptions,
+        IApplicationOutputWriter outputWriter,
+        IApplicationOutputCoordinator outputCoordinator,
         AuthorizationProvider authProvider,
         CoreProvider coreProvider)
     {
         private readonly ILogger<Actions> _logger = logger;
         private readonly Application _application = application;
+        private readonly ApplicationLaunchOptions _launchOptions = launchOptions;
+        private readonly IApplicationOutputWriter _outputWriter = outputWriter;
+        private readonly IApplicationOutputCoordinator _outputCoordinator = outputCoordinator;
         private readonly CoreProvider _coreProvider = coreProvider;
         private readonly AuthorizationProvider _authProvider = authProvider;
 
@@ -59,7 +65,7 @@ namespace Eppie.CLI.Menu
 
             if (!isFirstTime)
             {
-                _application.WriteSecondInitializationWarning();
+                WriteSecondInitializationWarning();
                 return;
             }
 
@@ -67,9 +73,9 @@ namespace Eppie.CLI.Menu
             string[] seedPhrase = await sm.CreateSeedPhraseAsync().ConfigureAwait(false);
             string password = _application.AskNewPassword();
 
-            if (password.Length == 0 || password != _application.ConfirmPassword())
+            if (password.Length == 0 || (!_launchOptions.NonInteractive && password != _application.ConfirmPassword()))
             {
-                _application.WriteInvalidPasswordWarning();
+                WriteInvalidPasswordWarning();
                 return;
             }
 
@@ -79,11 +85,11 @@ namespace Eppie.CLI.Menu
 
             if (success)
             {
-                _application.WriteApplicationInitializationMessage(seedPhrase);
+                WriteApplicationInitializationMessage(seedPhrase);
             }
             else
             {
-                _application.WriteImpossibleInitializationError();
+                WriteImpossibleInitializationError();
             }
         }
 
@@ -91,10 +97,10 @@ namespace Eppie.CLI.Menu
         {
             _logger.LogMethodCall();
 
-            if (_application.ConfirmReset())
+            if (ConfirmResetOrWarn(MenuCommand.Reset))
             {
                 await _coreProvider.ResetAsync().ConfigureAwait(false);
-                _application.WriteApplicationResetMessage();
+                WriteApplicationResetMessage();
             }
         }
 
@@ -106,7 +112,7 @@ namespace Eppie.CLI.Menu
 
             if (isFirstTime)
             {
-                _application.WriteUninitializedAppWarning();
+                WriteUninitializedAppWarning();
                 return;
             }
 
@@ -114,11 +120,11 @@ namespace Eppie.CLI.Menu
 
             if (success)
             {
-                _application.WriteApplicationOpenedMessage();
+                WriteApplicationOpenedMessage();
             }
             else
             {
-                _application.WriteInvalidPasswordWarning();
+                WriteInvalidPasswordWarning();
             }
         }
 
@@ -129,7 +135,7 @@ namespace Eppie.CLI.Menu
             List<Account> accounts = await _coreProvider.TuviMailCore.GetAccountsAsync().ConfigureAwait(true);
             accounts.Sort((a, b) => a.Id.CompareTo(b.Id));
 
-            _application.PrintAccounts(accounts);
+            _outputWriter.Write(new AccountsOutput(accounts));
         }
 
         internal Task AddAccountActionAsync(MenuCommand.CommandAddAccountOptions.AccountType type)
@@ -153,7 +159,7 @@ namespace Eppie.CLI.Menu
 
             if (!isFirstTime)
             {
-                if (!_application.ConfirmReset())
+                if (!ConfirmResetOrWarn(MenuCommand.Restore))
                 {
                     return;
                 }
@@ -165,7 +171,7 @@ namespace Eppie.CLI.Menu
             string password = _application.AskNewPassword();
             if (password.Length == 0 || password != _application.ConfirmPassword())
             {
-                _application.WriteInvalidPasswordWarning();
+                WriteInvalidPasswordWarning();
                 return;
             }
 
@@ -178,11 +184,11 @@ namespace Eppie.CLI.Menu
                 Uri restoreUri = new(_application.AskRestorePath());
 
                 await _coreProvider.TuviMailCore.RestoreFromBackupIfNeededAsync(restoreUri).ConfigureAwait(false);
-                _application.WriteSuccessfulRestoredMessage();
+                WriteSuccessfulRestoredMessage();
             }
             else
             {
-                _application.WriteImpossibleInitializationError();
+                WriteImpossibleInitializationError();
             }
         }
 
@@ -206,6 +212,7 @@ namespace Eppie.CLI.Menu
             message.To.Add(receiverAddress);
 
             await accountService.SendMessageAsync(message, false, false).ConfigureAwait(false);
+            _outputWriter.Write(new MessageSentOutput(message.Subject ?? string.Empty, receiverAddress.Address, senderAddress.Address));
         }
 
         internal async Task ListContactsActionAsync(int pageSize)
@@ -213,7 +220,7 @@ namespace Eppie.CLI.Menu
             _logger.LogMethodCall();
 
             List<Contact> contacts = [.. await _coreProvider.TuviMailCore.GetContactsAsync().ConfigureAwait(true)];
-            _application.PrintContacts(pageSize, contacts);
+            _outputCoordinator.WriteContacts(pageSize, contacts, _application.ConfirmAskMoreContacts);
         }
 
         internal async Task ShowMessageActionAsync(string address, string folderName, uint id, int pk)
@@ -226,7 +233,7 @@ namespace Eppie.CLI.Menu
 
             if (folder is null)
             {
-                _application.WriteUnknownFolderWarning(address, folderName);
+                WriteUnknownFolderWarning(address, folderName);
                 return;
             }
 
@@ -240,7 +247,7 @@ namespace Eppie.CLI.Menu
 
             IAccountService accountService = await _coreProvider.TuviMailCore.GetAccountServiceAsync(accountEmail).ConfigureAwait(true);
             Message message = await accountService.GetMessageBodyAsync(msg).ConfigureAwait(true);
-            _application.PrintMessage(message, false);
+            _outputWriter.Write(new MessageOutput(message, Compact: false));
         }
 
         internal async Task SyncFolderActionAsync(string accountAddress, string folderName)
@@ -257,18 +264,19 @@ namespace Eppie.CLI.Menu
 
             if (folder is null)
             {
-                _application.WriteUnknownFolderWarning(accountAddress, folderName);
+                WriteUnknownFolderWarning(accountAddress, folderName);
                 return;
             }
 
             await _coreProvider.TuviMailCore.CheckForNewMessagesInFolderAsync(folder, CancellationToken.None).ConfigureAwait(false);
+            _outputWriter.Write(new FolderSyncedOutput(accountAddress, folderName));
         }
 
         internal async Task ShowAllMessagesActionAsync(int pageSize)
         {
             _logger.LogMethodCall();
 
-            await _application.PrintAllMessagesAsync(pageSize, (count, lastMsg) => GetMessages(count, lastMsg, _coreProvider.TuviMailCore)).ConfigureAwait(false);
+            await _outputCoordinator.WriteMessagesAsync(_application.GetPrintAllMessagesHeader(), pageSize, (count, lastMsg) => GetMessages(count, lastMsg, _coreProvider.TuviMailCore), _application.ConfirmAskMoreMessages).ConfigureAwait(false);
 
             static async Task<IEnumerable<Message>> GetMessages(int count, Message lastMessage, ITuviMail tuviMail)
             {
@@ -286,11 +294,11 @@ namespace Eppie.CLI.Menu
 
             if (folder is null)
             {
-                _application.WriteUnknownFolderWarning(accountAddress, folderName);
+                WriteUnknownFolderWarning(accountAddress, folderName);
                 return;
             }
 
-            await _application.PrintFolderMessagesAsync(accountAddress, folderName, pageSize, (count, lastMsg) => GetMessages(count, lastMsg, folder, _coreProvider.TuviMailCore)).ConfigureAwait(false);
+            await _outputCoordinator.WriteMessagesAsync(_application.GetPrintFolderMessagesHeader(accountAddress, folderName), pageSize, (count, lastMsg) => GetMessages(count, lastMsg, folder, _coreProvider.TuviMailCore), _application.ConfirmAskMoreMessages).ConfigureAwait(false);
 
             static async Task<IEnumerable<Message>> GetMessages(int count, Message lastMessage, Folder folder, ITuviMail tuviMail)
             {
@@ -304,7 +312,7 @@ namespace Eppie.CLI.Menu
 
             EmailAddress contact = new(contactAddress);
 
-            await _application.PrintContactMessagesAsync(contactAddress, pageSize, (count, lastMsg) => GetMessages(count, lastMsg, contact, _coreProvider.TuviMailCore)).ConfigureAwait(false);
+            await _outputCoordinator.WriteMessagesAsync(_application.GetPrintContactMessagesHeader(contactAddress), pageSize, (count, lastMsg) => GetMessages(count, lastMsg, contact, _coreProvider.TuviMailCore), _application.ConfirmAskMoreMessages).ConfigureAwait(false);
 
             static async Task<IEnumerable<Message>> GetMessages(int count, Message lastMessage, EmailAddress email, ITuviMail tuviMail)
             {
@@ -356,10 +364,12 @@ namespace Eppie.CLI.Menu
                     incomingCredentialsProvider).ConfigureAwait(false);
 
                 await _coreProvider.TuviMailCore.AddAccountAsync(account).ConfigureAwait(false);
+
+                _outputWriter.Write(new AccountAddedOutput(account.Email.Address, account.Type.ToString()));
             }
             catch (OperationCanceledException)
             {
-                _application.WriteAuthorizationCanceledMessage();
+                WriteAuthorizationCanceledMessage();
             }
         }
 
@@ -398,14 +408,14 @@ namespace Eppie.CLI.Menu
 
                 IAuthorizationClient authClient = _authProvider.CreateAuthorizationClient(mailServer);
 
-                _application.WriteAuthorizationToServiceMessage(mailServer.ToString());
+                WriteAuthorizationToServiceMessage(mailServer.ToString());
                 AuthCredential authCredential = await authClient.LoginAsync(cancellationLogin.Token).ConfigureAwait(false);
 
                 string? email = await ReadEmailAddressAsync(authClient, authCredential).ConfigureAwait(false);
 
                 if (!string.IsNullOrEmpty(email))
                 {
-                    _application.WriteAuthorizationCompletedMessage();
+                    WriteAuthorizationCompletedMessage();
 
                     Account account = Account.Default;
                     account.Email = new EmailAddress(email);
@@ -482,6 +492,7 @@ namespace Eppie.CLI.Menu
             };
 
             await _coreProvider.TuviMailCore.AddAccountAsync(account).ConfigureAwait(false);
+            _outputWriter.Write(new AccountAddedOutput(account.Email.Address, account.Type.ToString()));
         }
 
         private void OnCoreException(object? sender, ExceptionEventArgs e)
@@ -490,7 +501,94 @@ namespace Eppie.CLI.Menu
 
             ArgumentNullException.ThrowIfNull(e);
 
-            _application.WriteError(e.Exception);
+            _logger.LogError("An error has occurred {Exception}", e.Exception);
+            _outputWriter.Write(new UnhandledExceptionOutput(e.Exception));
+        }
+
+        private void WriteApplicationInitializationMessage(IReadOnlyCollection<string> seedPhrase)
+        {
+            _logger.LogDebug("The application has been initialized.");
+            _outputWriter.Write(new ApplicationInitializedOutput(seedPhrase));
+        }
+
+        private void WriteApplicationResetMessage()
+        {
+            _logger.LogDebug("The application has been reset.");
+            _outputWriter.Write(new ApplicationResetOutput());
+        }
+
+        private void WriteApplicationOpenedMessage()
+        {
+            _logger.LogDebug("The application was opened.");
+            _outputWriter.Write(new ApplicationOpenedOutput());
+        }
+
+        private void WriteSuccessfulRestoredMessage()
+        {
+            _logger.LogDebug("Eppie account was restored.");
+            _outputWriter.Write(new ApplicationRestoredOutput());
+        }
+
+        private void WriteAuthorizationCanceledMessage()
+        {
+            _logger.LogDebug("Authorization operation was canceled.");
+            _outputWriter.Write(new AuthorizationCanceledOutput());
+        }
+
+        private void WriteAuthorizationToServiceMessage(string serviceName)
+        {
+            _logger.LogDebug("Authorization to {ServiceName} service starting.", serviceName);
+            _outputWriter.Write(new AuthorizationToServiceOutput(serviceName));
+        }
+
+        private void WriteAuthorizationCompletedMessage()
+        {
+            _logger.LogDebug("Authorization completed successfully.");
+            _outputWriter.Write(new AuthorizationCompletedOutput());
+        }
+
+        private void WriteInvalidPasswordWarning()
+        {
+            _logger.LogWarning("The command failed. (Reason: Invalid Password).");
+            _outputWriter.Write(new InvalidPasswordWarningOutput());
+        }
+
+        private void WriteSecondInitializationWarning()
+        {
+            _logger.LogWarning("The command failed. (Reason: The application has already been initialized.).");
+            _outputWriter.Write(new SecondInitializationWarningOutput());
+        }
+
+        private void WriteUninitializedAppWarning()
+        {
+            _logger.LogWarning("The command failed. (Reason: The application hasn't been initialized yet.).");
+            _outputWriter.Write(new UninitializedAppWarningOutput());
+        }
+
+        private void WriteImpossibleInitializationError()
+        {
+            _logger.LogError("The application could not be initialized.");
+            _outputWriter.Write(new ImpossibleInitializationErrorOutput());
+        }
+
+        private void WriteUnknownFolderWarning(string address, string folder)
+        {
+            _logger.LogWarning("The command failed. (Reason: Unknown folder; Parameters: {@Parameters}).", new { Address = address, Folder = folder });
+            _outputWriter.Write(new UnknownFolderWarningOutput(address, folder));
+        }
+
+        private bool ConfirmResetOrWarn(string commandName)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(commandName);
+
+            if (_launchOptions.NonInteractive && !_launchOptions.Yes)
+            {
+                _logger.LogWarning("The command failed. (Reason: The '{CommandName}' command requires '--yes' in '--non-interactive' mode to confirm data loss.).", commandName);
+                _outputWriter.Write(new CommandRequiresYesInNonInteractiveModeWarningOutput(commandName));
+                return false;
+            }
+
+            return _application.ConfirmReset();
         }
 
         private static async Task<string?> ReadEmailAddressAsync(IAuthorizationClient client, AuthCredential credential)

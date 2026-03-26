@@ -23,5 +23,7 @@ namespace Eppie.CLI.Menu
         Task LoopAsync(CancellationToken stoppingToken);
 
         Task InvokeCommandAsync(string commandText);
+
+        Task InvokeCommandAsync(IReadOnlyList<string> commandArguments);
     }
 }

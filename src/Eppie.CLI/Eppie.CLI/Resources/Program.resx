@@ -170,6 +170,11 @@
     <value>Error: The application could not be initialized.</value>
     <comment>This message alerts the user that the application cannot be initialized.</comment>
   </data>
+  <data name="Error.NonInteractiveOperationNotSupported" xml:space="preserve">
+    <value>Error: The '{0}' operation requires interactive input. Run without '--non-interactive' or provide explicit command arguments and standard input.</value>
+    <comment>This message informs the user that the requested operation requires interactive input.
+{0} is the operation description.</comment>
+  </data>
   <data name="Message.AppOpened" xml:space="preserve">
     <value>The application was opened successfully.</value>
     <comment>This message indicates to the user that the application has opened.</comment>
@@ -193,6 +198,16 @@
   <data name="Warning.UnsuccessfulAttempt" xml:space="preserve">
     <value>Warning: The operation was unsuccessful. Please try again. Press 'Ctrl+C' to abort.</value>
     <comment>This message warns the user that the operation was unsuccessful and suggests to try again.</comment>
+  </data>
+  <data name="Warning.StartupCommandRequiresUnlockPasswordFromStandardInput" xml:space="preserve">
+    <value>Warning: The '{0}' command requires an opened vault. Restart the application with '--unlock-password-stdin' and pass the vault password through standard input.</value>
+    <comment>This message warns the user that the startup command requires an opened vault and explains how to pass the vault password via standard input.
+{0} is the startup command name.</comment>
+  </data>
+  <data name="Warning.CommandRequiresYesInNonInteractiveMode" xml:space="preserve">
+    <value>Warning: The '{0}' command requires '--yes' in '--non-interactive' mode to confirm data loss.</value>
+    <comment>This message warns the user that the command needs the '--yes' flag in non-interactive mode before destructive changes are allowed.
+{0} is the command name.</comment>
   </data>
   <data name="Message.AskAccountAddress" xml:space="preserve">
     <value>Enter account address: </value>
@@ -252,6 +267,22 @@
     <value>Message subject.</value>
     <comment>Description of the 'send' command option in the help.</comment>
   </data>
+  <data name="MenuOption.UnlockPasswordFromStandardInputDescription" xml:space="preserve">
+    <value>Read the vault password from standard input before executing a startup command that requires an opened vault.</value>
+    <comment>Description of the '--unlock-password-stdin' startup option in the help.</comment>
+  </data>
+  <data name="MenuOption.NonInteractiveDescription" xml:space="preserve">
+    <value>Disable interactive prompts and startup banner; require explicit arguments and standard input for automation scenarios.</value>
+    <comment>Description of the '--non-interactive' startup option in the help.</comment>
+  </data>
+  <data name="MenuOption.OutputDescription" xml:space="preserve">
+    <value>Structured output format. Supported values: json.</value>
+    <comment>Description of the '--output' startup option in the help.</comment>
+  </data>
+  <data name="MenuOption.YesDescription" xml:space="preserve">
+    <value>Answer yes to destructive confirmation prompts in startup command mode.</value>
+    <comment>Description of the '--yes' startup option in the help.</comment>
+  </data>
   <data name="Message.AskNewPassword" xml:space="preserve">
     <value>Enter your new vault password: </value>
     <comment>This message prompts the user to enter a new vault password.</comment>
@@ -281,6 +312,18 @@
   <data name="Message.AskMessageBody" xml:space="preserve">
     <value>Enter a text message (end input with 'EOF' on a new line or Ctrl+C for cancel): </value>
     <comment>This message prompts the user to enter a text message.</comment>
+  </data>
+  <data name="Message.AccountAdded" xml:space="preserve">
+    <value>Account {0} added ({1}).</value>
+    <comment>Text shown after successfully adding an account. {0}=address, {1}=type</comment>
+  </data>
+  <data name="Message.MessageSent" xml:space="preserve">
+    <value>Message sent to {1}. Subject: {0}</value>
+    <comment>Text shown after successfully sending a message. {0}=subject, {1}=to</comment>
+  </data>
+  <data name="Message.FolderSynced" xml:space="preserve">
+    <value>Folder '{1}' for account {0} synchronized.</value>
+    <comment>Text shown after successfully syncing a folder. {0}=account, {1}=folder</comment>
   </data>
   <data name="Menu.ImportDescription" xml:space="preserve">
     <value>Import a key bundle from a file.</value>

@@ -18,8 +18,8 @@
 
 namespace Eppie.CLI.Services
 {
-    internal interface IApplicationUnlocker
+    internal sealed class ApplicationCommandLineArguments(string[] values)
     {
-        Task<bool> UnlockAsync(CancellationToken cancellationToken, bool readPasswordFromStandardInput = false);
+        internal IReadOnlyList<string> Values { get; } = values;
     }
 }

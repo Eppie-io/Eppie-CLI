@@ -18,8 +18,10 @@
 
 namespace Eppie.CLI.Services
 {
-    internal interface IApplicationUnlocker
+    internal interface IApplicationOutputWriter
     {
-        Task<bool> UnlockAsync(CancellationToken cancellationToken, bool readPasswordFromStandardInput = false);
+        ApplicationOutputFormat Format { get; }
+
+        void Write(ApplicationOutput output);
     }
 }

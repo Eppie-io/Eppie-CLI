@@ -37,20 +37,25 @@ namespace Eppie.CLI.Menu
         private readonly ILogger<MainMenu> _logger;
         private readonly Actions _actions;
         private readonly Application _application;
+        private readonly IApplicationOutputWriter _outputWriter;
         private readonly ResourceLoader _resourceLoader;
         private IAsyncParser? _commandParser;
 
         public MainMenu(
             ILoggerFactory loggerFactory,
             Application application,
+            ApplicationLaunchOptions launchOptions,
+            IApplicationOutputWriter outputWriter,
+            IApplicationOutputCoordinator outputCoordinator,
             AuthorizationProvider authProvider,
             CoreProvider coreProvider,
             ResourceLoader resourceLoader)
         {
             _logger = loggerFactory.CreateLogger<MainMenu>();
             _application = application;
+            _outputWriter = outputWriter;
             _resourceLoader = resourceLoader;
-            _actions = new Actions(loggerFactory.CreateLogger<Actions>(), _application, authProvider, coreProvider);
+            _actions = new Actions(loggerFactory.CreateLogger<Actions>(), _application, launchOptions, _outputWriter, outputCoordinator, authProvider, coreProvider);
         }
 
         public async Task LoopAsync(CancellationToken stoppingToken)
@@ -76,6 +81,14 @@ namespace Eppie.CLI.Menu
             return InvokeCommandAsync(GetCommandParser(), commandText);
         }
 
+        public Task InvokeCommandAsync(IReadOnlyList<string> commandArguments)
+        {
+            ArgumentNullException.ThrowIfNull(commandArguments);
+
+            _logger.LogMethodCall();
+            return InvokeCommandAsync(GetCommandParser(), [.. commandArguments]);
+        }
+
         private IAsyncParser GetCommandParser()
         {
             return _commandParser ??= Create();
@@ -90,6 +103,17 @@ namespace Eppie.CLI.Menu
             ICommand root = parser.CreateRoot(
                 description: _resourceLoader.Strings.GetMenuDescription(_resourceLoader.AssemblyStrings.Title,
                                                                         _resourceLoader.AssemblyStrings.Version),
+                options:
+                [
+                    parser.CreateOption<bool>([$"--{ApplicationLaunchOptions.NonInteractiveConfigurationKey}"],
+                                              description: _resourceLoader.Strings.NonInteractiveDescription),
+                    parser.CreateOption<string>([$"--{ApplicationLaunchOptions.OutputConfigurationKey}"],
+                                                description: _resourceLoader.Strings.OutputDescription),
+                    parser.CreateOption<bool>([$"--{ApplicationLaunchOptions.YesConfigurationKey}"],
+                                              description: _resourceLoader.Strings.YesDescription),
+                    parser.CreateOption<bool>([$"--{ApplicationLaunchOptions.UnlockPasswordFromStandardInputConfigurationKey}"],
+                                              description: _resourceLoader.Strings.UnlockPasswordFromStandardInputDescription)
+                ],
                 subcommands:
                 [
                     CreateCommand(parser, MenuCommand.Exit, _resourceLoader.Strings.ExitDescription,
@@ -160,7 +184,25 @@ namespace Eppie.CLI.Menu
             }
             catch (InvalidOperationException ex)
             {
-                _application.WriteError(ex);
+                _logger.LogError("An error has occurred {Exception}", ex);
+                _outputWriter.Write(new UnhandledExceptionOutput(ex));
+            }
+        }
+
+        private async Task InvokeCommandAsync(IAsyncParser commandParser, params string[] commandArguments)
+        {
+            ArgumentNullException.ThrowIfNull(commandParser);
+
+            try
+            {
+                int result = await commandParser.InvokeAsync(commandArguments).ConfigureAwait(false);
+
+                _logger.LogDebug("Command {CommandName} is completed with code: {CommandResult}", string.Join(' ', commandArguments), result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogError("An error has occurred {Exception}", ex);
+                _outputWriter.Write(new UnhandledExceptionOutput(ex));
             }
         }
 
@@ -181,7 +223,8 @@ namespace Eppie.CLI.Menu
                 }
                 catch (Exception ex)
                 {
-                    _application.WriteError(ex);
+                    _logger.LogError("An error has occurred {Exception}", ex);
+                    _outputWriter.Write(new UnhandledExceptionOutput(ex));
                 }
             }
 
@@ -208,7 +251,8 @@ namespace Eppie.CLI.Menu
                 }
                 catch (Exception ex)
                 {
-                    _application.WriteError(ex);
+                    _logger.LogError("An error has occurred {Exception}", ex);
+                    _outputWriter.Write(new UnhandledExceptionOutput(ex));
                 }
             }
 

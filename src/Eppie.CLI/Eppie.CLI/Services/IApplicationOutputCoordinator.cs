@@ -16,10 +16,14 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
+using Tuvi.Core.Entities;
+
 namespace Eppie.CLI.Services
 {
-    internal interface IApplicationUnlocker
+    internal interface IApplicationOutputCoordinator
     {
-        Task<bool> UnlockAsync(CancellationToken cancellationToken, bool readPasswordFromStandardInput = false);
+        void WriteContacts(int pageSize, IEnumerable<Contact> contacts, Func<bool> askMore);
+
+        Task WriteMessagesAsync(string header, int pageSize, Func<int, Message, Task<IEnumerable<Message>>> source, Func<bool> askMore);
     }
 }
