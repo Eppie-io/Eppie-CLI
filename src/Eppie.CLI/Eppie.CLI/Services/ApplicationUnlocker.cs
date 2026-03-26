@@ -44,7 +44,7 @@ namespace Eppie.CLI.Services
 
             if (isFirstTime)
             {
-                _logger.LogWarning("The command failed. (Reason: The application hasn't been initialized yet.).");
+                _logger.LogWarning("The command failed. (Reason: The application hasn't been initialized yet).");
                 _outputWriter.Write(new UninitializedAppWarningOutput());
                 return false;
             }
