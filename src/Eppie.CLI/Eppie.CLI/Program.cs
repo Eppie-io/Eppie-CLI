@@ -80,13 +80,13 @@ namespace Eppie.CLI
                     .AddAuthorizationProvider()
                     .AddSingleton(new ApplicationCommandLineArguments(args))
                     .AddSingleton<ApplicationLaunchOptions>()
-                     .AddSingleton<TextApplicationOutputWriter>()
-                     .AddSingleton<JsonApplicationOutputWriter>()
-                     .AddSingleton<IApplicationOutputWriter>(serviceProvider => serviceProvider.GetRequiredService<ApplicationLaunchOptions>().OutputFormat == ApplicationOutputFormat.Json
+                    .AddSingleton<TextApplicationOutputWriter>()
+                    .AddSingleton<JsonApplicationOutputWriter>()
+                    .AddSingleton<IApplicationOutputWriter>(serviceProvider => serviceProvider.GetRequiredService<ApplicationLaunchOptions>().OutputFormat == ApplicationOutputFormat.Json
                          ? serviceProvider.GetRequiredService<JsonApplicationOutputWriter>()
                          : serviceProvider.GetRequiredService<TextApplicationOutputWriter>())
-                     .AddSingleton<IApplicationPagingPolicy, ApplicationPagingPolicy>()
-                     .AddSingleton<IApplicationOutputCoordinator, ApplicationOutputCoordinator>()
+                    .AddSingleton<IApplicationPagingPolicy, ApplicationPagingPolicy>()
+                    .AddSingleton<IApplicationOutputCoordinator, ApplicationOutputCoordinator>()
                     .AddSingleton<IApplicationMenu>(serviceProvider => serviceProvider.GetRequiredService<MainMenu>())
                     .AddSingleton<IApplicationUnlocker, ApplicationUnlocker>()
                     .AddSingleton<IStartupCommandRunner, StartupCommandRunner>()
