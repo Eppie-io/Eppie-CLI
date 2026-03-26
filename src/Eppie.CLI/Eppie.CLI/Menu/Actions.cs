@@ -169,7 +169,7 @@ namespace Eppie.CLI.Menu
 
             string[] seedPhrase = _application.AskSeedPhrase().Split([' ', ';']);
             string password = _application.AskNewPassword();
-            if (password.Length == 0 || password != _application.ConfirmPassword())
+            if (password.Length == 0 || (!_launchOptions.NonInteractive && password != _application.ConfirmPassword()))
             {
                 WriteInvalidPasswordWarning();
                 return;

@@ -318,8 +318,8 @@
     <comment>Text shown after successfully adding an account. {0}=address, {1}=type</comment>
   </data>
   <data name="Message.MessageSent" xml:space="preserve">
-    <value>Message sent to {1}. Subject: {0}</value>
-    <comment>Text shown after successfully sending a message. {0}=subject, {1}=to</comment>
+    <value>Message sent from {2} to {1}. Subject: {0}</value>
+    <comment>Text shown after successfully sending a message. {0}=subject, {1}=to, {2}=from</comment>
   </data>
   <data name="Message.FolderSynced" xml:space="preserve">
     <value>Folder '{1}' for account {0} synchronized.</value>

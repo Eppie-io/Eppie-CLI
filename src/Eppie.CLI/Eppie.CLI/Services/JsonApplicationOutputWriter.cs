@@ -71,6 +71,9 @@ namespace Eppie.CLI.Services
                     WriteResult("messages", messagesOutput.Messages.Select(message => ToMessageOutput(message, messagesOutput.Compact)),
                                 meta: string.IsNullOrWhiteSpace(messagesOutput.Header) ? null : new { header = messagesOutput.Header });
                     return true;
+                case AccountAddedOutput accountAddedOutput:
+                    WriteResult("accountAdded", new { address = accountAddedOutput.Address, accountType = accountAddedOutput.AccountType });
+                    return true;
                 default:
                     return false;
             }
@@ -82,9 +85,6 @@ namespace Eppie.CLI.Services
             {
                 case ApplicationInitializedOutput initializedOutput:
                     WriteStatus("initialized", new { seedPhrase = initializedOutput.SeedPhrase });
-                    return true;
-                case AccountAddedOutput accountAddedOutput:
-                    WriteResult("accountAdded", new { address = accountAddedOutput.Address, accountType = accountAddedOutput.AccountType });
                     return true;
                 case ApplicationResetOutput:
                     WriteStatus("reset");
