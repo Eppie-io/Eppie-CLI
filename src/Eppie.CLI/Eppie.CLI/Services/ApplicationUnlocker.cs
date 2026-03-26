@@ -27,14 +27,14 @@ namespace Eppie.CLI.Services
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
     internal sealed class ApplicationUnlocker(
         ILogger<ApplicationUnlocker> logger,
-        Application application,
+        IApplicationPasswordReader passwordReader,
         IApplicationOutputWriter outputWriter,
-        CoreProvider coreProvider) : IApplicationUnlocker
+        ITuviMailCoreProvider coreProvider) : IApplicationUnlocker
     {
         private readonly ILogger<ApplicationUnlocker> _logger = logger;
-        private readonly Application _application = application;
+        private readonly IApplicationPasswordReader _passwordReader = passwordReader;
         private readonly IApplicationOutputWriter _outputWriter = outputWriter;
-        private readonly CoreProvider _coreProvider = coreProvider;
+        private readonly ITuviMailCoreProvider _coreProvider = coreProvider;
 
         public async Task<bool> UnlockAsync(CancellationToken cancellationToken, bool readPasswordFromStandardInput = false)
         {
@@ -50,8 +50,8 @@ namespace Eppie.CLI.Services
             }
 
             string password = readPasswordFromStandardInput
-                ? _application.ReadPasswordFromStandardInput()
-                : _application.AskPassword();
+                ? _passwordReader.ReadPasswordFromStandardInput()
+                : _passwordReader.AskPassword();
 
             bool success = await _coreProvider.TuviMailCore.InitializeApplicationAsync(password, cancellationToken).ConfigureAwait(false);
 

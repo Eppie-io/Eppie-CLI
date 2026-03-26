@@ -38,7 +38,7 @@ namespace Eppie.CLI.Services
        ApplicationLaunchOptions launchOptions,
        IApplicationOutputWriter outputWriter,
        IOptions<MailOptions> mailOptions,
-       ResourceLoader resourceLoader)
+        ResourceLoader resourceLoader) : IApplicationPasswordReader
     {
         private readonly ResourceLoader _resourceLoader = resourceLoader;
         private readonly ILogger<Application> _logger = logger;
@@ -67,6 +67,16 @@ namespace Eppie.CLI.Services
             _logger.LogMethodCall();
 
             return ReadValue(_resourceLoader.Strings.AskPassword, writePrompt: !_launchOptions.NonInteractive);
+        }
+
+        string IApplicationPasswordReader.AskPassword()
+        {
+            return AskPassword();
+        }
+
+        string IApplicationPasswordReader.ReadPasswordFromStandardInput()
+        {
+            return ReadPasswordFromStandardInput();
         }
 
         internal string AskNewPassword()

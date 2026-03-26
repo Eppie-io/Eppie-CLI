@@ -74,6 +74,11 @@ namespace Eppie.CLI.Services
             {
                 IReadOnlyCollection<Message> page = [.. (await source(pageSize, lastItem).ConfigureAwait(false)).Where(static item => item is not null)];
 
+                if (page.Count == 0 && !isFirstPage)
+                {
+                    break;
+                }
+
                 foreach (Message item in page)
                 {
                     lastItem = item;

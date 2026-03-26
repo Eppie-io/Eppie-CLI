@@ -78,8 +78,16 @@ namespace Eppie.CLI
             services.AddLocalization()
                     .AddHttpClient()
                     .AddAuthorizationProvider()
+
                     .AddSingleton(new ApplicationCommandLineArguments(args))
                     .AddSingleton<ApplicationLaunchOptions>()
+
+                    .AddSingleton<CoreProvider>()
+                    .AddSingleton<ITuviMailCoreProvider>(serviceProvider => serviceProvider.GetRequiredService<CoreProvider>())
+                    .AddSingleton<Application>()
+                    .AddSingleton<IApplicationPasswordReader>(serviceProvider => serviceProvider.GetRequiredService<Application>())
+
+                    .AddSingleton<ResourceLoader>()
                     .AddSingleton<TextApplicationOutputWriter>()
                     .AddSingleton<JsonApplicationOutputWriter>()
                     .AddSingleton<IApplicationOutputWriter>(serviceProvider => serviceProvider.GetRequiredService<ApplicationLaunchOptions>().OutputFormat == ApplicationOutputFormat.Json
@@ -87,14 +95,14 @@ namespace Eppie.CLI
                          : serviceProvider.GetRequiredService<TextApplicationOutputWriter>())
                     .AddSingleton<IApplicationPagingPolicy, ApplicationPagingPolicy>()
                     .AddSingleton<IApplicationOutputCoordinator, ApplicationOutputCoordinator>()
-                    .AddSingleton<IApplicationMenu>(serviceProvider => serviceProvider.GetRequiredService<MainMenu>())
+
                     .AddSingleton<IApplicationUnlocker, ApplicationUnlocker>()
                     .AddSingleton<IStartupCommandRunner, StartupCommandRunner>()
-                    .AddSingleton<ResourceLoader>()
-                    .AddSingleton<CoreProvider>()
-                    .AddSingleton<Application>()
-                    .AddSingleton<IHostLifetime, ApplicationLifetime>()
+
                     .AddSingleton<MainMenu>()
+                    .AddSingleton<IApplicationMenu>(serviceProvider => serviceProvider.GetRequiredService<MainMenu>())
+
+                    .AddSingleton<IHostLifetime, ApplicationLifetime>()
                     .AddHostedService<ApplicationMenuLoop>();
         }
 
