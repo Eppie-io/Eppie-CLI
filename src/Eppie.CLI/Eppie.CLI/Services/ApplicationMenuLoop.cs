@@ -29,12 +29,18 @@ namespace Eppie.CLI.Services
     internal partial class ApplicationMenuLoop(
         ILogger<ApplicationMenuLoop> logger,
         IHostApplicationLifetime lifetime,
+        ApplicationLaunchOptions launchOptions,
         IStartupCommandRunner startupCommandRunner,
+        IApplicationOutputWriter outputWriter,
         Menu.IApplicationMenu applicationMenu) : BackgroundService
     {
+        private const string InteractiveMenuOperationName = "interactive menu";
+
         private readonly ILogger<ApplicationMenuLoop> _logger = logger;
         private readonly IHostApplicationLifetime _lifetime = lifetime;
+        private readonly ApplicationLaunchOptions _launchOptions = launchOptions;
         private readonly IStartupCommandRunner _startupCommandRunner = startupCommandRunner;
+        private readonly IApplicationOutputWriter _outputWriter = outputWriter;
         private readonly Menu.IApplicationMenu _applicationMenu = applicationMenu;
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -50,6 +56,13 @@ namespace Eppie.CLI.Services
 
             if (!stoppingToken.IsCancellationRequested)
             {
+                if (_launchOptions.NonInteractive)
+                {
+                    _outputWriter.Write(new NonInteractiveOperationNotSupportedErrorOutput(InteractiveMenuOperationName));
+                    _lifetime.StopApplication();
+                    return;
+                }
+
                 using CancellationTokenSource cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, _lifetime.ApplicationStopping);
                 await _applicationMenu.LoopAsync(cancellationTokenSource.Token).ConfigureAwait(false);
             }

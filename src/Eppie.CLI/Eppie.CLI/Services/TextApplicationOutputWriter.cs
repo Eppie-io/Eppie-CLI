@@ -93,6 +93,9 @@ namespace Eppie.CLI.Services
                 case StartupCommandRequiresUnlockPasswordFromStandardInputWarningOutput startupWarningOutput:
                     WriteWarning(_resourceLoader.Strings.GetStartupCommandRequiresUnlockPasswordFromStandardInputWarning(startupWarningOutput.CommandName));
                     return;
+                case NonInteractiveOperationNotSupportedErrorOutput nonInteractiveOperationNotSupportedOutput:
+                    WriteError(_resourceLoader.Strings.GetNonInteractiveOperationNotSupportedError(nonInteractiveOperationNotSupportedOutput.Operation));
+                    return;
                 case ImpossibleInitializationErrorOutput:
                     WriteError(_resourceLoader.Strings.ImpossibleInitialization);
                     return;

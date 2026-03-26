@@ -158,6 +158,11 @@ namespace Eppie.CLI.Services
                 case ImpossibleInitializationErrorOutput:
                     WriteError("impossibleInitialization", _resourceLoader.Strings.ImpossibleInitialization);
                     return true;
+                case NonInteractiveOperationNotSupportedErrorOutput nonInteractiveOperationNotSupportedOutput:
+                    WriteError("nonInteractiveOperationNotSupported",
+                               _resourceLoader.Strings.GetNonInteractiveOperationNotSupportedError(nonInteractiveOperationNotSupportedOutput.Operation),
+                               new { operation = nonInteractiveOperationNotSupportedOutput.Operation });
+                    return true;
                 case UnhandledExceptionOutput unhandledExceptionOutput:
                     WriteError("unhandledException",
                                _resourceLoader.Strings.GetUnhandledException(unhandledExceptionOutput.Exception),

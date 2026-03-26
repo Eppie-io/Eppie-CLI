@@ -276,7 +276,7 @@
     <comment>Description of the '--non-interactive' startup option in the help.</comment>
   </data>
   <data name="MenuOption.OutputDescription" xml:space="preserve">
-    <value>Structured output format. Supported values: json.</value>
+    <value>Output format. Supported values: text, json.</value>
     <comment>Description of the '--output' startup option in the help.</comment>
   </data>
   <data name="MenuOption.YesDescription" xml:space="preserve">

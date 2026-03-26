@@ -64,6 +64,8 @@ namespace Eppie.CLI.Services
 
     internal sealed record FolderSyncedOutput(string AccountAddress, string FolderName) : ApplicationOutput;
 
+    internal sealed record NonInteractiveOperationNotSupportedErrorOutput(string Operation) : ApplicationOutput;
+
     internal sealed record ImpossibleInitializationErrorOutput() : ApplicationOutput;
 
     internal sealed record UnhandledExceptionOutput(Exception Exception) : ApplicationOutput;
