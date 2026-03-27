@@ -16,14 +16,14 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
-using Tuvi.Core.Entities;
+using Eppie.CLI.Exceptions;
 
 namespace Eppie.CLI.Services
 {
-    internal interface IApplicationOutputCoordinator
+    internal interface IApplicationFailureHandler
     {
-        void WriteContacts(ApplicationListingOptions options, IEnumerable<Contact> contacts, Func<bool> askMore);
+        void HandleControlledCommandFailure(ApplicationCommandException exception);
 
-        Task WriteMessagesAsync(string header, ApplicationListingOptions options, Func<int, Message, Task<IEnumerable<Message>>> source, Func<bool> askMore);
+        void HandleUnhandledException(Exception exception);
     }
 }

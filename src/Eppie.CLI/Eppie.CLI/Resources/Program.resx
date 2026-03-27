@@ -175,6 +175,17 @@
     <comment>This message informs the user that the requested operation requires interactive input.
 {0} is the operation description.</comment>
   </data>
+  <data name="Error.StructuredStandardInputInvalidJson" xml:space="preserve">
+    <value>Error: The remaining standard input for the '{0}' command is not valid JSON.</value>
+    <comment>This message informs the user that the remaining standard input cannot be parsed as JSON.
+{0} is the command name.</comment>
+  </data>
+  <data name="Error.StructuredStandardInputMissingProperty" xml:space="preserve">
+    <value>Error: The structured standard input for the '{0}' command must contain a non-empty '{1}' property.</value>
+    <comment>This message informs the user that a required JSON property is missing or empty in structured standard input.
+{0} is the command name.
+{1} is the required JSON property name.</comment>
+  </data>
   <data name="Message.AppOpened" xml:space="preserve">
     <value>The application was opened successfully.</value>
     <comment>This message indicates to the user that the application has opened.</comment>
@@ -231,17 +242,35 @@
     <value>Add a service account.</value>
     <comment>Description of the 'add-account' command in the help.</comment>
   </data>
+  <data name="MenuOption.InputJsonFromStandardInputDescription" xml:space="preserve">
+    <value>Read the remaining standard input as a JSON object for account fields.</value>
+    <comment>Description of the '--input-json-stdin' command option.</comment>
+  </data>
   <data name="Menu.ListAccountsDescription" xml:space="preserve">
     <value>Display a list of accounts.</value>
     <comment>Description of the 'list-accounts' command in the help.</comment>
+  </data>
+  <data name="Menu.ListFoldersDescription" xml:space="preserve">
+    <value>Display a list of folders for an account.</value>
+    <comment>Description of the 'list-folders' command in the help.</comment>
   </data>
   <data name="Message.EmptyAccountList" xml:space="preserve">
     <value>There are no accounts yet.</value>
     <comment>This message informs the user that no service accounts were added.</comment>
   </data>
+  <data name="Message.EmptyFolderList" xml:space="preserve">
+    <value>There are no folders for account {0}.</value>
+    <comment>This message informs the user that the account has no folders.
+{0} is the account address.</comment>
+  </data>
   <data name="Message.HeaderAccountList" xml:space="preserve">
     <value>Accounts:</value>
     <comment>This is the header for the list of accounts.</comment>
+  </data>
+  <data name="Message.HeaderFolderList" xml:space="preserve">
+    <value>Folders for account {0}:</value>
+    <comment>This is the header for the folder list.
+{0} is the account address.</comment>
   </data>
   <data name="Message.AppRestored" xml:space="preserve">
     <value>Your Eppie account has been restored successfully.</value>
@@ -299,6 +328,10 @@
     <value>Send a message.</value>
     <comment>Description of the 'send' command in the help.</comment>
   </data>
+  <data name="Menu.DeleteMessageDescription" xml:space="preserve">
+    <value>Delete a specific message.</value>
+    <comment>Description of the 'delete-message' command in the help.</comment>
+  </data>
   <data name="MenuOption.AccountTypeDescription" xml:space="preserve">
     <value>Type of account.</value>
     <comment>Description of the 'add-account' command option in the help.</comment>
@@ -320,6 +353,10 @@
   <data name="Message.MessageSent" xml:space="preserve">
     <value>Message sent from {2} to {1}. Subject: {0}</value>
     <comment>Text shown after successfully sending a message. {0}=subject, {1}=to, {2}=from</comment>
+  </data>
+  <data name="Message.MessageDeleted" xml:space="preserve">
+    <value>Message {2} (PK: {3}) deleted from folder '{1}' for account {0}.</value>
+    <comment>Text shown after successfully deleting a message. {0}=account, {1}=folder, {2}=id, {3}=pk</comment>
   </data>
   <data name="Message.FolderSynced" xml:space="preserve">
     <value>Folder '{1}' for account {0} synchronized.</value>
@@ -451,8 +488,12 @@
 {1} is a parameter containing the folder name.</comment>
   </data>
   <data name="MenuOption.PageSizeDescription" xml:space="preserve">
-    <value>Number of messages displayed at a time.</value>
-    <comment>Description of the 'show-all-messages' command option in the help.</comment>
+    <value>Number of records fetched and displayed per page.</value>
+    <comment>Description of a paging option in the help.</comment>
+  </data>
+  <data name="MenuOption.LimitDescription" xml:space="preserve">
+    <value>Maximum number of records to output.</value>
+    <comment>Description of an output limit option in the help.</comment>
   </data>
   <data name="Information.PrintContactMessagesHeader" xml:space="preserve">
     <value>Messages for contact {0}:</value>

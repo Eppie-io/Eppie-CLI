@@ -30,12 +30,12 @@ namespace Eppie.CLI.Services
         private readonly IApplicationPagingPolicy _pagingPolicy = pagingPolicy;
         private readonly IApplicationOutputWriter _outputWriter = outputWriter;
 
-        public void WriteContacts(int pageSize, IEnumerable<Contact> contacts, Func<bool> askMore)
+        public void WriteContacts(ApplicationListingOptions options, IEnumerable<Contact> contacts, Func<bool> askMore)
         {
             ArgumentNullException.ThrowIfNull(contacts);
             ArgumentNullException.ThrowIfNull(askMore);
 
-            IReadOnlyCollection<Contact> remainingContacts = [.. contacts];
+            IReadOnlyCollection<Contact> remainingContacts = ApplyLimit(contacts, options.Limit);
 
             if (_pagingPolicy.ShouldAggregatePagesBeforeWrite)
             {
@@ -43,7 +43,7 @@ namespace Eppie.CLI.Services
                 return;
             }
 
-            IReadOnlyCollection<Contact> page = [.. remainingContacts.Take(pageSize)];
+            IReadOnlyCollection<Contact> page = [.. remainingContacts.Take(options.PageSize)];
 
             if (page.Count == 0)
             {
@@ -55,12 +55,12 @@ namespace Eppie.CLI.Services
             {
                 _outputWriter.Write(new ContactsOutput(page));
                 remainingContacts = [.. remainingContacts.Skip(page.Count)];
-                page = [.. remainingContacts.Take(pageSize)];
+                page = [.. remainingContacts.Take(options.PageSize)];
             }
             while (_pagingPolicy.ShouldContinue(page.Count > 0, askMore));
         }
 
-        public async Task WriteMessagesAsync(string header, int pageSize, Func<int, Message, Task<IEnumerable<Message>>> source, Func<bool> askMore)
+        public async Task WriteMessagesAsync(string header, ApplicationListingOptions options, Func<int, Message, Task<IEnumerable<Message>>> source, Func<bool> askMore)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(header);
             ArgumentNullException.ThrowIfNull(source);
@@ -68,13 +68,19 @@ namespace Eppie.CLI.Services
 
             List<Message> allMessages = [];
             Message lastItem = null!;
-            bool isFirstPage = true;
+            bool anyPageProcessed = false;
+            int remainingLimit = options.Limit;
+            bool hasMore = false;
 
             while (true)
             {
-                IReadOnlyCollection<Message> page = [.. (await source(pageSize, lastItem).ConfigureAwait(false)).Where(static item => item is not null)];
+                int requestedCount = options.GetRequestSize(remainingLimit);
 
-                if (page.Count == 0 && !isFirstPage)
+                IReadOnlyCollection<Message> page = [.. (await source(requestedCount, lastItem).ConfigureAwait(false))
+                    .Where(static item => item is not null)
+                    .Take(requestedCount)];
+
+                if (page.Count == 0 && anyPageProcessed)
                 {
                     break;
                 }
@@ -90,20 +96,33 @@ namespace Eppie.CLI.Services
                 }
                 else
                 {
-                    _outputWriter.Write(new MessagesOutput(isFirstPage ? header : null, page, Compact: true));
-                    isFirstPage = false;
+                    _outputWriter.Write(new MessagesOutput(anyPageProcessed ? null : header, page, Paging: null));
                 }
 
-                if (!_pagingPolicy.ShouldContinue(page.Count >= pageSize, askMore))
+                anyPageProcessed = true;
+                remainingLimit -= page.Count;
+
+                bool pageFull = page.Count >= requestedCount;
+                bool shouldStop = remainingLimit <= 0 || !_pagingPolicy.ShouldContinue(pageFull, askMore);
+
+                if (shouldStop)
                 {
+                    hasMore = pageFull;
                     break;
                 }
             }
 
             if (_pagingPolicy.ShouldAggregatePagesBeforeWrite)
             {
-                _outputWriter.Write(new MessagesOutput(header, allMessages, Compact: true));
+                _outputWriter.Write(new MessagesOutput(header, allMessages, Paging: new PagingInfo(allMessages.Count, hasMore)));
             }
+        }
+
+        private static IReadOnlyCollection<T> ApplyLimit<T>(IEnumerable<T> items, int limit)
+        {
+            ArgumentNullException.ThrowIfNull(items);
+
+            return [.. items.Take(limit)];
         }
     }
 }

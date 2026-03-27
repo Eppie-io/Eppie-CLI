@@ -16,14 +16,33 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
-using Tuvi.Core.Entities;
-
 namespace Eppie.CLI.Services
 {
-    internal interface IApplicationOutputCoordinator
+    internal readonly record struct ApplicationListingOptions
     {
-        void WriteContacts(ApplicationListingOptions options, IEnumerable<Contact> contacts, Func<bool> askMore);
+        internal const int DefaultPageSize = 20;
+        internal const int DefaultLimit = 20;
 
-        Task WriteMessagesAsync(string header, ApplicationListingOptions options, Func<int, Message, Task<IEnumerable<Message>>> source, Func<bool> askMore);
+        public ApplicationListingOptions(int pageSize, int? limit)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
+
+            if (limit.HasValue)
+            {
+                ArgumentOutOfRangeException.ThrowIfNegativeOrZero(limit.Value, nameof(limit));
+            }
+
+            PageSize = pageSize;
+            Limit = limit ?? DefaultLimit;
+        }
+
+        internal int PageSize { get; }
+
+        internal int Limit { get; }
+
+        internal int GetRequestSize(int remainingLimit)
+        {
+            return Math.Min(PageSize, remainingLimit);
+        }
     }
 }

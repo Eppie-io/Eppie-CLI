@@ -16,14 +16,40 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
-using Tuvi.Core.Entities;
+using Eppie.CLI.Services;
 
-namespace Eppie.CLI.Services
+namespace Eppie.CLI.Exceptions
 {
-    internal interface IApplicationOutputCoordinator
+    internal sealed class ApplicationCommandException : Exception
     {
-        void WriteContacts(ApplicationListingOptions options, IEnumerable<Contact> contacts, Func<bool> askMore);
+        public ApplicationCommandException()
+        {
+        }
 
-        Task WriteMessagesAsync(string header, ApplicationListingOptions options, Func<int, Message, Task<IEnumerable<Message>>> source, Func<bool> askMore);
+        public ApplicationCommandException(string? message)
+            : base(message)
+        {
+        }
+
+        public ApplicationCommandException(string? message, Exception? innerException)
+            : base(message, innerException)
+        {
+        }
+
+        internal ApplicationCommandException(ApplicationOutput output, int exitCode, bool logStackTrace = false, Exception? innerException = null)
+            : base(message: null, innerException)
+        {
+            ArgumentNullException.ThrowIfNull(output);
+
+            Output = output;
+            ExitCode = exitCode;
+            LogStackTrace = logStackTrace;
+        }
+
+        internal ApplicationOutput? Output { get; }
+
+        internal int ExitCode { get; }
+
+        internal bool LogStackTrace { get; }
     }
 }

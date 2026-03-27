@@ -101,7 +101,9 @@ namespace Eppie.CLI.Services
         {
             _logger.LogMethodCall();
 
-            return ReadValue(_resourceLoader.Strings.AskAccountAddress);
+            return _launchOptions.NonInteractive
+                ? ReadValue(_resourceLoader.Strings.AskAccountAddress, writePrompt: false)
+                : ReadValue(_resourceLoader.Strings.AskAccountAddress);
         }
 
         internal string AskAccountPassword()
@@ -257,7 +259,9 @@ namespace Eppie.CLI.Services
         {
             _logger.LogMethodCall();
 
-            return ConsoleExtension.ReadMultiLine(_launchOptions.NonInteractive ? string.Empty : _resourceLoader.Strings.AskMessageBody, "EOF") ?? throw new ReadValueCanceledException();
+            return _launchOptions.NonInteractive
+                ? ReadRemainingStandardInput()
+                : ConsoleExtension.ReadMultiLine(_resourceLoader.Strings.AskMessageBody, "EOF") ?? throw new ReadValueCanceledException();
         }
 
         internal string GetPrintAllMessagesHeader()
@@ -299,6 +303,26 @@ namespace Eppie.CLI.Services
                                                   }
                                               },
                                               Console.ReadLine) ?? throw new ReadValueCanceledException();
+        }
+
+        internal Task<string> ReadStandardInputToEndAsync()
+        {
+            _logger.LogMethodCall();
+            return Console.In.ReadToEndAsync();
+        }
+
+        private string ReadRemainingStandardInput()
+        {
+            _logger.LogMethodCall();
+
+            List<string> lines = [];
+
+            while (Console.ReadLine() is string line)
+            {
+                lines.Add(line);
+            }
+
+            return string.Join(Environment.NewLine, lines);
         }
 
         private string ReadSecretValue(string message, ConsoleColor foreground = ConsoleColor.Gray)

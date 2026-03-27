@@ -26,9 +26,13 @@ namespace Eppie.CLI.Services
 
     internal sealed record ContactsOutput(IReadOnlyCollection<Contact> Contacts) : ApplicationOutput;
 
+    internal sealed record FoldersOutput(string AccountAddress, IReadOnlyCollection<Folder> Folders) : ApplicationOutput;
+
     internal sealed record MessageOutput(Message Message, bool Compact) : ApplicationOutput;
 
-    internal sealed record MessagesOutput(string? Header, IReadOnlyCollection<Message> Messages, bool Compact) : ApplicationOutput;
+    internal readonly record struct PagingInfo(int Returned, bool HasMore);
+
+    internal sealed record MessagesOutput(string? Header, IReadOnlyCollection<Message> Messages, PagingInfo? Paging) : ApplicationOutput;
 
     internal sealed record ApplicationInitializedOutput(IReadOnlyCollection<string> SeedPhrase) : ApplicationOutput;
 
@@ -58,9 +62,15 @@ namespace Eppie.CLI.Services
 
     internal sealed record StartupCommandRequiresUnlockPasswordFromStandardInputWarningOutput(string CommandName) : ApplicationOutput;
 
+    internal sealed record StructuredStandardInputInvalidJsonErrorOutput(string CommandName) : ApplicationOutput;
+
+    internal sealed record StructuredStandardInputMissingPropertyErrorOutput(string CommandName, string PropertyName) : ApplicationOutput;
+
     internal sealed record AccountAddedOutput(string Address, string AccountType) : ApplicationOutput;
 
     internal sealed record MessageSentOutput(string Subject, string To, string From) : ApplicationOutput;
+
+    internal sealed record MessageDeletedOutput(string AccountAddress, string FolderName, uint Id, int Pk) : ApplicationOutput;
 
     internal sealed record FolderSyncedOutput(string AccountAddress, string FolderName) : ApplicationOutput;
 

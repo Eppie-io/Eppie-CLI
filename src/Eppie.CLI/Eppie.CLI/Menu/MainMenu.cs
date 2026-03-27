@@ -37,8 +37,8 @@ namespace Eppie.CLI.Menu
         private readonly ILogger<MainMenu> _logger;
         private readonly Actions _actions;
         private readonly Application _application;
-        private readonly IApplicationOutputWriter _outputWriter;
         private readonly ResourceLoader _resourceLoader;
+        private readonly IApplicationFailureHandler _failureHandler;
         private IAsyncParser? _commandParser;
 
         public MainMenu(
@@ -46,16 +46,18 @@ namespace Eppie.CLI.Menu
             Application application,
             ApplicationLaunchOptions launchOptions,
             IApplicationOutputWriter outputWriter,
+            IApplicationFailureHandler failureHandler,
             IApplicationOutputCoordinator outputCoordinator,
+            IProtonAccountInputResolver protonAccountInputResolver,
             AuthorizationProvider authProvider,
             CoreProvider coreProvider,
             ResourceLoader resourceLoader)
         {
             _logger = loggerFactory.CreateLogger<MainMenu>();
             _application = application;
-            _outputWriter = outputWriter;
             _resourceLoader = resourceLoader;
-            _actions = new Actions(loggerFactory.CreateLogger<Actions>(), _application, launchOptions, _outputWriter, outputCoordinator, authProvider, coreProvider);
+            _failureHandler = failureHandler;
+            _actions = new Actions(loggerFactory.CreateLogger<Actions>(), _application, launchOptions, outputWriter, failureHandler, outputCoordinator, protonAccountInputResolver, authProvider, coreProvider);
         }
 
         public async Task LoopAsync(CancellationToken stoppingToken)
@@ -126,8 +128,11 @@ namespace Eppie.CLI.Menu
                                        action: (cmd) => _actions.OpenActionAsync()),
                     CreateAsyncCommand(parser, MenuCommand.ListAccounts, _resourceLoader.Strings.ListAccountsDescription,
                                        action: (cmd) => _actions.ListAccountsActionAsync()),
+                    CreateAsyncCommand(parser, MenuCommand.ListFolders, _resourceLoader.Strings.ListFoldersDescription,
+                                       action: (cmd) => _actions.ListFoldersActionAsync(MenuCommand.CommandListFoldersOptions.GetAccountValue(cmd)),
+                                       options: MenuCommand.CommandListFoldersOptions.GetOptions(parser, _resourceLoader)),
                     CreateAsyncCommand(parser, MenuCommand.AddAccount, _resourceLoader.Strings.AddAccountDescription,
-                                      action: (cmd) => _actions.AddAccountActionAsync(MenuCommand.CommandAddAccountOptions.GetTypeValue(cmd)),
+                                       action: (cmd) => _actions.AddAccountActionAsync(MenuCommand.CommandAddAccountOptions.GetValues(cmd)),
                                       options: MenuCommand.CommandAddAccountOptions.GetOptions(parser, _resourceLoader)),
                     CreateAsyncCommand(parser, MenuCommand.Restore, _resourceLoader.Strings.RestoreDescription,
                                        action: (cmd) => _actions.RestoreActionAsync()),
@@ -137,7 +142,7 @@ namespace Eppie.CLI.Menu
                                                                                  MenuCommand.CommandSendOptions.GetSubjectValue(cmd)),
                                        options: MenuCommand.CommandSendOptions.GetOptions(parser, _resourceLoader)),
                     CreateAsyncCommand(parser, MenuCommand.ListContacts, _resourceLoader.Strings.ListContactsDescription,
-                                       action: (cmd) => _actions.ListContactsActionAsync(MenuCommand.CommandListContactsOptions.GetPageSizeValue(cmd)),
+                                       action: (cmd) => _actions.ListContactsActionAsync(MenuCommand.CommandListContactsOptions.GetListingOptions(cmd)),
                                        options: MenuCommand.CommandListContactsOptions.GetOptions(parser, _resourceLoader)),
                     CreateAsyncCommand(parser, MenuCommand.ShowMessage, _resourceLoader.Strings.ShowMessageDescription,
                                        action: (cmd) => _actions.ShowMessageActionAsync(MenuCommand.CommandShowMessageOptions.GetAccountValue(cmd),
@@ -145,21 +150,27 @@ namespace Eppie.CLI.Menu
                                                                                         MenuCommand.CommandShowMessageOptions.GetIdValue(cmd),
                                                                                         MenuCommand.CommandShowMessageOptions.GetPKValue(cmd)),
                                        options: MenuCommand.CommandShowMessageOptions.GetOptions(parser, _resourceLoader)),
+                    CreateAsyncCommand(parser, MenuCommand.DeleteMessage, _resourceLoader.Strings.DeleteMessageDescription,
+                                       action: (cmd) => _actions.DeleteMessageActionAsync(MenuCommand.CommandShowMessageOptions.GetAccountValue(cmd),
+                                                                                          MenuCommand.CommandShowMessageOptions.GetFolderNameValue(cmd),
+                                                                                          MenuCommand.CommandShowMessageOptions.GetIdValue(cmd),
+                                                                                          MenuCommand.CommandShowMessageOptions.GetPKValue(cmd)),
+                                       options: MenuCommand.CommandShowMessageOptions.GetOptions(parser, _resourceLoader)),
                     CreateAsyncCommand(parser, MenuCommand.SyncFolder, _resourceLoader.Strings.SyncFolderDescription,
                                        action: (cmd) => _actions.SyncFolderActionAsync(MenuCommand.CommandSyncFolderOptions.GetAccountValue(cmd),
                                                                                        MenuCommand.CommandSyncFolderOptions.GetFolderNameValue(cmd)),
                                        options: MenuCommand.CommandSyncFolderOptions.GetSyncFolderOptions(parser, _resourceLoader)),
                     CreateAsyncCommand(parser, MenuCommand.ShowAllMessages, _resourceLoader.Strings.ShowAllMessagesDescription,
-                                       action: (cmd) => _actions.ShowAllMessagesActionAsync(MenuCommand.CommandShowMessagesOptions.GetPageSizeValue(cmd)),
+                                       action: (cmd) => _actions.ShowAllMessagesActionAsync(MenuCommand.CommandShowMessagesOptions.GetListingOptions(cmd)),
                                        options: MenuCommand.CommandShowMessagesOptions.GetShowMessagesOptions(parser, _resourceLoader)),
                     CreateAsyncCommand(parser, MenuCommand.ShowFolderMessages, _resourceLoader.Strings.ShowFolderMessagesDescription,
                                        action: (cmd) => _actions.ShowFolderMessagesActionAsync(MenuCommand.CommandShowMessagesOptions.GetAccountValue(cmd),
                                                                                                MenuCommand.CommandShowMessagesOptions.GetFolderNameValue(cmd),
-                                                                                               MenuCommand.CommandShowMessagesOptions.GetPageSizeValue(cmd)),
+                                                                                                MenuCommand.CommandShowMessagesOptions.GetListingOptions(cmd)),
                                        options: MenuCommand.CommandShowMessagesOptions.GetShowFolderMessagesOptions(parser, _resourceLoader)),
                     CreateAsyncCommand(parser, MenuCommand.ShowContactMessages, _resourceLoader.Strings.ShowContactMessagesDescription,
                                        action: (cmd) => _actions.ShowContactMessagesActionAsync(MenuCommand.CommandShowMessagesOptions.GetContactAddressValue(cmd),
-                                                                                                MenuCommand.CommandShowMessagesOptions.GetPageSizeValue(cmd)),
+                                                                                                 MenuCommand.CommandShowMessagesOptions.GetListingOptions(cmd)),
                                        options: MenuCommand.CommandShowMessagesOptions.GetShowContactMessagesOptions(parser, _resourceLoader)),
                     CreateAsyncCommand(parser, MenuCommand.Import, _resourceLoader.Strings.ImportDescription,
                                        action: (cmd) => _actions.ImportKeyBundleFromFileAsync(MenuCommand.CommandImportOptions.GetFileValue(cmd)),
@@ -182,10 +193,13 @@ namespace Eppie.CLI.Menu
 
                 _logger.LogDebug("Command {CommandName} is completed with code: {CommandResult}", cmd, result);
             }
+            catch (ApplicationCommandException ex)
+            {
+                HandleControlledCommandFailure(ex);
+            }
             catch (InvalidOperationException ex)
             {
-                _logger.LogError("An error has occurred {Exception}", ex);
-                _outputWriter.Write(new UnhandledExceptionOutput(ex));
+                WriteUnhandledException(ex);
             }
         }
 
@@ -199,10 +213,13 @@ namespace Eppie.CLI.Menu
 
                 _logger.LogDebug("Command {CommandName} is completed with code: {CommandResult}", string.Join(' ', commandArguments), result);
             }
+            catch (ApplicationCommandException ex)
+            {
+                HandleControlledCommandFailure(ex);
+            }
             catch (InvalidOperationException ex)
             {
-                _logger.LogError("An error has occurred {Exception}", ex);
-                _outputWriter.Write(new UnhandledExceptionOutput(ex));
+                WriteUnhandledException(ex);
             }
         }
 
@@ -217,14 +234,17 @@ namespace Eppie.CLI.Menu
                 {
                     action?.Invoke(cmd);
                 }
+                catch (ApplicationCommandException ex)
+                {
+                    HandleControlledCommandFailure(ex);
+                }
                 catch (ReadValueCanceledException)
                 {
                     OnCancelCommand();
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError("An error has occurred {Exception}", ex);
-                    _outputWriter.Write(new UnhandledExceptionOutput(ex));
+                    WriteUnhandledException(ex);
                 }
             }
 
@@ -245,18 +265,31 @@ namespace Eppie.CLI.Menu
                         await action.Invoke(cmd).ConfigureAwait(false);
                     }
                 }
+                catch (ApplicationCommandException ex)
+                {
+                    HandleControlledCommandFailure(ex);
+                }
                 catch (ReadValueCanceledException)
                 {
                     OnCancelCommand();
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError("An error has occurred {Exception}", ex);
-                    _outputWriter.Write(new UnhandledExceptionOutput(ex));
+                    WriteUnhandledException(ex);
                 }
             }
 
             return parser.CreateAsyncCommand(name, description, options, action: HandleException);
+        }
+
+        private void HandleControlledCommandFailure(ApplicationCommandException ex)
+        {
+            _failureHandler.HandleControlledCommandFailure(ex);
+        }
+
+        private void WriteUnhandledException(Exception ex)
+        {
+            _failureHandler.HandleUnhandledException(ex);
         }
 
         private static void OnCancelCommand()

@@ -16,14 +16,21 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
-using Tuvi.Core.Entities;
-
 namespace Eppie.CLI.Services
 {
-    internal interface IApplicationOutputCoordinator
+    internal interface IProtonAccountInputResolver
     {
-        void WriteContacts(ApplicationListingOptions options, IEnumerable<Contact> contacts, Func<bool> askMore);
+        Task<IProtonAccountInput> ResolveAsync(bool inputJsonFromStandardInput);
+    }
 
-        Task WriteMessagesAsync(string header, ApplicationListingOptions options, Func<int, Message, Task<IEnumerable<Message>>> source, Func<bool> askMore);
+    internal interface IProtonAccountInput
+    {
+        string Email { get; }
+
+        string AccountPassword { get; }
+
+        string GetTwoFactorCode(bool firstAttempt);
+
+        string GetMailboxPassword(bool firstAttempt);
     }
 }

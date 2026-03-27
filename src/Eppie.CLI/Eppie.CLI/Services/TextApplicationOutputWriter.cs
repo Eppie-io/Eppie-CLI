@@ -42,11 +42,14 @@ namespace Eppie.CLI.Services
                 case ContactsOutput contactsOutput:
                     WriteContacts(contactsOutput.Contacts);
                     return;
+                case FoldersOutput foldersOutput:
+                    WriteFolders(foldersOutput.AccountAddress, foldersOutput.Folders);
+                    return;
                 case MessageOutput messageOutput:
                     WriteMessage(messageOutput.Message, messageOutput.Compact);
                     return;
                 case MessagesOutput messagesOutput:
-                    WriteMessages(messagesOutput.Header, messagesOutput.Messages, messagesOutput.Compact);
+                    WriteMessages(messagesOutput.Header, messagesOutput.Messages);
                     return;
                 case ApplicationInitializedOutput initializedOutput:
                     WriteInitialized(initializedOutput.SeedPhrase);
@@ -96,6 +99,13 @@ namespace Eppie.CLI.Services
                 case NonInteractiveOperationNotSupportedErrorOutput nonInteractiveOperationNotSupportedOutput:
                     WriteError(_resourceLoader.Strings.GetNonInteractiveOperationNotSupportedError(nonInteractiveOperationNotSupportedOutput.Operation));
                     return;
+                case StructuredStandardInputInvalidJsonErrorOutput structuredInputInvalidJsonOutput:
+                    WriteError(_resourceLoader.Strings.GetStructuredStandardInputInvalidJsonError(structuredInputInvalidJsonOutput.CommandName));
+                    return;
+                case StructuredStandardInputMissingPropertyErrorOutput structuredInputMissingPropertyOutput:
+                    WriteError(_resourceLoader.Strings.GetStructuredStandardInputMissingPropertyError(structuredInputMissingPropertyOutput.CommandName,
+                                                                                                      structuredInputMissingPropertyOutput.PropertyName));
+                    return;
                 case ImpossibleInitializationErrorOutput:
                     WriteError(_resourceLoader.Strings.ImpossibleInitialization);
                     return;
@@ -105,12 +115,40 @@ namespace Eppie.CLI.Services
                 case MessageSentOutput messageSentOutput:
                     Console.WriteLine(_resourceLoader.Strings.GetMessageSentText(messageSentOutput.Subject, messageSentOutput.To, messageSentOutput.From));
                     return;
+                case MessageDeletedOutput messageDeletedOutput:
+                    Console.WriteLine(_resourceLoader.Strings.GetMessageDeletedText(messageDeletedOutput.AccountAddress,
+                                                                                   messageDeletedOutput.FolderName,
+                                                                                   messageDeletedOutput.Id,
+                                                                                   messageDeletedOutput.Pk));
+                    return;
                 case FolderSyncedOutput folderSyncedOutput:
                     Console.WriteLine(_resourceLoader.Strings.GetFolderSyncedText(folderSyncedOutput.AccountAddress, folderSyncedOutput.FolderName));
                     return;
                 default:
                     throw new InvalidOperationException($"Unknown output type '{output.GetType().FullName}'.");
             }
+        }
+
+        private void WriteFolders(string accountAddress, IReadOnlyCollection<Folder> folders)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(accountAddress);
+            ArgumentNullException.ThrowIfNull(folders);
+
+            if (folders.Count == 0)
+            {
+                Console.WriteLine(_resourceLoader.Strings.GetEmptyFolderList(accountAddress));
+                return;
+            }
+
+            Console.WriteLine(_resourceLoader.Strings.GetHeaderFolderList(accountAddress));
+
+            int i = 0;
+            foreach (Folder folder in folders)
+            {
+                Console.WriteLine($"{++i}. {folder.FullName}");
+            }
+
+            Console.WriteLine();
         }
 
         private void WriteInitialized(IReadOnlyCollection<string> seedPhrase)
@@ -143,7 +181,7 @@ namespace Eppie.CLI.Services
             int i = 0;
             foreach (Account account in accounts)
             {
-                Console.WriteLine($"{++i}. {account.Email.Address}");
+                Console.WriteLine($"{++i}. {account.Email.Address} ({account.Type})");
             }
 
             Console.WriteLine();
@@ -165,7 +203,7 @@ namespace Eppie.CLI.Services
             }
         }
 
-        private void WriteMessages(string? header, IReadOnlyCollection<Message> messages, bool compact)
+        private void WriteMessages(string? header, IReadOnlyCollection<Message> messages)
         {
             ArgumentNullException.ThrowIfNull(messages);
 
@@ -176,7 +214,7 @@ namespace Eppie.CLI.Services
 
             foreach (Message message in messages)
             {
-                WriteMessage(message, compact);
+                WriteMessage(message, compact: true);
             }
         }
 

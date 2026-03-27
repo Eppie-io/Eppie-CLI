@@ -53,6 +53,7 @@ namespace Eppie.CLI.Services
                     {
                         id = account.Id,
                         address = account.Email.Address,
+                        accountType = account.Type.ToString(),
                     }));
                     return true;
                 case ContactsOutput contactsOutput:
@@ -64,12 +65,30 @@ namespace Eppie.CLI.Services
                         unreadCount = contact.UnreadCount,
                     }));
                     return true;
+                case FoldersOutput foldersOutput:
+                    WriteResult("folders",
+                                foldersOutput.Folders.Select(static folder => new
+                                {
+                                    fullName = folder.FullName,
+                                    unreadCount = folder.UnreadCount,
+                                    totalCount = folder.TotalCount,
+                                    roles = GetFolderRoles(folder),
+                                }),
+                                meta: new { account = foldersOutput.AccountAddress });
+                    return true;
                 case MessageOutput messageOutput:
                     WriteResult("message", ToMessageOutput(messageOutput.Message, messageOutput.Compact));
                     return true;
                 case MessagesOutput messagesOutput:
-                    WriteResult("messages", messagesOutput.Messages.Select(message => ToMessageOutput(message, messagesOutput.Compact)),
-                                meta: string.IsNullOrWhiteSpace(messagesOutput.Header) ? null : new { header = messagesOutput.Header });
+                    WriteResult("messages", messagesOutput.Messages.Select(static message => ToMessageOutput(message, compact: true)),
+                                meta: string.IsNullOrWhiteSpace(messagesOutput.Header)
+                                    ? null
+                                    : new
+                                    {
+                                        header = messagesOutput.Header,
+                                        returned = messagesOutput.Paging?.Returned,
+                                        hasMore = messagesOutput.Paging?.HasMore,
+                                    });
                     return true;
                 case AccountAddedOutput accountAddedOutput:
                     WriteResult("accountAdded", new { address = accountAddedOutput.Address, accountType = accountAddedOutput.AccountType });
@@ -106,6 +125,9 @@ namespace Eppie.CLI.Services
                     return true;
                 case MessageSentOutput messageSentOutput:
                     WriteStatus("messageSent", new { subject = messageSentOutput.Subject, to = messageSentOutput.To, from = messageSentOutput.From });
+                    return true;
+                case MessageDeletedOutput messageDeletedOutput:
+                    WriteStatus("messageDeleted", new { account = messageDeletedOutput.AccountAddress, folder = messageDeletedOutput.FolderName, id = messageDeletedOutput.Id, pk = messageDeletedOutput.Pk });
                     return true;
                 case FolderSyncedOutput folderSyncedOutput:
                     WriteStatus("folderSynced", new { account = folderSyncedOutput.AccountAddress, folder = folderSyncedOutput.FolderName });
@@ -163,14 +185,38 @@ namespace Eppie.CLI.Services
                                _resourceLoader.Strings.GetNonInteractiveOperationNotSupportedError(nonInteractiveOperationNotSupportedOutput.Operation),
                                new { operation = nonInteractiveOperationNotSupportedOutput.Operation });
                     return true;
+                case StructuredStandardInputInvalidJsonErrorOutput structuredInputInvalidJsonOutput:
+                    WriteError("structuredStandardInputInvalidJson",
+                               _resourceLoader.Strings.GetStructuredStandardInputInvalidJsonError(structuredInputInvalidJsonOutput.CommandName),
+                               new { commandName = structuredInputInvalidJsonOutput.CommandName });
+                    return true;
+                case StructuredStandardInputMissingPropertyErrorOutput structuredInputMissingPropertyOutput:
+                    WriteError("structuredStandardInputMissingProperty",
+                               _resourceLoader.Strings.GetStructuredStandardInputMissingPropertyError(structuredInputMissingPropertyOutput.CommandName,
+                                                                                                      structuredInputMissingPropertyOutput.PropertyName),
+                               new
+                               {
+                                   commandName = structuredInputMissingPropertyOutput.CommandName,
+                                   propertyName = structuredInputMissingPropertyOutput.PropertyName,
+                               });
+                    return true;
                 case UnhandledExceptionOutput unhandledExceptionOutput:
                     WriteError("unhandledException",
-                               _resourceLoader.Strings.GetUnhandledException(unhandledExceptionOutput.Exception),
+                               _resourceLoader.Strings.GetUnhandledException(GetUnhandledExceptionMessage(unhandledExceptionOutput.Exception)),
                                new { exceptionType = unhandledExceptionOutput.Exception.GetType().FullName });
                     return true;
                 default:
                     return false;
             }
+        }
+
+        private static string GetUnhandledExceptionMessage(Exception exception)
+        {
+            ArgumentNullException.ThrowIfNull(exception);
+
+            return string.IsNullOrWhiteSpace(exception.Message)
+                ? exception.GetType().Name
+                : exception.Message;
         }
 
         private static void WriteResult<TData>(string code, TData data, object? meta = null)
@@ -226,8 +272,8 @@ namespace Eppie.CLI.Services
                     id = message.Id,
                     pk = message.Pk,
                     date = message.Date,
-                    to = message.To.FirstOrDefault()?.Address ?? string.Empty,
-                    from = message.From.FirstOrDefault()?.Address ?? string.Empty,
+                    to = message.To.Select(static address => address.Address),
+                    from = message.From.Select(static address => address.Address),
                     folder = message.Folder.FullName,
                     subject = message.Subject,
                 }
@@ -246,6 +292,50 @@ namespace Eppie.CLI.Services
                     htmlBody = message.HtmlBody,
                     attachmentsCount = message.Attachments.Count,
                 };
+        }
+
+        private static string[] GetFolderRoles(Folder folder)
+        {
+            ArgumentNullException.ThrowIfNull(folder);
+
+            List<string> roles = [];
+
+            if (folder.IsInbox)
+            {
+                roles.Add("inbox");
+            }
+
+            if (folder.IsDraft)
+            {
+                roles.Add("draft");
+            }
+
+            if (folder.IsJunk)
+            {
+                roles.Add("junk");
+            }
+
+            if (folder.IsTrash)
+            {
+                roles.Add("trash");
+            }
+
+            if (folder.IsSent)
+            {
+                roles.Add("sent");
+            }
+
+            if (folder.IsImportant)
+            {
+                roles.Add("important");
+            }
+
+            if (folder.IsAll)
+            {
+                roles.Add("all");
+            }
+
+            return [.. roles];
         }
 
         private static void WriteJson<T>(T value)

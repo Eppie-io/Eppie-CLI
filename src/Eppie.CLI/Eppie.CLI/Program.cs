@@ -95,6 +95,8 @@ namespace Eppie.CLI
                          : serviceProvider.GetRequiredService<TextApplicationOutputWriter>())
                     .AddSingleton<IApplicationPagingPolicy, ApplicationPagingPolicy>()
                     .AddSingleton<IApplicationOutputCoordinator, ApplicationOutputCoordinator>()
+                    .AddSingleton<IApplicationFailureHandler, ApplicationFailureHandler>()
+                    .AddSingleton<IProtonAccountInputResolver, ProtonAccountInputResolver>()
 
                     .AddSingleton<IApplicationUnlocker, ApplicationUnlocker>()
                     .AddSingleton<IStartupCommandRunner, StartupCommandRunner>()
