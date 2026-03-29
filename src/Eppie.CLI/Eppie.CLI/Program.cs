@@ -96,6 +96,7 @@ namespace Eppie.CLI
                     .AddSingleton<IApplicationPagingPolicy, ApplicationPagingPolicy>()
                     .AddSingleton<IApplicationOutputCoordinator, ApplicationOutputCoordinator>()
                     .AddSingleton<IApplicationFailureHandler, ApplicationFailureHandler>()
+                    .AddSingleton<IEmailAccountInputResolver, EmailAccountInputResolver>()
                     .AddSingleton<IProtonAccountInputResolver, ProtonAccountInputResolver>()
 
                     .AddSingleton<IApplicationUnlocker, ApplicationUnlocker>()

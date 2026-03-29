@@ -41,6 +41,7 @@ namespace Eppie.CLI.Menu
         IApplicationOutputWriter outputWriter,
         IApplicationFailureHandler failureHandler,
         IApplicationOutputCoordinator outputCoordinator,
+        IEmailAccountInputResolver emailAccountInputResolver,
         IProtonAccountInputResolver protonAccountInputResolver,
         AuthorizationProvider authProvider,
         CoreProvider coreProvider)
@@ -51,6 +52,7 @@ namespace Eppie.CLI.Menu
         private readonly IApplicationOutputWriter _outputWriter = outputWriter;
         private readonly IApplicationFailureHandler _failureHandler = failureHandler;
         private readonly IApplicationOutputCoordinator _outputCoordinator = outputCoordinator;
+        private readonly IEmailAccountInputResolver _emailAccountInputResolver = emailAccountInputResolver;
         private readonly IProtonAccountInputResolver _protonAccountInputResolver = protonAccountInputResolver;
         private readonly CoreProvider _coreProvider = coreProvider;
         private readonly AuthorizationProvider _authProvider = authProvider;
@@ -160,7 +162,7 @@ namespace Eppie.CLI.Menu
 
             return options.Type switch
             {
-                MenuCommand.CommandAddAccountOptions.AccountType.Email => AddEmailAccountAsync(),
+                MenuCommand.CommandAddAccountOptions.AccountType.Email => AddEmailAccountAsync(options),
                 MenuCommand.CommandAddAccountOptions.AccountType.Dec => AddDecAccountAsync(),
                 MenuCommand.CommandAddAccountOptions.AccountType.Proton => AddProtonAccountAsync(options),
                 _ => throw new ArgumentException($"Account type '{options.Type}' is not supported.", nameof(options)),
@@ -381,12 +383,17 @@ namespace Eppie.CLI.Menu
 
         private readonly record struct MessageCommandContext(IAccountService AccountService, Folder Folder, Message Message);
 
-        private async Task AddEmailAccountAsync()
+        private async Task AddEmailAccountAsync(MenuCommand.CommandAddAccountOptions.Options options)
         {
             _logger.LogMethodCall();
 
             async Task<Account> CreateAccountAsync()
             {
+                if (options.InputJsonFromStandardInput)
+                {
+                    return await _emailAccountInputResolver.ResolveAsync().ConfigureAwait(false);
+                }
+
                 MailServer mailServer = _application.SelectOption(MailServer.Other, true);
 
                 return mailServer == MailServer.Other ? CreateDefaultAccount()
