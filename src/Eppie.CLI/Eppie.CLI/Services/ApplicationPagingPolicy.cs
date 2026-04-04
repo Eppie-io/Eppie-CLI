@@ -18,17 +18,20 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-using Eppie.CLI.Common;
-
-namespace Eppie.CLI.Options
+namespace Eppie.CLI.Services
 {
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal class MailOptions : IConfigurationSectionOptions
+    internal sealed class ApplicationPagingPolicy(ApplicationLaunchOptions launchOptions) : IApplicationPagingPolicy
     {
-        public string SectionName => nameof(MailOptions);
+        private readonly ApplicationLaunchOptions _launchOptions = launchOptions;
 
-        public IReadOnlyDictionary<MailServer, MailServerConfiguration> Servers { get; init; } = new Dictionary<MailServer, MailServerConfiguration>();
+        public bool ShouldAggregatePagesBeforeWrite => _launchOptions.OutputFormat == ApplicationOutputFormat.Json;
+
+        public bool ShouldContinue(bool hasMore, Func<bool> askMore)
+        {
+            ArgumentNullException.ThrowIfNull(askMore);
+
+            return hasMore && (ShouldAggregatePagesBeforeWrite || (!_launchOptions.NonInteractive && askMore()));
+        }
     }
-
-    internal record MailServerConfiguration(string SMTP = "", int SMTPPort = 0, string IMAP = "", int IMAPPort = 0);
 }

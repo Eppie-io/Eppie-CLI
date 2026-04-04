@@ -1,6 +1,6 @@
 // ---------------------------------------------------------------------------- //
 //                                                                              //
-//   Copyright 2024 Eppie (https://eppie.io)                                    //
+//   Copyright 2026 Eppie (https://eppie.io)                                    //
 //                                                                              //
 //   Licensed under the Apache License, Version 2.0 (the "License"),            //
 //   you may not use this file except in compliance with the License.           //
@@ -50,7 +50,7 @@ namespace Eppie.CLI
 
                 Host.CreateDefaultBuilder(args)
                     .UseContentRoot(AppContext.BaseDirectory)
-                    .ConfigureServices(ConfigureServices)
+                    .ConfigureServices((context, services) => ConfigureServices(context, services, args))
                     .UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration), preserveStaticLogger: true)
                     .Build()
                     .Run();
@@ -67,7 +67,7 @@ namespace Eppie.CLI
             }
         }
 
-        private static void ConfigureServices(HostBuilderContext ctx, IServiceCollection services)
+        private static void ConfigureServices(HostBuilderContext ctx, IServiceCollection services, string[] args)
         {
             ArgumentNullException.ThrowIfNull(ctx);
 
@@ -78,11 +78,34 @@ namespace Eppie.CLI
             services.AddLocalization()
                     .AddHttpClient()
                     .AddAuthorizationProvider()
-                    .AddSingleton<ResourceLoader>()
+
+                    .AddSingleton(new ApplicationCommandLineArguments(args))
+                    .AddSingleton<ApplicationLaunchOptions>()
+
                     .AddSingleton<CoreProvider>()
+                    .AddSingleton<ITuviMailCoreProvider>(serviceProvider => serviceProvider.GetRequiredService<CoreProvider>())
                     .AddSingleton<Application>()
-                    .AddSingleton<IHostLifetime, ApplicationLifetime>()
+                    .AddSingleton<IApplicationPasswordReader>(serviceProvider => serviceProvider.GetRequiredService<Application>())
+
+                    .AddSingleton<ResourceLoader>()
+                    .AddSingleton<TextApplicationOutputWriter>()
+                    .AddSingleton<JsonApplicationOutputWriter>()
+                    .AddSingleton<IApplicationOutputWriter>(serviceProvider => serviceProvider.GetRequiredService<ApplicationLaunchOptions>().OutputFormat == ApplicationOutputFormat.Json
+                         ? serviceProvider.GetRequiredService<JsonApplicationOutputWriter>()
+                         : serviceProvider.GetRequiredService<TextApplicationOutputWriter>())
+                    .AddSingleton<IApplicationPagingPolicy, ApplicationPagingPolicy>()
+                    .AddSingleton<IApplicationOutputCoordinator, ApplicationOutputCoordinator>()
+                    .AddSingleton<IApplicationFailureHandler, ApplicationFailureHandler>()
+                    .AddSingleton<IEmailAccountInputResolver, EmailAccountInputResolver>()
+                    .AddSingleton<IProtonAccountInputResolver, ProtonAccountInputResolver>()
+
+                    .AddSingleton<IApplicationUnlocker, ApplicationUnlocker>()
+                    .AddSingleton<IStartupCommandRunner, StartupCommandRunner>()
+
                     .AddSingleton<MainMenu>()
+                    .AddSingleton<IApplicationMenu>(serviceProvider => serviceProvider.GetRequiredService<MainMenu>())
+
+                    .AddSingleton<IHostLifetime, ApplicationLifetime>()
                     .AddHostedService<ApplicationMenuLoop>();
         }
 

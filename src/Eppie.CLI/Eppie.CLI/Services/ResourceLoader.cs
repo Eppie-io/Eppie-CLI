@@ -1,6 +1,6 @@
 // ---------------------------------------------------------------------------- //
 //                                                                              //
-//   Copyright 2024 Eppie (https://eppie.io)                                    //
+//   Copyright 2026 Eppie (https://eppie.io)                                    //
 //                                                                              //
 //   Licensed under the Apache License, Version 2.0 (the "License"),            //
 //   you may not use this file except in compliance with the License.           //
@@ -118,6 +118,16 @@ namespace Eppie.CLI.Services
 
             internal string EmptyContactList => field ??= _localizer.LoadString(GetStringResourceName());
 
+            internal string GetHeaderFolderList(string accountAddress)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Message", name: "HeaderFolderList"), accountAddress);
+            }
+
+            internal string GetEmptyFolderList(string accountAddress)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Message", name: "EmptyFolderList"), accountAddress);
+            }
+
             internal string AppReset => field ??= _localizer.LoadString(GetStringResourceName());
 
             internal string AppOpened => field ??= _localizer.LoadString(GetStringResourceName());
@@ -144,6 +154,41 @@ namespace Eppie.CLI.Services
 
             internal string UnsuccessfulAttempt => field ??= _localizer.LoadString(GetStringResourceName(category: "Warning"));
 
+            internal string NonInteractiveDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+
+            internal string OutputDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+
+            internal string UnlockPasswordFromStandardInputDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+
+            internal string InputJsonFromStandardInputDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+
+            internal string YesDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+
+            internal string GetStartupCommandRequiresUnlockPasswordFromStandardInputWarning(string commandName)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Warning", name: "StartupCommandRequiresUnlockPasswordFromStandardInput"), commandName);
+            }
+
+            internal string GetCommandRequiresYesInNonInteractiveModeWarning(string commandName)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Warning", name: "CommandRequiresYesInNonInteractiveMode"), commandName);
+            }
+
+            internal string GetNonInteractiveOperationNotSupportedError(string operation)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Error", name: "NonInteractiveOperationNotSupported"), operation);
+            }
+
+            internal string GetStructuredStandardInputInvalidJsonError(string commandName)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Error", name: "StructuredStandardInputInvalidJson"), commandName);
+            }
+
+            internal string GetStructuredStandardInputMissingPropertyError(string commandName, string propertyName)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Error", name: "StructuredStandardInputMissingProperty"), commandName, propertyName);
+            }
+
             internal string ImpossibleInitialization => field ??= _localizer.LoadString(GetStringResourceName(category: "Error"));
 
             internal string GetUnknownFolderWarning(string address, string folder)
@@ -151,9 +196,36 @@ namespace Eppie.CLI.Services
                 return _localizer.LoadFormattedString(GetStringResourceName(category: "Warning", name: "UnknownFolder"), folder, address);
             }
 
+            internal string GetAccountAddedText(string address, string accountType)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Message", name: "AccountAdded"), address, accountType);
+            }
+
+            internal string GetMessageSentText(string subject, string to, string from)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Message", name: "MessageSent"), subject, to, from);
+            }
+
+            internal string GetMessageDeletedText(string account, string folder, uint id, int pk)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Message", name: "MessageDeleted"), account, folder, id, pk);
+            }
+
+            internal string GetFolderSyncedText(string account, string folder)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Message", name: "FolderSynced"), account, folder);
+            }
+
             internal string GetUnhandledException(Exception exception)
             {
-                return _localizer.LoadFormattedString(GetStringResourceName(category: "Error", name: "UnhandledException"), exception);
+                ArgumentNullException.ThrowIfNull(exception);
+
+                return GetUnhandledException(exception.ToString());
+            }
+
+            internal string GetUnhandledException(string errorInformation)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Error", name: "UnhandledException"), errorInformation);
             }
 
             internal string GetMenuDescription(string name, string version)
@@ -173,6 +245,8 @@ namespace Eppie.CLI.Services
 
             internal string ListAccountsDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
 
+            internal string ListFoldersDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+
             internal string RestoreDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
 
             internal string SendDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
@@ -180,6 +254,8 @@ namespace Eppie.CLI.Services
             internal string ImportDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
 
             internal string ShowMessageDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
+
+            internal string DeleteMessageDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
 
             internal string SyncFolderDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "Menu"));
 
@@ -208,6 +284,8 @@ namespace Eppie.CLI.Services
             internal string AccountFolderDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
 
             internal string PageSizeDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+
+            internal string LimitDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
 
             internal string MessageIDDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
 

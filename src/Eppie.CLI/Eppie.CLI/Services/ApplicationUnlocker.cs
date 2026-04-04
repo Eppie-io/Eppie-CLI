@@ -18,43 +18,50 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-using ComponentBuilder;
-
 using Eppie.CLI.Tools;
 
 using Microsoft.Extensions.Logging;
 
-using Tuvi.Core;
-
 namespace Eppie.CLI.Services
 {
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal class CoreProvider(ILogger<CoreProvider> logger,
-                                ILoggerFactory loggerFactory,
-                                ITokenRefresher tokenRefresher) : ITuviMailCoreProvider
+    internal sealed class ApplicationUnlocker(
+        ILogger<ApplicationUnlocker> logger,
+        IApplicationPasswordReader passwordReader,
+        IApplicationOutputWriter outputWriter,
+        ITuviMailCoreProvider coreProvider) : IApplicationUnlocker
     {
-        private readonly ILogger<CoreProvider> _logger = logger;
-        private readonly ILoggerFactory _loggerFactory = loggerFactory;
-        private readonly ITokenRefresher _tokenRefresher = tokenRefresher;
+        private readonly ILogger<ApplicationUnlocker> _logger = logger;
+        private readonly IApplicationPasswordReader _passwordReader = passwordReader;
+        private readonly IApplicationOutputWriter _outputWriter = outputWriter;
+        private readonly ITuviMailCoreProvider _coreProvider = coreProvider;
 
-        private ITuviMail? _tuviMailCore;
-        public ITuviMail TuviMailCore => _tuviMailCore ??= CreateTuviMail();
-
-        public async Task ResetAsync()
+        public async Task<bool> UnlockAsync(CancellationToken cancellationToken, bool readPasswordFromStandardInput = false)
         {
             _logger.LogMethodCall();
 
-            await TuviMailCore.ResetApplicationAsync().ConfigureAwait(false);
+            bool isFirstTime = await _coreProvider.TuviMailCore.IsFirstApplicationStartAsync(cancellationToken).ConfigureAwait(false);
 
-            _tuviMailCore?.Dispose();
-            _tuviMailCore = null;
-        }
+            if (isFirstTime)
+            {
+                _logger.LogWarning("The command failed. (Reason: The application hasn't been initialized yet).");
+                _outputWriter.Write(new UninitializedAppWarningOutput());
+                return false;
+            }
 
-        private ITuviMail CreateTuviMail()
-        {
-            _logger.LogMethodCall();
+            string password = readPasswordFromStandardInput
+                ? _passwordReader.ReadPasswordFromStandardInput()
+                : _passwordReader.AskPassword();
 
-            return Components.CreateTuviMailCore("data.db", new ImplementationDetailsProvider("Eppie seed", "Eppie.Package", "backup@system.service.eppie.io"), _tokenRefresher, _loggerFactory);
+            bool success = await _coreProvider.TuviMailCore.InitializeApplicationAsync(password, cancellationToken).ConfigureAwait(false);
+
+            if (!success)
+            {
+                _logger.LogWarning("The command failed. (Reason: Invalid Password).");
+                _outputWriter.Write(new InvalidPasswordWarningOutput());
+            }
+
+            return success;
         }
     }
 }

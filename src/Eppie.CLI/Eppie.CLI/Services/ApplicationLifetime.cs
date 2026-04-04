@@ -1,6 +1,6 @@
 // ---------------------------------------------------------------------------- //
 //                                                                              //
-//   Copyright 2024 Eppie (https://eppie.io)                                    //
+//   Copyright 2026 Eppie (https://eppie.io)                                    //
 //                                                                              //
 //   Licensed under the Apache License, Version 2.0 (the "License"),            //
 //   you may not use this file except in compliance with the License.           //
@@ -36,6 +36,7 @@ namespace Eppie.CLI.Services
         private readonly IHostEnvironment _environment;
         private readonly ResourceLoader _resourceLoader;
         private readonly ConsoleOptions _consoleOptions;
+        private readonly ApplicationLaunchOptions _launchOptions;
 
         private bool _disposedValue;
 
@@ -43,7 +44,8 @@ namespace Eppie.CLI.Services
            ILogger<ApplicationLifetime> logger,
            IHostEnvironment environment,
            ResourceLoader resourceLoader,
-           IOptions<ConsoleOptions> consoleOptions)
+           IOptions<ConsoleOptions> consoleOptions,
+           ApplicationLaunchOptions launchOptions)
         {
             Debug.Assert(consoleOptions is not null);
 
@@ -53,6 +55,7 @@ namespace Eppie.CLI.Services
             _resourceLoader = resourceLoader;
 
             _consoleOptions = consoleOptions.Value;
+            _launchOptions = launchOptions;
 
             Console.CancelKeyPress += OnCancelKeyPressed;
         }
@@ -60,13 +63,22 @@ namespace Eppie.CLI.Services
         public Task WaitForStartAsync(CancellationToken cancellationToken)
         {
             InitializeConsole();
-            WriteGreetingMessage();
+
+            if (!_launchOptions.NonInteractive && _launchOptions.OutputFormat != ApplicationOutputFormat.Json)
+            {
+                WriteGreetingMessage();
+            }
+
             return Task.CompletedTask;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            WriteGoodbyeMessage();
+            if (!_launchOptions.NonInteractive && _launchOptions.OutputFormat != ApplicationOutputFormat.Json)
+            {
+                WriteGoodbyeMessage();
+            }
+
             return Task.CompletedTask;
         }
 
