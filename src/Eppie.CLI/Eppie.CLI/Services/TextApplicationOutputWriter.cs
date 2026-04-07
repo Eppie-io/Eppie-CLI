@@ -87,8 +87,8 @@ namespace Eppie.CLI.Services
                 case UnknownFolderWarningOutput unknownFolderWarningOutput:
                     WriteWarning(_resourceLoader.Strings.GetUnknownFolderWarning(unknownFolderWarningOutput.Address, unknownFolderWarningOutput.Folder));
                     return;
-                case CommandRequiresYesInNonInteractiveModeWarningOutput commandRequiresYesWarningOutput:
-                    WriteWarning(_resourceLoader.Strings.GetCommandRequiresYesInNonInteractiveModeWarning(commandRequiresYesWarningOutput.CommandName));
+                case CommandRequiresAssumeYesInNonInteractiveModeWarningOutput commandRequiresAssumeYesWarningOutput:
+                    WriteWarning(_resourceLoader.Strings.GetCommandRequiresAssumeYesInNonInteractiveModeWarning(commandRequiresAssumeYesWarningOutput.CommandName));
                     return;
                 case AccountAddedOutput accountAddedOutput:
                     Console.WriteLine(_resourceLoader.Strings.GetAccountAddedText(accountAddedOutput.Address, accountAddedOutput.AccountType));

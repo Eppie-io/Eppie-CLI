@@ -238,7 +238,7 @@ namespace Eppie.CLI.Services
         {
             _logger.LogMethodCall();
 
-            return _launchOptions.Yes || ReadBoolValue(_resourceLoader.Strings.ConfirmReset);
+            return _launchOptions.AssumeYes || ReadBoolValue(_resourceLoader.Strings.ConfirmReset);
         }
 
         internal bool ConfirmAskMoreContacts()

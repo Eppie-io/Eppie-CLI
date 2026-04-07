@@ -215,9 +215,9 @@
     <comment>This message warns the user that the startup command requires an opened vault and explains how to pass the vault password via standard input.
 {0} is the startup command name.</comment>
   </data>
-  <data name="Warning.CommandRequiresYesInNonInteractiveMode" xml:space="preserve">
-    <value>Warning: The '{0}' command requires '--yes' in '--non-interactive' mode to confirm data loss.</value>
-    <comment>This message warns the user that the command needs the '--yes' flag in non-interactive mode before destructive changes are allowed.
+  <data name="Warning.CommandRequiresAssumeYesInNonInteractiveMode" xml:space="preserve">
+    <value>Warning: The '{0}' command requires '--assume-yes=true' in '--non-interactive=true' mode to confirm data loss.</value>
+    <comment>This message warns the user that the command needs the '--assume-yes=true' flag in non-interactive mode before destructive changes are allowed.
 {0} is the command name.</comment>
   </data>
   <data name="Message.AskAccountAddress" xml:space="preserve">
@@ -308,9 +308,9 @@
     <value>Output format. Supported values: text, json.</value>
     <comment>Description of the '--output' startup option in the help.</comment>
   </data>
-  <data name="MenuOption.YesDescription" xml:space="preserve">
-    <value>Answer yes to destructive confirmation prompts in startup command mode.</value>
-    <comment>Description of the '--yes' startup option in the help.</comment>
+  <data name="MenuOption.AssumeYesDescription" xml:space="preserve">
+    <value>Assume yes for destructive confirmation prompts in startup command mode.</value>
+    <comment>Description of the '--assume-yes' startup option in the help.</comment>
   </data>
   <data name="Message.AskNewPassword" xml:space="preserve">
     <value>Enter your new vault password: </value>

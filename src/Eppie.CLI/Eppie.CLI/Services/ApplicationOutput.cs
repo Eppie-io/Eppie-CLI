@@ -58,7 +58,7 @@ namespace Eppie.CLI.Services
 
     internal sealed record UnknownFolderWarningOutput(string Address, string Folder) : ApplicationOutput;
 
-    internal sealed record CommandRequiresYesInNonInteractiveModeWarningOutput(string CommandName) : ApplicationOutput;
+    internal sealed record CommandRequiresAssumeYesInNonInteractiveModeWarningOutput(string CommandName) : ApplicationOutput;
 
     internal sealed record StartupCommandRequiresUnlockPasswordFromStandardInputWarningOutput(string CommandName) : ApplicationOutput;
 

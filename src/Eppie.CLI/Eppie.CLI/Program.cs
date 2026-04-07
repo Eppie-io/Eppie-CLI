@@ -79,7 +79,7 @@ namespace Eppie.CLI
                     .AddHttpClient()
                     .AddAuthorizationProvider()
 
-                    .AddSingleton(new ApplicationCommandLineArguments(args))
+                    .AddSingleton(new RawCommandLineArguments(args))
                     .AddSingleton<ApplicationLaunchOptions>()
 
                     .AddSingleton<CoreProvider>()

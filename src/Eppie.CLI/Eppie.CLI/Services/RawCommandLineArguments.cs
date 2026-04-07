@@ -18,7 +18,7 @@
 
 namespace Eppie.CLI.Services
 {
-    internal sealed class ApplicationCommandLineArguments(string[] values)
+    internal sealed class RawCommandLineArguments(string[] values)
     {
         internal IReadOnlyList<string> Values { get; } = values;
     }

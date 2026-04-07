@@ -643,8 +643,8 @@ namespace Eppie.CLI.Menu
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(commandName);
 
-            return _launchOptions.NonInteractive && !_launchOptions.Yes
-                ? throw new ApplicationCommandException(new CommandRequiresYesInNonInteractiveModeWarningOutput(commandName), exitCode: 0)
+            return _launchOptions.NonInteractive && !_launchOptions.AssumeYes
+                ? throw new ApplicationCommandException(new CommandRequiresAssumeYesInNonInteractiveModeWarningOutput(commandName), exitCode: 0)
                 : _application.ConfirmReset();
         }
 

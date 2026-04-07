@@ -28,14 +28,14 @@ namespace Eppie.CLI.Services
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
     internal sealed class StartupCommandRunner(
         ILogger<StartupCommandRunner> logger,
-        ApplicationCommandLineArguments commandLineArguments,
+        RawCommandLineArguments commandLineArguments,
         ApplicationLaunchOptions launchOptions,
         IApplicationOutputWriter outputWriter,
         IApplicationUnlocker applicationUnlocker,
         IApplicationMenu applicationMenu) : IStartupCommandRunner
     {
         private readonly ILogger<StartupCommandRunner> _logger = logger;
-        private readonly ApplicationCommandLineArguments _commandLineArguments = commandLineArguments;
+        private readonly RawCommandLineArguments _commandLineArguments = commandLineArguments;
         private readonly ApplicationLaunchOptions _launchOptions = launchOptions;
         private readonly IApplicationOutputWriter _outputWriter = outputWriter;
         private readonly IApplicationUnlocker _applicationUnlocker = applicationUnlocker;
@@ -45,7 +45,7 @@ namespace Eppie.CLI.Services
         {
             _logger.LogMethodCall();
 
-            string[] startupCommandArguments = GetStartupCommandArguments();
+            string[] startupCommandArguments = StartupCommandArguments.GetStartupCommandArguments(_commandLineArguments);
 
             if (startupCommandArguments.Length == 0)
             {
@@ -70,26 +70,6 @@ namespace Eppie.CLI.Services
 
             await _applicationMenu.InvokeCommandAsync(startupCommandArguments).ConfigureAwait(false);
             return true;
-        }
-
-        private string[] GetStartupCommandArguments()
-        {
-            List<string> commandArguments = [];
-
-            for (int i = 0; i < _commandLineArguments.Values.Count; i++)
-            {
-                int optionArgumentCount = ApplicationLaunchCommandLine.GetOptionArgumentCount(_commandLineArguments.Values, i);
-
-                if (optionArgumentCount > 0)
-                {
-                    i += optionArgumentCount - 1;
-                    continue;
-                }
-
-                commandArguments.Add(_commandLineArguments.Values[i]);
-            }
-
-            return [.. commandArguments];
         }
 
         private void WriteUnlockPasswordFromStandardInputHint(string commandName)

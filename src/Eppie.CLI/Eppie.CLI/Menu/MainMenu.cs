@@ -112,8 +112,8 @@ namespace Eppie.CLI.Menu
                                               description: _resourceLoader.Strings.NonInteractiveDescription),
                     parser.CreateOption<string>([$"--{ApplicationLaunchOptions.OutputConfigurationKey}"],
                                                 description: _resourceLoader.Strings.OutputDescription),
-                    parser.CreateOption<bool>([$"--{ApplicationLaunchOptions.YesConfigurationKey}"],
-                                              description: _resourceLoader.Strings.YesDescription),
+                    parser.CreateOption<bool>([$"--{ApplicationLaunchOptions.AssumeYesConfigurationKey}"],
+                                              description: _resourceLoader.Strings.AssumeYesDescription),
                     parser.CreateOption<bool>([$"--{ApplicationLaunchOptions.UnlockPasswordFromStandardInputConfigurationKey}"],
                                               description: _resourceLoader.Strings.UnlockPasswordFromStandardInputDescription)
                 ],

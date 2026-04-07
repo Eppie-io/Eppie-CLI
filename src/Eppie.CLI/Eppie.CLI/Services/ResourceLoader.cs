@@ -162,16 +162,16 @@ namespace Eppie.CLI.Services
 
             internal string InputJsonFromStandardInputDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
 
-            internal string YesDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
+            internal string AssumeYesDescription => field ??= _localizer.LoadString(GetStringResourceName(category: "MenuOption"));
 
             internal string GetStartupCommandRequiresUnlockPasswordFromStandardInputWarning(string commandName)
             {
                 return _localizer.LoadFormattedString(GetStringResourceName(category: "Warning", name: "StartupCommandRequiresUnlockPasswordFromStandardInput"), commandName);
             }
 
-            internal string GetCommandRequiresYesInNonInteractiveModeWarning(string commandName)
+            internal string GetCommandRequiresAssumeYesInNonInteractiveModeWarning(string commandName)
             {
-                return _localizer.LoadFormattedString(GetStringResourceName(category: "Warning", name: "CommandRequiresYesInNonInteractiveMode"), commandName);
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Warning", name: "CommandRequiresAssumeYesInNonInteractiveMode"), commandName);
             }
 
             internal string GetNonInteractiveOperationNotSupportedError(string operation)

@@ -158,10 +158,10 @@ namespace Eppie.CLI.Services
                                  _resourceLoader.Strings.GetUnknownFolderWarning(unknownFolderWarningOutput.Address, unknownFolderWarningOutput.Folder),
                                  new { address = unknownFolderWarningOutput.Address, folder = unknownFolderWarningOutput.Folder });
                     return true;
-                case CommandRequiresYesInNonInteractiveModeWarningOutput commandRequiresYesWarningOutput:
-                    WriteWarning("commandRequiresYesInNonInteractiveMode",
-                                 _resourceLoader.Strings.GetCommandRequiresYesInNonInteractiveModeWarning(commandRequiresYesWarningOutput.CommandName),
-                                 new { commandName = commandRequiresYesWarningOutput.CommandName });
+                case CommandRequiresAssumeYesInNonInteractiveModeWarningOutput commandRequiresAssumeYesWarningOutput:
+                    WriteWarning("commandRequiresAssumeYesInNonInteractiveMode",
+                                 _resourceLoader.Strings.GetCommandRequiresAssumeYesInNonInteractiveModeWarning(commandRequiresAssumeYesWarningOutput.CommandName),
+                                 new { commandName = commandRequiresAssumeYesWarningOutput.CommandName });
                     return true;
                 case StartupCommandRequiresUnlockPasswordFromStandardInputWarningOutput startupWarningOutput:
                     WriteWarning("startupCommandRequiresUnlockPasswordFromStandardInput",

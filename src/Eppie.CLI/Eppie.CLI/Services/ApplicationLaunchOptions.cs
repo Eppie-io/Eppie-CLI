@@ -23,43 +23,43 @@ using Microsoft.Extensions.Configuration;
 namespace Eppie.CLI.Services
 {
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal sealed class ApplicationLaunchOptions(IConfiguration configuration, ApplicationCommandLineArguments commandLineArguments)
+    internal sealed class ApplicationLaunchOptions(IConfiguration configuration)
     {
         internal const string NonInteractiveConfigurationKey = "non-interactive";
         internal const string OutputConfigurationKey = "output";
         internal const string UnlockPasswordFromStandardInputConfigurationKey = "unlock-password-stdin";
-        internal const string YesConfigurationKey = "yes";
+        internal const string AssumeYesConfigurationKey = "assume-yes";
 
-        internal bool NonInteractive { get; } = ReadBooleanOption(configuration, commandLineArguments, NonInteractiveConfigurationKey);
-        internal ApplicationOutputFormat OutputFormat { get; } = ReadOutputFormat(configuration, commandLineArguments, OutputConfigurationKey);
-        internal bool UnlockPasswordFromStandardInput { get; } = ReadBooleanOption(configuration, commandLineArguments, UnlockPasswordFromStandardInputConfigurationKey);
-        internal bool Yes { get; } = ReadBooleanOption(configuration, commandLineArguments, YesConfigurationKey);
+        internal static IReadOnlyList<string> LaunchOptionKeys { get; } =
+        [
+            UnlockPasswordFromStandardInputConfigurationKey,
+            NonInteractiveConfigurationKey,
+            AssumeYesConfigurationKey,
+            OutputConfigurationKey,
+        ];
 
-        private static ApplicationOutputFormat ReadOutputFormat(IConfiguration configuration, ApplicationCommandLineArguments commandLineArguments, string key)
+        internal bool NonInteractive { get; } = ReadBooleanOption(configuration, NonInteractiveConfigurationKey);
+        internal ApplicationOutputFormat OutputFormat { get; } = ReadOutputFormat(configuration, OutputConfigurationKey);
+        internal bool UnlockPasswordFromStandardInput { get; } = ReadBooleanOption(configuration, UnlockPasswordFromStandardInputConfigurationKey);
+        internal bool AssumeYes { get; } = ReadBooleanOption(configuration, AssumeYesConfigurationKey);
+
+        private static ApplicationOutputFormat ReadOutputFormat(IConfiguration configuration, string key)
         {
             ArgumentNullException.ThrowIfNull(configuration);
-            ArgumentNullException.ThrowIfNull(commandLineArguments);
 
-            return ApplicationLaunchCommandLine.TryReadOptionValue(commandLineArguments, key, out string? optionValue)
-                ? ReadOutputFormatValue(optionValue)
-                : ReadOutputFormatValue(configuration[key]);
+            return ReadOutputFormatValue(configuration[key]);
         }
 
-        private static bool ReadBooleanOption(IConfiguration configuration, ApplicationCommandLineArguments commandLineArguments, string key)
+        private static bool ReadBooleanOption(IConfiguration configuration, string key)
         {
             ArgumentNullException.ThrowIfNull(configuration);
-            ArgumentNullException.ThrowIfNull(commandLineArguments);
 
-            return ApplicationLaunchCommandLine.TryReadOptionValue(commandLineArguments, key, out string? optionValue)
-                ? ReadBooleanValue(optionValue, true)
-                : ReadBooleanValue(configuration[key]);
+            return ReadBooleanValue(configuration[key]);
         }
 
-        private static bool ReadBooleanValue(string? value, bool defaultValue = false)
+        private static bool ReadBooleanValue(string? value)
         {
-            return value is null
-                ? defaultValue
-                : value.Length == 0 || (bool.TryParse(value, out bool parsedValue) ? parsedValue : defaultValue);
+            return bool.TryParse(value, out bool parsedValue) && parsedValue;
         }
 
         private static ApplicationOutputFormat ReadOutputFormatValue(string? value)
