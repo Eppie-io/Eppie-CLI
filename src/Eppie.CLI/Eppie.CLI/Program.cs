@@ -105,8 +105,7 @@ namespace Eppie.CLI
                     .AddSingleton<IApplicationUnlocker, ApplicationUnlocker>()
                     .AddSingleton<IStartupCommandRunner, StartupCommandRunner>()
 
-                    .AddSingleton<MainMenu>()
-                    .AddSingleton<IApplicationMenu>(serviceProvider => serviceProvider.GetRequiredService<MainMenu>())
+                    .AddSingleton<IApplicationMenu, MainMenu>();
 
                     .AddSingleton<IHostLifetime, ApplicationLifetime>()
                     .AddHostedService<ApplicationMenuLoop>();
