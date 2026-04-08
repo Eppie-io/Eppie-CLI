@@ -18,6 +18,8 @@
 
 using System.Diagnostics.CodeAnalysis;
 
+using Eppie.CLI.Options;
+
 using Microsoft.Extensions.Configuration;
 
 namespace Eppie.CLI.Services
