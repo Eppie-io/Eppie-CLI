@@ -23,12 +23,26 @@ using Microsoft.Extensions.Configuration;
 namespace Eppie.CLI.Services
 {
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal sealed class ApplicationLaunchOptions(IConfiguration configuration)
+    internal class ApplicationLaunchOptions
     {
         internal const string NonInteractiveConfigurationKey = "non-interactive";
         internal const string OutputConfigurationKey = "output";
         internal const string UnlockPasswordFromStandardInputConfigurationKey = "unlock-password-stdin";
         internal const string AssumeYesConfigurationKey = "assume-yes";
+
+        [ConfigurationKeyName(NonInteractiveConfigurationKey)]
+        internal bool NonInteractive { get; init; }
+
+        [ConfigurationKeyName(OutputConfigurationKey)]
+        private string? OutputFormatKey { get; init; }
+
+        internal ApplicationOutputFormat OutputFormat => OptionConverter.ConvertEnumValue<ApplicationOutputFormat>(OutputFormatKey ?? string.Empty, ApplicationOutputFormat.Text, true);
+
+        [ConfigurationKeyName(UnlockPasswordFromStandardInputConfigurationKey)]
+        internal bool UnlockPasswordFromStandardInput { get; init; }
+
+        [ConfigurationKeyName(AssumeYesConfigurationKey)]
+        internal bool AssumeYes { get; init; }
 
         internal static IReadOnlyList<string> LaunchOptionKeys { get; } =
         [
@@ -37,40 +51,6 @@ namespace Eppie.CLI.Services
             AssumeYesConfigurationKey,
             OutputConfigurationKey,
         ];
-
-        internal bool NonInteractive { get; } = ReadBooleanOption(configuration, NonInteractiveConfigurationKey);
-        internal ApplicationOutputFormat OutputFormat { get; } = ReadOutputFormat(configuration, OutputConfigurationKey);
-        internal bool UnlockPasswordFromStandardInput { get; } = ReadBooleanOption(configuration, UnlockPasswordFromStandardInputConfigurationKey);
-        internal bool AssumeYes { get; } = ReadBooleanOption(configuration, AssumeYesConfigurationKey);
-
-        private static ApplicationOutputFormat ReadOutputFormat(IConfiguration configuration, string key)
-        {
-            ArgumentNullException.ThrowIfNull(configuration);
-
-            return ReadOutputFormatValue(configuration[key]);
-        }
-
-        private static bool ReadBooleanOption(IConfiguration configuration, string key)
-        {
-            ArgumentNullException.ThrowIfNull(configuration);
-
-            return ReadBooleanValue(configuration[key]);
-        }
-
-        private static bool ReadBooleanValue(string? value)
-        {
-            return bool.TryParse(value, out bool parsedValue) && parsedValue;
-        }
-
-        private static ApplicationOutputFormat ReadOutputFormatValue(string? value)
-        {
-            return IsJsonOutputValue(value) ? ApplicationOutputFormat.Json : ApplicationOutputFormat.Text;
-        }
-
-        private static bool IsJsonOutputValue(string? value)
-        {
-            return string.Equals(value, "json", StringComparison.OrdinalIgnoreCase);
-        }
     }
 
     internal enum ApplicationOutputFormat
