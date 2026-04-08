@@ -89,11 +89,13 @@ namespace Eppie.CLI
                     .AddSingleton<IApplicationPasswordReader>(serviceProvider => serviceProvider.GetRequiredService<Application>())
 
                     .AddSingleton<ResourceLoader>()
-                    .AddSingleton<TextApplicationOutputWriter>()
-                    .AddSingleton<JsonApplicationOutputWriter>()
-                    .AddSingleton<IApplicationOutputWriter>(serviceProvider => serviceProvider.GetRequiredService<IOptions<ApplicationLaunchOptions>>().Value.OutputFormat == ApplicationOutputFormat.Json
-                         ? serviceProvider.GetRequiredService<JsonApplicationOutputWriter>()
-                         : serviceProvider.GetRequiredService<TextApplicationOutputWriter>())
+                    .AddKeyedSingleton<IApplicationOutputWriter, TextApplicationOutputWriter>(ApplicationOutputFormat.Text)
+                    .AddKeyedSingleton<IApplicationOutputWriter, JsonApplicationOutputWriter>(ApplicationOutputFormat.Json)
+                    .AddSingleton<IApplicationOutputWriter>((serviceProvider) => 
+                    {
+                        ApplicationOutputFormat format = serviceProvider.GetRequiredService<IOptions<ApplicationLaunchOptions>>().Value.OutputFormat;
+                        return serviceProvider.GetRequiredKeyedService<IApplicationOutputWriter>(format);
+                    })
                     .AddSingleton<IApplicationPagingPolicy, ApplicationPagingPolicy>()
                     .AddSingleton<IApplicationOutputCoordinator, ApplicationOutputCoordinator>()
                     .AddSingleton<IApplicationFailureHandler, ApplicationFailureHandler>()
