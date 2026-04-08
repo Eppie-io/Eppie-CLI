@@ -44,10 +44,11 @@ namespace Eppie.CLI.Services
            ILogger<ApplicationLifetime> logger,
            IHostEnvironment environment,
            ResourceLoader resourceLoader,
-           IOptions<ConsoleOptions> consoleOptions,
-           ApplicationLaunchOptions launchOptions)
+            IOptions<ConsoleOptions> consoleOptions,
+            IOptions<ApplicationLaunchOptions> launchOptions)
         {
             Debug.Assert(consoleOptions is not null);
+            ArgumentNullException.ThrowIfNull(launchOptions);
 
             _logger = logger;
 
@@ -55,7 +56,7 @@ namespace Eppie.CLI.Services
             _resourceLoader = resourceLoader;
 
             _consoleOptions = consoleOptions.Value;
-            _launchOptions = launchOptions;
+            _launchOptions = launchOptions.Value;
 
             Console.CancelKeyPress += OnCancelKeyPressed;
         }

@@ -35,7 +35,7 @@ namespace Eppie.CLI.Services
     internal class Application(
        ILogger<Application> logger,
        IHostApplicationLifetime lifetime,
-       ApplicationLaunchOptions launchOptions,
+       IOptions<ApplicationLaunchOptions> launchOptions,
        IApplicationOutputWriter outputWriter,
        IOptions<MailOptions> mailOptions,
         ResourceLoader resourceLoader) : IApplicationPasswordReader
@@ -43,7 +43,7 @@ namespace Eppie.CLI.Services
         private readonly ResourceLoader _resourceLoader = resourceLoader;
         private readonly ILogger<Application> _logger = logger;
         private readonly IHostApplicationLifetime _lifetime = lifetime;
-        private readonly ApplicationLaunchOptions _launchOptions = launchOptions;
+        private readonly ApplicationLaunchOptions _launchOptions = launchOptions.Value;
         private readonly IApplicationOutputWriter _outputWriter = outputWriter;
         private readonly IOptions<MailOptions> _mailOptions = mailOptions;
 

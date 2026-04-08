@@ -22,6 +22,7 @@ using Eppie.CLI.Menu;
 using Eppie.CLI.Tools;
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Eppie.CLI.Services
 {
@@ -29,14 +30,14 @@ namespace Eppie.CLI.Services
     internal sealed class StartupCommandRunner(
         ILogger<StartupCommandRunner> logger,
         RawCommandLineArguments commandLineArguments,
-        ApplicationLaunchOptions launchOptions,
+        IOptions<ApplicationLaunchOptions> launchOptions,
         IApplicationOutputWriter outputWriter,
         IApplicationUnlocker applicationUnlocker,
         IApplicationMenu applicationMenu) : IStartupCommandRunner
     {
         private readonly ILogger<StartupCommandRunner> _logger = logger;
         private readonly RawCommandLineArguments _commandLineArguments = commandLineArguments;
-        private readonly ApplicationLaunchOptions _launchOptions = launchOptions;
+        private readonly ApplicationLaunchOptions _launchOptions = launchOptions.Value;
         private readonly IApplicationOutputWriter _outputWriter = outputWriter;
         private readonly IApplicationUnlocker _applicationUnlocker = applicationUnlocker;
         private readonly IApplicationMenu _applicationMenu = applicationMenu;

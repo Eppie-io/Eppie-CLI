@@ -21,17 +21,18 @@ using System.Diagnostics.CodeAnalysis;
 using Eppie.CLI.Exceptions;
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Eppie.CLI.Services
 {
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
     internal sealed class ApplicationFailureHandler(
         ILogger<ApplicationFailureHandler> logger,
-        ApplicationLaunchOptions launchOptions,
+        IOptions<ApplicationLaunchOptions> launchOptions,
         IApplicationOutputWriter outputWriter) : IApplicationFailureHandler
     {
         private readonly ILogger<ApplicationFailureHandler> _logger = logger;
-        private readonly ApplicationLaunchOptions _launchOptions = launchOptions;
+        private readonly ApplicationLaunchOptions _launchOptions = launchOptions.Value;
         private readonly IApplicationOutputWriter _outputWriter = outputWriter;
 
         public void HandleControlledCommandFailure(ApplicationCommandException exception)

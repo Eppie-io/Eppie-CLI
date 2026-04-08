@@ -24,6 +24,7 @@ using Eppie.CLI.Services;
 using Eppie.CLI.Tools;
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 using Tuvi.Toolkit.Cli.CommandLine;
 
@@ -44,7 +45,7 @@ namespace Eppie.CLI.Menu
         public MainMenu(
             ILoggerFactory loggerFactory,
             Application application,
-            ApplicationLaunchOptions launchOptions,
+            IOptions<ApplicationLaunchOptions> launchOptions,
             IApplicationOutputWriter outputWriter,
             IApplicationFailureHandler failureHandler,
             IApplicationOutputCoordinator outputCoordinator,

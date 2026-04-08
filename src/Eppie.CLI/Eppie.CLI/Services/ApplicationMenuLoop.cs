@@ -22,6 +22,7 @@ using Eppie.CLI.Tools;
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Eppie.CLI.Services
 {
@@ -29,7 +30,7 @@ namespace Eppie.CLI.Services
     internal partial class ApplicationMenuLoop(
         ILogger<ApplicationMenuLoop> logger,
         IHostApplicationLifetime lifetime,
-        ApplicationLaunchOptions launchOptions,
+        IOptions<ApplicationLaunchOptions> launchOptions,
         IStartupCommandRunner startupCommandRunner,
         IApplicationOutputWriter outputWriter,
         Menu.IApplicationMenu applicationMenu) : BackgroundService
@@ -38,7 +39,7 @@ namespace Eppie.CLI.Services
 
         private readonly ILogger<ApplicationMenuLoop> _logger = logger;
         private readonly IHostApplicationLifetime _lifetime = lifetime;
-        private readonly ApplicationLaunchOptions _launchOptions = launchOptions;
+        private readonly ApplicationLaunchOptions _launchOptions = launchOptions.Value;
         private readonly IStartupCommandRunner _startupCommandRunner = startupCommandRunner;
         private readonly IApplicationOutputWriter _outputWriter = outputWriter;
         private readonly Menu.IApplicationMenu _applicationMenu = applicationMenu;

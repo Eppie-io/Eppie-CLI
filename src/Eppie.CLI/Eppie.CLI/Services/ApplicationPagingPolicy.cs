@@ -18,12 +18,14 @@
 
 using System.Diagnostics.CodeAnalysis;
 
+using Microsoft.Extensions.Options;
+
 namespace Eppie.CLI.Services
 {
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal sealed class ApplicationPagingPolicy(ApplicationLaunchOptions launchOptions) : IApplicationPagingPolicy
+    internal sealed class ApplicationPagingPolicy(IOptions<ApplicationLaunchOptions> launchOptions) : IApplicationPagingPolicy
     {
-        private readonly ApplicationLaunchOptions _launchOptions = launchOptions;
+        private readonly ApplicationLaunchOptions _launchOptions = launchOptions.Value;
 
         public bool ShouldAggregatePagesBeforeWrite => _launchOptions.OutputFormat == ApplicationOutputFormat.Json;
 

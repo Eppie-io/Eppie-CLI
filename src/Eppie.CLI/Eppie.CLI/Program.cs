@@ -29,6 +29,7 @@ using Eppie.CLI.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 using Serilog;
 using Serilog.Enrichers.Sensitive;
@@ -74,13 +75,13 @@ namespace Eppie.CLI
             services.ConfigureOptions<ConsoleOptions>(ctx.Configuration, new BinderOptions { BindNonPublicProperties = true });
             services.ConfigureOptions<MailOptions>(ctx.Configuration, new BinderOptions { BindNonPublicProperties = true });
             services.ConfigureOptions<AuthorizationOptions>(ctx.Configuration, new BinderOptions { BindNonPublicProperties = true });
+            services.ConfigureRootOptions<ApplicationLaunchOptions>(ctx.Configuration, new BinderOptions { BindNonPublicProperties = true });
 
             services.AddLocalization()
                     .AddHttpClient()
                     .AddAuthorizationProvider()
 
                     .AddSingleton(new RawCommandLineArguments(args))
-                    .AddSingleton<ApplicationLaunchOptions>()
 
                     .AddSingleton<CoreProvider>()
                     .AddSingleton<ITuviMailCoreProvider>(serviceProvider => serviceProvider.GetRequiredService<CoreProvider>())
@@ -90,7 +91,7 @@ namespace Eppie.CLI
                     .AddSingleton<ResourceLoader>()
                     .AddSingleton<TextApplicationOutputWriter>()
                     .AddSingleton<JsonApplicationOutputWriter>()
-                    .AddSingleton<IApplicationOutputWriter>(serviceProvider => serviceProvider.GetRequiredService<ApplicationLaunchOptions>().OutputFormat == ApplicationOutputFormat.Json
+                    .AddSingleton<IApplicationOutputWriter>(serviceProvider => serviceProvider.GetRequiredService<IOptions<ApplicationLaunchOptions>>().Value.OutputFormat == ApplicationOutputFormat.Json
                          ? serviceProvider.GetRequiredService<JsonApplicationOutputWriter>()
                          : serviceProvider.GetRequiredService<TextApplicationOutputWriter>())
                     .AddSingleton<IApplicationPagingPolicy, ApplicationPagingPolicy>()

@@ -27,6 +27,7 @@ using Finebits.Authorization.OAuth2.Abstractions;
 using Finebits.Authorization.OAuth2.Types;
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 using Tuvi.Core;
 using Tuvi.Core.Entities;
@@ -37,7 +38,7 @@ namespace Eppie.CLI.Menu
     internal class Actions(
         ILogger<Actions> logger,
         Application application,
-        ApplicationLaunchOptions launchOptions,
+        IOptions<ApplicationLaunchOptions> launchOptions,
         IApplicationOutputWriter outputWriter,
         IApplicationFailureHandler failureHandler,
         IApplicationOutputCoordinator outputCoordinator,
@@ -48,7 +49,7 @@ namespace Eppie.CLI.Menu
     {
         private readonly ILogger<Actions> _logger = logger;
         private readonly Application _application = application;
-        private readonly ApplicationLaunchOptions _launchOptions = launchOptions;
+        private readonly ApplicationLaunchOptions _launchOptions = launchOptions.Value;
         private readonly IApplicationOutputWriter _outputWriter = outputWriter;
         private readonly IApplicationFailureHandler _failureHandler = failureHandler;
         private readonly IApplicationOutputCoordinator _outputCoordinator = outputCoordinator;
