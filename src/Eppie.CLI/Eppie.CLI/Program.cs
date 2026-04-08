@@ -83,8 +83,7 @@ namespace Eppie.CLI
 
                     .AddSingleton(new RawCommandLineArguments(args))
 
-                    .AddSingleton<CoreProvider>()
-                    .AddSingleton<ITuviMailCoreProvider>(serviceProvider => serviceProvider.GetRequiredService<CoreProvider>())
+                    .AddSingleton<ITuviMailCoreProvider, CoreProvider>()
                     .AddSingleton<Application>()
                     .AddSingleton<IApplicationPasswordReader>(serviceProvider => serviceProvider.GetRequiredService<Application>())
 
