@@ -52,7 +52,7 @@ namespace Eppie.CLI.Menu
             IEmailAccountInputResolver emailAccountInputResolver,
             IProtonAccountInputResolver protonAccountInputResolver,
             AuthorizationProvider authProvider,
-            CoreProvider coreProvider,
+            ITuviMailCoreProvider coreProvider,
             ResourceLoader resourceLoader)
         {
             _logger = loggerFactory.CreateLogger<MainMenu>();

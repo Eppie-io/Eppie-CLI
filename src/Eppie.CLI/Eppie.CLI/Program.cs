@@ -72,10 +72,20 @@ namespace Eppie.CLI
         {
             ArgumentNullException.ThrowIfNull(ctx);
 
-            services.ConfigureOptions<ConsoleOptions>(ctx.Configuration, new BinderOptions { BindNonPublicProperties = true });
-            services.ConfigureOptions<MailOptions>(ctx.Configuration, new BinderOptions { BindNonPublicProperties = true });
-            services.ConfigureOptions<AuthorizationOptions>(ctx.Configuration, new BinderOptions { BindNonPublicProperties = true });
-            services.ConfigureRootOptions<ApplicationLaunchOptions>(ctx.Configuration, new BinderOptions { BindNonPublicProperties = true });
+            BinderOptions bindNonPublicProperties = new() { BindNonPublicProperties = true };
+
+            services.ConfigureRootOptions<ApplicationLaunchOptions>(ctx.Configuration, bindNonPublicProperties);
+            services.ConfigureOptions<AuthorizationOptions>(ctx.Configuration, bindNonPublicProperties);
+            services.ConfigureOptions<ConsoleOptions>(ctx.Configuration, bindNonPublicProperties);
+            services.ConfigureOptions<MailOptions>(ctx.Configuration, bindNonPublicProperties);
+
+            static IApplicationOutputWriter GetApplicationOutputWriter(IServiceProvider serviceProvider)
+            {
+                ArgumentNullException.ThrowIfNull(serviceProvider);
+
+                ApplicationOutputFormat format = serviceProvider.GetRequiredService<IOptions<ApplicationLaunchOptions>>().Value.OutputFormat;
+                return serviceProvider.GetRequiredKeyedService<IApplicationOutputWriter>(format);
+            }
 
             services.AddLocalization()
                     .AddHttpClient()
@@ -83,28 +93,27 @@ namespace Eppie.CLI
 
                     .AddSingleton(new RawCommandLineArguments(args))
 
-                    .AddSingleton<ITuviMailCoreProvider, CoreProvider>()
                     .AddSingleton<Application>()
                     .AddSingleton<IApplicationPasswordReader>(serviceProvider => serviceProvider.GetRequiredService<Application>())
 
+                    .AddSingleton<ITuviMailCoreProvider, CoreProvider>()
+
                     .AddSingleton<ResourceLoader>()
+
                     .AddKeyedSingleton<IApplicationOutputWriter, TextApplicationOutputWriter>(ApplicationOutputFormat.Text)
                     .AddKeyedSingleton<IApplicationOutputWriter, JsonApplicationOutputWriter>(ApplicationOutputFormat.Json)
-                    .AddSingleton<IApplicationOutputWriter>((serviceProvider) => 
-                    {
-                        ApplicationOutputFormat format = serviceProvider.GetRequiredService<IOptions<ApplicationLaunchOptions>>().Value.OutputFormat;
-                        return serviceProvider.GetRequiredKeyedService<IApplicationOutputWriter>(format);
-                    })
-                    .AddSingleton<IApplicationPagingPolicy, ApplicationPagingPolicy>()
-                    .AddSingleton<IApplicationOutputCoordinator, ApplicationOutputCoordinator>()
+                    .AddSingleton<IApplicationOutputWriter>(GetApplicationOutputWriter)
+
                     .AddSingleton<IApplicationFailureHandler, ApplicationFailureHandler>()
+                    .AddSingleton<IApplicationOutputCoordinator, ApplicationOutputCoordinator>()
+                    .AddSingleton<IApplicationPagingPolicy, ApplicationPagingPolicy>()
+
                     .AddSingleton<IEmailAccountInputResolver, EmailAccountInputResolver>()
                     .AddSingleton<IProtonAccountInputResolver, ProtonAccountInputResolver>()
 
+                    .AddSingleton<IApplicationMenu, MainMenu>()
                     .AddSingleton<IApplicationUnlocker, ApplicationUnlocker>()
                     .AddSingleton<IStartupCommandRunner, StartupCommandRunner>()
-
-                    .AddSingleton<IApplicationMenu, MainMenu>();
 
                     .AddSingleton<IHostLifetime, ApplicationLifetime>()
                     .AddHostedService<ApplicationMenuLoop>();

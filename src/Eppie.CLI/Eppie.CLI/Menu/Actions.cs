@@ -45,7 +45,7 @@ namespace Eppie.CLI.Menu
         IEmailAccountInputResolver emailAccountInputResolver,
         IProtonAccountInputResolver protonAccountInputResolver,
         AuthorizationProvider authProvider,
-        CoreProvider coreProvider)
+        ITuviMailCoreProvider coreProvider)
     {
         private readonly ILogger<Actions> _logger = logger;
         private readonly Application _application = application;
@@ -55,7 +55,7 @@ namespace Eppie.CLI.Menu
         private readonly IApplicationOutputCoordinator _outputCoordinator = outputCoordinator;
         private readonly IEmailAccountInputResolver _emailAccountInputResolver = emailAccountInputResolver;
         private readonly IProtonAccountInputResolver _protonAccountInputResolver = protonAccountInputResolver;
-        private readonly CoreProvider _coreProvider = coreProvider;
+        private readonly ITuviMailCoreProvider _coreProvider = coreProvider;
         private readonly AuthorizationProvider _authProvider = authProvider;
 
         internal void ExitAction()

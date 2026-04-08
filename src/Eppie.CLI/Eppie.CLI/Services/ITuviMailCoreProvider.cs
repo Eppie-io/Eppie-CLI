@@ -22,6 +22,7 @@ namespace Eppie.CLI.Services
 {
     internal interface ITuviMailCoreProvider
     {
+        Task ResetAsync();
         ITuviMail TuviMailCore { get; }
     }
 }
