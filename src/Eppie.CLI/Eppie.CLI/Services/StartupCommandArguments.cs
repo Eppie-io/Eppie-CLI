@@ -20,57 +20,31 @@ namespace Eppie.CLI.Services
 {
     internal static class StartupCommandArguments
     {
+        internal const string CommandDelimiter = "--";
+
         internal static string[] GetStartupCommandArguments(RawCommandLineArguments commandLineArguments)
         {
             ArgumentNullException.ThrowIfNull(commandLineArguments);
 
             int commandStartIndex = GetCommandStartIndex(commandLineArguments.Values);
-            return [.. commandLineArguments.Values.Skip(commandStartIndex)];
+            return commandStartIndex >= 0
+                ? [.. commandLineArguments.Values.Skip(commandStartIndex)]
+                : [];
         }
 
         private static int GetCommandStartIndex(IReadOnlyList<string> arguments)
         {
             ArgumentNullException.ThrowIfNull(arguments);
 
-            int commandStartIndex = 0;
-
-            while (commandStartIndex < arguments.Count
-                && TryGetLeadingLaunchOptionArgumentCount(arguments, commandStartIndex, out int argumentCount))
+            for (int index = 0; index < arguments.Count; index++)
             {
-                commandStartIndex += argumentCount;
-            }
-
-            return commandStartIndex;
-        }
-
-        private static bool TryGetLeadingLaunchOptionArgumentCount(IReadOnlyList<string> arguments, int index, out int argumentCount)
-        {
-            ArgumentNullException.ThrowIfNull(arguments);
-            ArgumentOutOfRangeException.ThrowIfNegative(index);
-            ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(index, arguments.Count);
-
-            string argument = arguments[index];
-            ArgumentException.ThrowIfNullOrWhiteSpace(argument);
-
-            foreach (string optionKey in ApplicationLaunchOptions.LaunchOptionKeys)
-            {
-                string optionName = $"--{optionKey}";
-
-                if (argument.Equals(optionName, StringComparison.Ordinal))
+                if (string.Equals(arguments[index], CommandDelimiter, StringComparison.Ordinal))
                 {
-                    argumentCount = index + 1 < arguments.Count ? 2 : 1;
-                    return true;
-                }
-
-                if (argument.StartsWith(optionName + "=", StringComparison.Ordinal))
-                {
-                    argumentCount = 1;
-                    return true;
+                    return index + 1 < arguments.Count ? index + 1 : -1;
                 }
             }
 
-            argumentCount = 0;
-            return false;
+            return -1;
         }
     }
 }
