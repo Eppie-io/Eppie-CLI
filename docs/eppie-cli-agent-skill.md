@@ -157,6 +157,10 @@ Use:
 To avoid passing the same startup flags on every call, you can put them in `appsettings.json` next to `eppie-console`, for example:
 - `{ "non-interactive": true, "output": "json", "unlock-password-stdin": true }`
 
+`eppie-console` also reads configuration from environment variables.
+
+When the default .NET host configuration pipeline is used, environment variables override `appsettings.json`. Command-line arguments override both.
+
 For structured machine-readable output, also use:
 - `--output=json`
 
