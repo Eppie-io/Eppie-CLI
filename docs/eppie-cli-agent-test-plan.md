@@ -20,7 +20,7 @@ Cover:
 
 1. Prefer `--non-interactive=true` for automation.
 2. Prefer `--output=json` when validating machine-readable behavior.
-3. Put global launch options before the startup command.
+3. Put global launch options before `--` and put the startup command after `--`.
 4. For stateful non-interactive commands, use `--unlock-password-stdin=true`.
 5. For destructive commands such as `reset`, use `--assume-yes=true` unless intentionally testing the warning path.
 6. Use one isolated working directory per scenario.
@@ -131,7 +131,7 @@ This is the main scenario that should run first.
 
 ### 1. Initialize a fresh vault
 Command:
-- `--non-interactive=true --output=json init`
+- `--non-interactive=true --output=json -- init`
 
 `stdin`:
 1. vault password
@@ -143,7 +143,7 @@ Expected result:
 
 ### 2. Verify locked command warning without `--unlock-password-stdin=true`
 Command:
-- `--non-interactive=true --output=json list-accounts`
+- `--non-interactive=true --output=json -- list-accounts`
 
 `stdin`:
 - none
@@ -154,7 +154,7 @@ Expected result:
 
 ### 3. Verify invalid password handling
 Command:
-- `--non-interactive=true --unlock-password-stdin=true --output=json list-accounts`
+- `--non-interactive=true --unlock-password-stdin=true --output=json -- list-accounts`
 
 `stdin`:
 1. wrong password
@@ -165,7 +165,7 @@ Expected result:
 
 ### 4. List accounts in a fresh vault
 Command:
-- `--non-interactive=true --unlock-password-stdin=true --output=json list-accounts`
+- `--non-interactive=true --unlock-password-stdin=true --output=json -- list-accounts`
 
 `stdin`:
 1. vault password
@@ -178,7 +178,7 @@ Expected result:
 
 ### 5. Add a DEC account
 Command:
-- `--non-interactive=true --unlock-password-stdin=true --output=json add-account -t dec`
+- `--non-interactive=true --unlock-password-stdin=true --output=json -- add-account -t dec`
 
 `stdin`:
 1. vault password
@@ -194,7 +194,7 @@ Store the returned `data.address` as `<dec-address>`.
 
 ### 6. List accounts after account creation
 Command:
-- `--non-interactive=true --unlock-password-stdin=true --output=json list-accounts`
+- `--non-interactive=true --unlock-password-stdin=true --output=json -- list-accounts`
 
 `stdin`:
 1. vault password
@@ -208,7 +208,7 @@ Expected result:
 
 ### 6a. List folders for the account
 Command:
-- `--non-interactive=true --unlock-password-stdin=true --output=json list-folders -a <dec-address>`
+- `--non-interactive=true --unlock-password-stdin=true --output=json -- list-folders -a <dec-address>`
 
 `stdin`:
 1. vault password
@@ -224,7 +224,7 @@ If one folder is available, store:
 
 ### 7. Send a message to the DEC account itself
 Command:
-- `--non-interactive=true --unlock-password-stdin=true --output=json send -s <dec-address> -r <dec-address> -t "Hello from automation"`
+- `--non-interactive=true --unlock-password-stdin=true --output=json -- send -s <dec-address> -r <dec-address> -t "Hello from automation"`
 
 `stdin` order:
 1. vault password
@@ -244,7 +244,7 @@ Notes:
 
 ### 7a. Synchronize the relevant folder before validating newly arrived messages
 Command:
-- `--non-interactive=true --unlock-password-stdin=true --output=json sync-folder -a <dec-address> -f <folder-name>`
+- `--non-interactive=true --unlock-password-stdin=true --output=json -- sync-folder -a <dec-address> -f <folder-name>`
 
 `stdin`:
 1. vault password
@@ -257,7 +257,7 @@ If the current account type or folder does not support a meaningful sync in the 
 
 ### 8. Read recent messages after synchronization
 Command:
-- `--non-interactive=true --unlock-password-stdin=true --output=json show-all-messages -s 5 -l 5`
+- `--non-interactive=true --unlock-password-stdin=true --output=json -- show-all-messages -s 5 -l 5`
 
 `stdin`:
 1. vault password
@@ -280,7 +280,7 @@ If at least one message is present, store:
 
 ### 9. Read one message
 Command:
-- `--non-interactive=true --unlock-password-stdin=true --output=json show-message -a <dec-address> -f Inbox -i <message-id> -k <message-pk>`
+- `--non-interactive=true --unlock-password-stdin=true --output=json -- show-message -a <dec-address> -f Inbox -i <message-id> -k <message-pk>`
 
 `stdin`:
 1. vault password
@@ -297,7 +297,7 @@ Expected result:
 
 ### 10. Read one folder
 Command:
-- `--non-interactive=true --unlock-password-stdin=true --output=json show-folder-messages -a <dec-address> -f <folder-name> -s 5 -l 5`
+- `--non-interactive=true --unlock-password-stdin=true --output=json -- show-folder-messages -a <dec-address> -f <folder-name> -s 5 -l 5`
 
 `stdin`:
 1. vault password
@@ -310,7 +310,7 @@ Expected result:
 
 ### 10a. Delete one message
 Command:
-- `--non-interactive=true --unlock-password-stdin=true --output=json delete-message -a <dec-address> -f <folder-name> -i <message-id> -k <message-pk>`
+- `--non-interactive=true --unlock-password-stdin=true --output=json -- delete-message -a <dec-address> -f <folder-name> -i <message-id> -k <message-pk>`
 
 `stdin`:
 1. vault password
@@ -336,7 +336,7 @@ Notes:
 
 ### 11. List contacts
 Command:
-- `--non-interactive=true --unlock-password-stdin=true --output=json list-contacts -s 10 -l 10`
+- `--non-interactive=true --unlock-password-stdin=true --output=json -- list-contacts -s 10 -l 10`
 
 `stdin`:
 1. vault password
@@ -350,7 +350,7 @@ If one contact is available, store `<contact-address>` from the first item.
 
 ### 12. Read messages for a contact
 Command:
-- `--non-interactive=true --unlock-password-stdin=true --output=json show-contact-messages -c <contact-address> -s 10 -l 10`
+- `--non-interactive=true --unlock-password-stdin=true --output=json -- show-contact-messages -c <contact-address> -s 10 -l 10`
 
 `stdin`:
 1. vault password
@@ -365,7 +365,7 @@ Expected result:
 
 ### 13. Reset without `--assume-yes=true` to validate warning behavior
 Command:
-- `--non-interactive=true --output=json reset`
+- `--non-interactive=true --output=json -- reset`
 
 `stdin`:
 - none
@@ -376,7 +376,7 @@ Expected result:
 
 ### 14. Reset with `--assume-yes=true`
 Command:
-- `--non-interactive=true --assume-yes=true --output=json reset`
+- `--non-interactive=true --assume-yes=true --output=json -- reset`
 
 `stdin`:
 - none
@@ -393,9 +393,9 @@ If post-reset validation is needed, use a suitable non-interactive command whose
 In addition to the JSON scenario, validate a small text-mode subset.
 
 Recommended checks:
-- `--non-interactive=true --assume-yes=true reset`
-- `--non-interactive=true --unlock-password-stdin=true add-account -t dec`
-- `--non-interactive=true --unlock-password-stdin=true send -s <sender> -r <receiver> -t "<subject>"`
+- `--non-interactive=true --assume-yes=true -- reset`
+- `--non-interactive=true --unlock-password-stdin=true -- add-account -t dec`
+- `--non-interactive=true --unlock-password-stdin=true -- send -s <sender> -r <receiver> -t "<subject>"`
 
 Expected text samples:
 - `The application has just been reset.`
@@ -406,7 +406,7 @@ Expected text samples:
 
 ### Empty body for `send`
 Command:
-- `--non-interactive=true --unlock-password-stdin=true --output=json send -s <dec-address> -r <dec-address> -t "Empty body"`
+- `--non-interactive=true --unlock-password-stdin=true --output=json -- send -s <dec-address> -r <dec-address> -t "Empty body"`
 
 `stdin` order:
 1. vault password
@@ -423,7 +423,7 @@ Note:
 
 ### Unknown sender account
 Command:
-- `--non-interactive=true --unlock-password-stdin=true --output=json send -s missing@eppie -r missing@eppie -t "Missing account"`
+- `--non-interactive=true --unlock-password-stdin=true --output=json -- send -s missing@eppie -r missing@eppie -t "Missing account"`
 
 `stdin` order:
 1. vault password
@@ -468,7 +468,7 @@ Validate:
 - message listing.
 
 Recommended automation pattern:
-- `--non-interactive=true --unlock-password-stdin=true --output=json add-account -t proton --input-json-stdin`
+- `--non-interactive=true --unlock-password-stdin=true --output=json -- add-account -t proton --input-json-stdin`
 
 `stdin` shape:
 1. vault password on the first line if `--unlock-password-stdin=true` is used
@@ -545,6 +545,6 @@ A test run is successful when:
 ## Cleanup
 
 After the scenario:
-- run `--non-interactive=true --assume-yes=true reset` if needed,
+- run `--non-interactive=true --assume-yes=true -- reset` if needed,
 - delete the isolated working directory,
 - do not reuse the same vault directory for unrelated scenarios.

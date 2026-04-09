@@ -206,7 +206,7 @@ Common text success-output examples:
 ## Normative rules
 
 - Treat `Normative command patterns for agents` and `Normative stdin contracts` as normative for agent workflows.
-- Put global launch options before the startup command.
+- Put global launch options before `--` and put the startup command after `--`.
 - Do not assume `open` creates a reusable session for future process launches.
 - Synchronize the relevant folder before reading when the task requires newly arrived messages.
 - Do not guess provider-specific folder names; call `list-folders` first.
@@ -222,21 +222,21 @@ Use this section as the single source of truth for agent command lines. Unless t
 
 | Task | Canonical command |
 | --- | --- |
-| Initialize a vault | `--non-interactive=true --output=json init` |
-| List accounts | `--non-interactive=true --unlock-password-stdin=true --output=json list-accounts` |
-| List folders | `--non-interactive=true --unlock-password-stdin=true --output=json list-folders -a <account>` |
-| Show all messages | `--non-interactive=true --unlock-password-stdin=true --output=json show-all-messages -s 10 -l 10` |
-| Show one message | `--non-interactive=true --unlock-password-stdin=true --output=json show-message -a <account> -f <folder> -i <id> -k <pk>` |
-| Delete one message | `--non-interactive=true --unlock-password-stdin=true --output=json delete-message -a <account> -f <folder> -i <id> -k <pk>` |
-| List contacts | `--non-interactive=true --unlock-password-stdin=true --output=json list-contacts -s 10 -l 10` |
-| Show contact messages | `--non-interactive=true --unlock-password-stdin=true --output=json show-contact-messages -c <contact> -s 10 -l 10` |
-| Show folder messages | `--non-interactive=true --unlock-password-stdin=true --output=json show-folder-messages -a <account> -f <folder> -s 10 -l 10` |
-| Sync a folder | `--non-interactive=true --unlock-password-stdin=true --output=json sync-folder -a <account> -f <folder>` |
-| Send a message | `--non-interactive=true --unlock-password-stdin=true --output=json send -s <sender> -r <receiver> -t "<subject>"` |
-| Reset local data | `--non-interactive=true --assume-yes=true --output=json reset` |
-| Add a DEC account | `--non-interactive=true --unlock-password-stdin=true --output=json add-account -t dec` |
-| Add a regular IMAP/SMTP account | `--non-interactive=true --unlock-password-stdin=true --output=json add-account -t email --input-json-stdin` |
-| Add a Proton Mail account | `--non-interactive=true --unlock-password-stdin=true --output=json add-account -t proton --input-json-stdin` |
+| Initialize a vault | `--non-interactive=true --output=json -- init` |
+| List accounts | `--non-interactive=true --unlock-password-stdin=true --output=json -- list-accounts` |
+| List folders | `--non-interactive=true --unlock-password-stdin=true --output=json -- list-folders -a <account>` |
+| Show all messages | `--non-interactive=true --unlock-password-stdin=true --output=json -- show-all-messages -s 10 -l 10` |
+| Show one message | `--non-interactive=true --unlock-password-stdin=true --output=json -- show-message -a <account> -f <folder> -i <id> -k <pk>` |
+| Delete one message | `--non-interactive=true --unlock-password-stdin=true --output=json -- delete-message -a <account> -f <folder> -i <id> -k <pk>` |
+| List contacts | `--non-interactive=true --unlock-password-stdin=true --output=json -- list-contacts -s 10 -l 10` |
+| Show contact messages | `--non-interactive=true --unlock-password-stdin=true --output=json -- show-contact-messages -c <contact> -s 10 -l 10` |
+| Show folder messages | `--non-interactive=true --unlock-password-stdin=true --output=json -- show-folder-messages -a <account> -f <folder> -s 10 -l 10` |
+| Sync a folder | `--non-interactive=true --unlock-password-stdin=true --output=json -- sync-folder -a <account> -f <folder>` |
+| Send a message | `--non-interactive=true --unlock-password-stdin=true --output=json -- send -s <sender> -r <receiver> -t "<subject>"` |
+| Reset local data | `--non-interactive=true --assume-yes=true --output=json -- reset` |
+| Add a DEC account | `--non-interactive=true --unlock-password-stdin=true --output=json -- add-account -t dec` |
+| Add a regular IMAP/SMTP account | `--non-interactive=true --unlock-password-stdin=true --output=json -- add-account -t email --input-json-stdin` |
+| Add a Proton Mail account | `--non-interactive=true --unlock-password-stdin=true --output=json -- add-account -t proton --input-json-stdin` |
 
 ## Normative stdin contracts
 
@@ -244,21 +244,21 @@ Provide `stdin` exactly in the documented order. Unless a command explicitly rea
 
 | Command | Exact `stdin` contract | EOF required |
 | --- | --- | --- |
-| `--non-interactive=true --output=json init` | line 1: new vault password | no |
-| `--non-interactive=true --unlock-password-stdin=true --output=json list-accounts` | line 1: vault password | no |
-| `--non-interactive=true --unlock-password-stdin=true --output=json list-folders -a <account>` | line 1: vault password | no |
-| `--non-interactive=true --unlock-password-stdin=true --output=json show-all-messages -s <page-size> -l <limit>` | line 1: vault password | no |
-| `--non-interactive=true --unlock-password-stdin=true --output=json show-message -a <account> -f <folder> -i <id> -k <pk>` | line 1: vault password | no |
-| `--non-interactive=true --unlock-password-stdin=true --output=json delete-message -a <account> -f <folder> -i <id> -k <pk>` | line 1: vault password | no |
-| `--non-interactive=true --unlock-password-stdin=true --output=json list-contacts -s <page-size> -l <limit>` | line 1: vault password | no |
-| `--non-interactive=true --unlock-password-stdin=true --output=json show-contact-messages -c <contact> -s <page-size> -l <limit>` | line 1: vault password | no |
-| `--non-interactive=true --unlock-password-stdin=true --output=json show-folder-messages -a <account> -f <folder> -s <page-size> -l <limit>` | line 1: vault password | no |
-| `--non-interactive=true --unlock-password-stdin=true --output=json sync-folder -a <account> -f <folder>` | line 1: vault password | no |
-| `--non-interactive=true --unlock-password-stdin=true --output=json send -s <sender> -r <receiver> -t "<subject>"` | line 1: vault password; line 2 and later: message body; then close `stdin` | yes |
-| `--non-interactive=true --assume-yes=true --output=json reset` | no `stdin` | no |
-| `--non-interactive=true --unlock-password-stdin=true --output=json add-account -t dec` | line 1: vault password | no |
-| `--non-interactive=true --unlock-password-stdin=true --output=json add-account -t email --input-json-stdin` | line 1: vault password; remaining bytes: one JSON object | yes |
-| `--non-interactive=true --unlock-password-stdin=true --output=json add-account -t proton --input-json-stdin` | line 1: vault password; remaining bytes: one JSON object | yes |
+| `--non-interactive=true --output=json -- init` | line 1: new vault password | no |
+| `--non-interactive=true --unlock-password-stdin=true --output=json -- list-accounts` | line 1: vault password | no |
+| `--non-interactive=true --unlock-password-stdin=true --output=json -- list-folders -a <account>` | line 1: vault password | no |
+| `--non-interactive=true --unlock-password-stdin=true --output=json -- show-all-messages -s <page-size> -l <limit>` | line 1: vault password | no |
+| `--non-interactive=true --unlock-password-stdin=true --output=json -- show-message -a <account> -f <folder> -i <id> -k <pk>` | line 1: vault password | no |
+| `--non-interactive=true --unlock-password-stdin=true --output=json -- delete-message -a <account> -f <folder> -i <id> -k <pk>` | line 1: vault password | no |
+| `--non-interactive=true --unlock-password-stdin=true --output=json -- list-contacts -s <page-size> -l <limit>` | line 1: vault password | no |
+| `--non-interactive=true --unlock-password-stdin=true --output=json -- show-contact-messages -c <contact> -s <page-size> -l <limit>` | line 1: vault password | no |
+| `--non-interactive=true --unlock-password-stdin=true --output=json -- show-folder-messages -a <account> -f <folder> -s <page-size> -l <limit>` | line 1: vault password | no |
+| `--non-interactive=true --unlock-password-stdin=true --output=json -- sync-folder -a <account> -f <folder>` | line 1: vault password | no |
+| `--non-interactive=true --unlock-password-stdin=true --output=json -- send -s <sender> -r <receiver> -t "<subject>"` | line 1: vault password; line 2 and later: message body; then close `stdin` | yes |
+| `--non-interactive=true --assume-yes=true --output=json -- reset` | no `stdin` | no |
+| `--non-interactive=true --unlock-password-stdin=true --output=json -- add-account -t dec` | line 1: vault password | no |
+| `--non-interactive=true --unlock-password-stdin=true --output=json -- add-account -t email --input-json-stdin` | line 1: vault password; remaining bytes: one JSON object | yes |
+| `--non-interactive=true --unlock-password-stdin=true --output=json -- add-account -t proton --input-json-stdin` | line 1: vault password; remaining bytes: one JSON object | yes |
 
 ### Command summary
 
@@ -451,13 +451,13 @@ PowerShell example with the command line and exact `stdin` in one block:
 vault password
 Hello from automation
 Second body line
-"@ | .\eppie-console --non-interactive=true --unlock-password-stdin=true --output=json send -s sender@example.com -r receiver@example.com -t "Hello from automation"
+"@ | .\eppie-console --non-interactive=true --unlock-password-stdin=true --output=json -- send -s sender@example.com -r receiver@example.com -t "Hello from automation"
 ```
 
 Linux / bash example with the command line and exact `stdin` in one block:
 
 ```bash
-cat <<'EOF_INPUT' | ./eppie-console --non-interactive=true --unlock-password-stdin=true --output=json send -s sender@example.com -r receiver@example.com -t "Hello from automation"
+cat <<'EOF_INPUT' | ./eppie-console --non-interactive=true --unlock-password-stdin=true --output=json -- send -s sender@example.com -r receiver@example.com -t "Hello from automation"
 vault password
 Hello from automation
 Second body line
