@@ -16,19 +16,33 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
-using System.Diagnostics.CodeAnalysis;
-
-using Eppie.CLI.Common;
-
-namespace Eppie.CLI.Options
+namespace Eppie.CLI.Services
 {
-    [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal class MailOptions : IConfigurationSectionOptions
+    internal readonly record struct ApplicationListingOptions
     {
-        public string SectionName => nameof(MailOptions);
+        internal const int DefaultPageSize = 20;
+        internal const int DefaultLimit = 20;
 
-        public IReadOnlyDictionary<MailServer, MailServerConfiguration> Servers { get; init; } = new Dictionary<MailServer, MailServerConfiguration>();
+        public ApplicationListingOptions(int pageSize, int? limit)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
+
+            if (limit.HasValue)
+            {
+                ArgumentOutOfRangeException.ThrowIfNegativeOrZero(limit.Value, nameof(limit));
+            }
+
+            PageSize = pageSize;
+            Limit = limit ?? DefaultLimit;
+        }
+
+        internal int PageSize { get; }
+
+        internal int Limit { get; }
+
+        internal int GetRequestSize(int remainingLimit)
+        {
+            return Math.Min(PageSize, remainingLimit);
+        }
     }
-
-    internal record MailServerConfiguration(string SMTP = "", int SMTPPort = 0, string IMAP = "", int IMAPPort = 0);
 }

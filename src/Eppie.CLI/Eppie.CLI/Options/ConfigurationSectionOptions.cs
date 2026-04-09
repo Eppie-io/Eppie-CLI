@@ -1,6 +1,6 @@
 // ---------------------------------------------------------------------------- //
 //                                                                              //
-//   Copyright 2024 Eppie (https://eppie.io)                                    //
+//   Copyright 2026 Eppie (https://eppie.io)                                    //
 //                                                                              //
 //   Licensed under the Apache License, Version 2.0 (the "License"),            //
 //   you may not use this file except in compliance with the License.           //
@@ -37,13 +37,28 @@ namespace Eppie.CLI.Options
         public static void ConfigureOptions<TOptions>(this IServiceCollection services, IConfiguration configuration, BinderOptions binderOptions)
             where TOptions : class, IConfigurationSectionOptions
         {
-            static void Clone(BinderOptions options, BinderOptions other)
-            {
-                options.ErrorOnUnknownConfiguration = other.ErrorOnUnknownConfiguration;
-                options.BindNonPublicProperties = other.BindNonPublicProperties;
-            }
-
             services.Configure<TOptions>(options => configuration.GetSection(options.SectionName).Bind(options, opt => Clone(opt, binderOptions)));
+        }
+
+        public static void ConfigureRootOptions<TOptions>(this IServiceCollection services, IConfiguration configuration)
+            where TOptions : class
+        {
+            services.AddOptions<TOptions>().Bind(configuration);
+        }
+
+        public static void ConfigureRootOptions<TOptions>(this IServiceCollection services, IConfiguration configuration, BinderOptions binderOptions)
+            where TOptions : class
+        {
+            services.AddOptions<TOptions>().Bind(configuration, options => Clone(options, binderOptions));
+        }
+
+        private static void Clone(BinderOptions options, BinderOptions other)
+        {
+            ArgumentNullException.ThrowIfNull(options);
+            ArgumentNullException.ThrowIfNull(other);
+
+            options.ErrorOnUnknownConfiguration = other.ErrorOnUnknownConfiguration;
+            options.BindNonPublicProperties = other.BindNonPublicProperties;
         }
     }
 }

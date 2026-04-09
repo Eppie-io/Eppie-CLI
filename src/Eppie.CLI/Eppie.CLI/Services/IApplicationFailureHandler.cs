@@ -16,19 +16,14 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
-using System.Diagnostics.CodeAnalysis;
+using Eppie.CLI.Exceptions;
 
-using Eppie.CLI.Common;
-
-namespace Eppie.CLI.Options
+namespace Eppie.CLI.Services
 {
-    [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal class MailOptions : IConfigurationSectionOptions
+    internal interface IApplicationFailureHandler
     {
-        public string SectionName => nameof(MailOptions);
+        void HandleControlledCommandFailure(ApplicationCommandException exception);
 
-        public IReadOnlyDictionary<MailServer, MailServerConfiguration> Servers { get; init; } = new Dictionary<MailServer, MailServerConfiguration>();
+        void HandleUnhandledException(Exception exception);
     }
-
-    internal record MailServerConfiguration(string SMTP = "", int SMTPPort = 0, string IMAP = "", int IMAPPort = 0);
 }

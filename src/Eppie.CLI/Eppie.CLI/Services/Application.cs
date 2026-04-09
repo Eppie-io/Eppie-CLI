@@ -1,6 +1,6 @@
 // ---------------------------------------------------------------------------- //
 //                                                                              //
-//   Copyright 2024 Eppie (https://eppie.io)                                    //
+//   Copyright 2026 Eppie (https://eppie.io)                                    //
 //                                                                              //
 //   Licensed under the Apache License, Version 2.0 (the "License"),            //
 //   you may not use this file except in compliance with the License.           //
@@ -17,7 +17,6 @@
 // ---------------------------------------------------------------------------- //
 
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
 
 using Eppie.CLI.Common;
 using Eppie.CLI.Exceptions;
@@ -28,7 +27,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using Tuvi.Core.Entities;
 using Tuvi.Toolkit.Cli;
 
 namespace Eppie.CLI.Services
@@ -37,12 +35,16 @@ namespace Eppie.CLI.Services
     internal class Application(
        ILogger<Application> logger,
        IHostApplicationLifetime lifetime,
+       IOptions<ApplicationLaunchOptions> launchOptions,
+       IApplicationOutputWriter outputWriter,
        IOptions<MailOptions> mailOptions,
-       ResourceLoader resourceLoader)
+        ResourceLoader resourceLoader) : IApplicationPasswordReader
     {
         private readonly ResourceLoader _resourceLoader = resourceLoader;
         private readonly ILogger<Application> _logger = logger;
         private readonly IHostApplicationLifetime _lifetime = lifetime;
+        private readonly ApplicationLaunchOptions _launchOptions = launchOptions.Value;
+        private readonly IApplicationOutputWriter _outputWriter = outputWriter;
         private readonly IOptions<MailOptions> _mailOptions = mailOptions;
 
         internal void StopApplication()
@@ -55,35 +57,62 @@ namespace Eppie.CLI.Services
         {
             _logger.LogMethodCall();
 
-            return ReadSecretValue(_resourceLoader.Strings.AskPassword);
+            return _launchOptions.NonInteractive
+                ? ReadPasswordFromStandardInput()
+                : ReadSecretValue(_resourceLoader.Strings.AskPassword);
+        }
+
+        internal string ReadPasswordFromStandardInput()
+        {
+            _logger.LogMethodCall();
+
+            return ReadValue(_resourceLoader.Strings.AskPassword, writePrompt: !_launchOptions.NonInteractive);
+        }
+
+        string IApplicationPasswordReader.AskPassword()
+        {
+            return AskPassword();
+        }
+
+        string IApplicationPasswordReader.ReadPasswordFromStandardInput()
+        {
+            return ReadPasswordFromStandardInput();
         }
 
         internal string AskNewPassword()
         {
             _logger.LogMethodCall();
 
-            return ReadSecretValue(_resourceLoader.Strings.AskNewPassword);
+            return _launchOptions.NonInteractive
+                ? ReadValue(_resourceLoader.Strings.AskNewPassword, writePrompt: false)
+                : ReadSecretValue(_resourceLoader.Strings.AskNewPassword);
         }
 
         internal string ConfirmPassword()
         {
             _logger.LogMethodCall();
 
-            return ReadSecretValue(_resourceLoader.Strings.ConfirmPassword);
+            return _launchOptions.NonInteractive
+                ? ReadValue(_resourceLoader.Strings.ConfirmPassword, writePrompt: false)
+                : ReadSecretValue(_resourceLoader.Strings.ConfirmPassword);
         }
 
         internal string AskAccountAddress()
         {
             _logger.LogMethodCall();
 
-            return ReadValue(_resourceLoader.Strings.AskAccountAddress);
+            return _launchOptions.NonInteractive
+                ? ReadValue(_resourceLoader.Strings.AskAccountAddress, writePrompt: false)
+                : ReadValue(_resourceLoader.Strings.AskAccountAddress);
         }
 
         internal string AskAccountPassword()
         {
             _logger.LogMethodCall();
 
-            return ReadSecretValue(_resourceLoader.Strings.AskAccountPassword);
+            return _launchOptions.NonInteractive
+                ? ReadValue(_resourceLoader.Strings.AskAccountPassword, writePrompt: false)
+                : ReadSecretValue(_resourceLoader.Strings.AskAccountPassword);
         }
 
         internal string AskTwoFactorCode(bool firstAttempt)
@@ -92,7 +121,7 @@ namespace Eppie.CLI.Services
 
             if (!firstAttempt)
             {
-                WriteUnsuccessfulAttemptWarning();
+                _outputWriter.Write(new UnsuccessfulAttemptWarningOutput());
             }
 
             return ReadValue(_resourceLoader.Strings.AskTwoFactorCode);
@@ -104,10 +133,12 @@ namespace Eppie.CLI.Services
 
             if (!firstAttempt)
             {
-                WriteUnsuccessfulAttemptWarning();
+                _outputWriter.Write(new UnsuccessfulAttemptWarningOutput());
             }
 
-            return ReadSecretValue(_resourceLoader.Strings.AskMailboxPassword);
+            return _launchOptions.NonInteractive
+                ? ReadValue(_resourceLoader.Strings.AskMailboxPassword, writePrompt: false)
+                : ReadSecretValue(_resourceLoader.Strings.AskMailboxPassword);
         }
 
         internal string AskIMAPServer(MailServer mailServer)
@@ -168,7 +199,9 @@ namespace Eppie.CLI.Services
         {
             _logger.LogMethodCall();
 
-            return ReadSecretValue(_resourceLoader.Strings.AskSeedPhrase);
+            return _launchOptions.NonInteractive
+                ? ReadValue(_resourceLoader.Strings.AskSeedPhrase, writePrompt: false)
+                : ReadSecretValue(_resourceLoader.Strings.AskSeedPhrase);
         }
 
         internal string AskRestorePath()
@@ -182,6 +215,11 @@ namespace Eppie.CLI.Services
             where TEnum : struct, Enum
         {
             _logger.LogMethodCall();
+
+            if (_launchOptions.NonInteractive)
+            {
+                throw new InvalidOperationException(_resourceLoader.Strings.GetNonInteractiveOperationNotSupportedError("option selection"));
+            }
 
             Console.WriteLine(_resourceLoader.Strings.SelectOptionHeader);
 
@@ -200,249 +238,91 @@ namespace Eppie.CLI.Services
         {
             _logger.LogMethodCall();
 
-            return ReadBoolValue(_resourceLoader.Strings.ConfirmReset);
+            return _launchOptions.AssumeYes || ReadBoolValue(_resourceLoader.Strings.ConfirmReset);
+        }
+
+        internal bool ConfirmAskMoreContacts()
+        {
+            _logger.LogMethodCall();
+
+            return ReadBoolValue(_resourceLoader.Strings.AskMoreContacts);
+        }
+
+        internal bool ConfirmAskMoreMessages()
+        {
+            _logger.LogMethodCall();
+
+            return ReadBoolValue(_resourceLoader.Strings.AskMoreMessages);
         }
 
         internal string AskMessageBody()
         {
             _logger.LogMethodCall();
 
-            return ConsoleExtension.ReadMultiLine(_resourceLoader.Strings.AskMessageBody, "EOF") ?? throw new ReadValueCanceledException();
+            return _launchOptions.NonInteractive
+                ? ReadRemainingStandardInput()
+                : ConsoleExtension.ReadMultiLine(_resourceLoader.Strings.AskMessageBody, "EOF") ?? throw new ReadValueCanceledException();
         }
 
-        internal void PrintAccounts(IReadOnlyCollection<Account> accounts)
+        internal string GetPrintAllMessagesHeader()
         {
             _logger.LogMethodCall();
 
-            if (accounts is null || accounts.Count == 0)
-            {
-                _logger.LogDebug("Print Account: There are no accounts yet.");
-                Console.WriteLine(_resourceLoader.Strings.EmptyAccountList);
-                return;
-            }
-
-            Console.WriteLine(_resourceLoader.Strings.HeaderAccountList);
-            int i = 0;
-            foreach (Account account in accounts)
-            {
-                _logger.LogDebug("Print Account: {Id}", account.Id);
-                Console.WriteLine($"{++i}. {account.Email.Address}");
-            }
-
-            Console.WriteLine();
+            return _resourceLoader.Strings.PrintAllMessagesHeader;
         }
 
-        internal void PrintMessage(Message message, bool compact)
-        {
-            ArgumentNullException.ThrowIfNull(message);
-
-            _logger.LogDebug("Print message: Id - {Id}, Key - {Pk}", message.Id, message.Pk);
-
-            if (compact)
-            {
-                string to = message.To.FirstOrDefault()?.Address ?? string.Empty;
-                string from = message.From.FirstOrDefault()?.Address ?? string.Empty;
-
-                Console.WriteLine(_resourceLoader.Strings.GetMessageDetailsText(message.Id, message.Pk, message.Date, Truncate(to), Truncate(from),
-                                                                                message.Folder.FullName, message.Subject));
-            }
-            else
-            {
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine(_resourceLoader.Strings.GetMessageIDPropertyText(message.Id));
-                Console.WriteLine(_resourceLoader.Strings.GetMessagePKPropertyText(message.Pk));
-                Console.WriteLine(_resourceLoader.Strings.GetMessageDatePropertyText(message.Date));
-                Console.WriteLine(_resourceLoader.Strings.GetMessageToPropertyText(string.Join(';', message.To)));
-                Console.WriteLine(_resourceLoader.Strings.GetMessageFromPropertyText(string.Join(';', message.From)));
-                Console.WriteLine(_resourceLoader.Strings.GetMessageCcPropertyText(string.Join(';', message.Cc)));
-                Console.WriteLine(_resourceLoader.Strings.GetMessageBccPropertyText(string.Join(';', message.Bcc)));
-                Console.WriteLine(_resourceLoader.Strings.GetMessageFolderText(message.Folder.FullName));
-                Console.WriteLine(_resourceLoader.Strings.GetMessageSubjectPropertyText(message.Subject));
-
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine(message.TextBody ?? message.HtmlBody ?? string.Empty);
-
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine(_resourceLoader.Strings.GetMessageAttachmentsCountText(message.Attachments.Count));
-
-                Console.ResetColor();
-            }
-
-            static string Truncate(string s, int maxLength = 19)
-            {
-                if (s.Length <= maxLength)
-                {
-                    return s;
-                }
-
-                int halfLen = maxLength >> 1;
-                StringBuilder sb = new(maxLength);
-                sb.Append(s.AsSpan(0, halfLen));
-                sb.Append('…');
-                sb.Append(s.AsSpan(s.Length - halfLen, halfLen));
-                return sb.ToString();
-            }
-        }
-
-        internal void WriteApplicationInitializationMessage(string[] seedPhrase)
-        {
-            _logger.LogDebug("The application has been initialized.");
-
-            Console.WriteLine();
-            Console.WriteLine(_resourceLoader.Strings.SeedPhraseHeader);
-            Console.WriteLine();
-
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"{string.Join(' ', seedPhrase)}");
-            Console.ResetColor();
-
-            Console.WriteLine();
-            Console.WriteLine(_resourceLoader.Strings.SeedPhraseFooter);
-        }
-
-        internal void WriteApplicationResetMessage()
-        {
-            _logger.LogDebug("The application has been reset.");
-            Console.WriteLine(_resourceLoader.Strings.AppReset);
-        }
-
-        internal void WriteApplicationOpenedMessage()
-        {
-            _logger.LogDebug("The application was opened.");
-            Console.WriteLine(_resourceLoader.Strings.AppOpened);
-        }
-
-        internal void WriteSuccessfulRestoredMessage()
-        {
-            _logger.LogDebug("Eppie account was restored.");
-            Console.WriteLine(_resourceLoader.Strings.AppRestored);
-        }
-
-        internal void WriteAuthorizationCanceledMessage()
-        {
-            _logger.LogDebug("Authorization operation was canceled.");
-            Console.WriteLine(_resourceLoader.Strings.AuthorizationCanceled);
-        }
-
-        internal void WriteAuthorizationToServiceMessage(string serviceName)
-        {
-            _logger.LogDebug("Authorization to {ServiceName} service starting.", serviceName);
-            Console.WriteLine(_resourceLoader.Strings.GetAuthorizationToServiceText(serviceName));
-        }
-
-        internal void WriteAuthorizationCompletedMessage()
-        {
-            _logger.LogDebug("Authorization completed successfully.");
-            Console.WriteLine(_resourceLoader.Strings.AuthorizationCompleted);
-        }
-
-        internal void WriteInvalidPasswordWarning()
-        {
-            LogCommandWarning("Invalid Password");
-
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine(_resourceLoader.Strings.InvalidPassword);
-            Console.ResetColor();
-        }
-
-        internal void WriteSecondInitializationWarning()
-        {
-            LogCommandWarning("The application has already been initialized.");
-
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine(_resourceLoader.Strings.SecondInitialization);
-            Console.ResetColor();
-        }
-
-        internal void WriteUninitializedAppWarning()
-        {
-            LogCommandWarning("The application hasn't been initialized yet.");
-
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine(_resourceLoader.Strings.Uninitialized);
-            Console.ResetColor();
-        }
-
-        internal void WriteUnsuccessfulAttemptWarning()
-        {
-            LogCommandWarning("The attempt was unsuccessful.");
-
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine(_resourceLoader.Strings.UnsuccessfulAttempt);
-            Console.ResetColor();
-        }
-
-        internal void WriteImpossibleInitializationError()
-        {
-            _logger.LogError("The application could not be initialized.");
-
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(_resourceLoader.Strings.ImpossibleInitialization);
-            Console.ResetColor();
-        }
-
-        internal void WriteError(Exception ex)
-        {
-            _logger.LogError("An error has occurred {Exception}", ex);
-
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(_resourceLoader.Strings.GetUnhandledException(ex));
-            Console.ResetColor();
-        }
-
-        internal void WriteUnknownFolderWarning(string address, string folder)
-        {
-            LogCommandWarning($"Unknown folder", new { Address = address, Folder = folder });
-
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine(_resourceLoader.Strings.GetUnknownFolderWarning(address, folder));
-            Console.ResetColor();
-        }
-
-        internal void PrintContacts(int pageSize, IEnumerable<Contact> contacts)
-        {
-            ArgumentNullException.ThrowIfNull(contacts);
-
-            if (!contacts.Any())
-            {
-                Console.WriteLine(_resourceLoader.Strings.EmptyContactList);
-                return;
-            }
-
-            do
-            {
-                foreach (Contact contact in contacts.Take(pageSize))
-                {
-                    PrintContact(contact);
-                }
-
-                contacts = contacts.Skip(pageSize);
-            }
-            while (contacts.Any() && ReadBoolValue(_resourceLoader.Strings.AskMoreContacts));
-        }
-
-        internal Task PrintAllMessagesAsync(int pageSize, Func<int, Message, Task<IEnumerable<Message>>> messageSource)
+        internal string GetPrintFolderMessagesHeader(string accountAddress, string folderName)
         {
             _logger.LogMethodCall();
-            return PrintMessagesAsync(_resourceLoader.Strings.PrintAllMessagesHeader, pageSize, messageSource);
+
+            return _resourceLoader.Strings.GetPrintFolderMessagesHeader(accountAddress, folderName);
         }
 
-        internal Task PrintFolderMessagesAsync(string accountAddress, string folderName, int pageSize, Func<int, Message, Task<IEnumerable<Message>>> messageSource)
+        internal string GetPrintContactMessagesHeader(string contactAddress)
         {
             _logger.LogMethodCall();
-            return PrintMessagesAsync(_resourceLoader.Strings.GetPrintFolderMessagesHeader(accountAddress, folderName), pageSize, messageSource);
-        }
 
-        internal Task PrintContactMessagesAsync(string contactAddress, int pageSize, Func<int, Message, Task<IEnumerable<Message>>> messageSource)
-        {
-            _logger.LogMethodCall();
-            return PrintMessagesAsync(_resourceLoader.Strings.GetPrintContactMessagesHeader(contactAddress), pageSize, messageSource);
+            return _resourceLoader.Strings.GetPrintContactMessagesHeader(contactAddress);
         }
 
         internal string ReadValue(string message, ConsoleColor foreground = ConsoleColor.Gray)
         {
+            return ReadValue(message, writePrompt: true, foreground);
+        }
+
+        internal string ReadValue(string message, bool writePrompt, ConsoleColor foreground = ConsoleColor.Gray)
+        {
             _logger.LogMethodCall();
-            return ConsoleExtension.ReadValue(message, (message) => ConsoleExtension.Write(message, foreground), Console.ReadLine) ?? throw new ReadValueCanceledException();
+
+            return ConsoleExtension.ReadValue(writePrompt ? message : string.Empty,
+                                              (message) =>
+                                              {
+                                                  if (!string.IsNullOrEmpty(message))
+                                                  {
+                                                      ConsoleExtension.Write(message, foreground);
+                                                  }
+                                              },
+                                              Console.ReadLine) ?? throw new ReadValueCanceledException();
+        }
+
+        internal Task<string> ReadStandardInputToEndAsync()
+        {
+            _logger.LogMethodCall();
+            return Console.In.ReadToEndAsync();
+        }
+
+        private string ReadRemainingStandardInput()
+        {
+            _logger.LogMethodCall();
+
+            List<string> lines = [];
+
+            while (Console.ReadLine() is string line)
+            {
+                lines.Add(line);
+            }
+
+            return string.Join(Environment.NewLine, lines);
         }
 
         private string ReadSecretValue(string message, ConsoleColor foreground = ConsoleColor.Gray)
@@ -462,55 +342,10 @@ namespace Eppie.CLI.Services
         private bool ReadBoolValue(string message, ConsoleColor foreground = ConsoleColor.Gray)
         {
             _logger.LogMethodCall();
-            return ConsoleExtension.ReadBool(message, (message) => ConsoleExtension.Write(message, foreground));
-        }
 
-        private async Task PrintMessagesAsync(string header, int pageSize, Func<int, Message, Task<IEnumerable<Message>>> source)
-        {
-            ArgumentNullException.ThrowIfNull(source);
-
-            Console.WriteLine(header);
-
-            Message lastItem = null!;
-
-            while (true)
-            {
-                IEnumerable<Message> items = await source(pageSize, lastItem).ConfigureAwait(false);
-                int count = 0;
-                foreach (Message item in items)
-                {
-                    if (item != null)
-                    {
-                        PrintMessage(item, true);
-                        lastItem = item;
-                        ++count;
-                    }
-                }
-
-                if (count < pageSize || !ReadBoolValue(_resourceLoader.Strings.AskMoreMessages))
-                {
-                    break;
-                }
-            }
-        }
-
-        private void PrintContact(Contact contact)
-        {
-            ArgumentNullException.ThrowIfNull(contact);
-
-            _logger.LogDebug("Print contact: {Id}", contact.Id);
-
-            Console.WriteLine(_resourceLoader.Strings.GetContactDetailsText(contact.Id, contact.Email.Address, contact.FullName, contact.UnreadCount));
-        }
-
-        private void LogCommandWarning(string reason)
-        {
-            _logger.LogWarning("The command failed. (Reason: {WarningReason}).", reason);
-        }
-
-        private void LogCommandWarning(string reason, object parameters)
-        {
-            _logger.LogWarning("The command failed. (Reason: {WarningReason}; Parameters: {@Parameters}).", reason, parameters);
+            return !_launchOptions.NonInteractive
+                ? ConsoleExtension.ReadBool(message, (message) => ConsoleExtension.Write(message, foreground))
+                : throw new InvalidOperationException(_resourceLoader.Strings.GetNonInteractiveOperationNotSupportedError("confirmation prompt"));
         }
     }
 }

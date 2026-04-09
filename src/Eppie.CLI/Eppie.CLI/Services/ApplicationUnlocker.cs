@@ -20,53 +20,48 @@ using System.Diagnostics.CodeAnalysis;
 
 using Eppie.CLI.Tools;
 
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Eppie.CLI.Services
 {
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal partial class ApplicationMenuLoop(
-        ILogger<ApplicationMenuLoop> logger,
-        IHostApplicationLifetime lifetime,
-        IOptions<ApplicationLaunchOptions> launchOptions,
-        IStartupCommandRunner startupCommandRunner,
+    internal sealed class ApplicationUnlocker(
+        ILogger<ApplicationUnlocker> logger,
+        IApplicationPasswordReader passwordReader,
         IApplicationOutputWriter outputWriter,
-        Menu.IApplicationMenu applicationMenu) : BackgroundService
+        ITuviMailCoreProvider coreProvider) : IApplicationUnlocker
     {
-        private const string InteractiveMenuOperationName = "interactive menu";
-
-        private readonly ILogger<ApplicationMenuLoop> _logger = logger;
-        private readonly IHostApplicationLifetime _lifetime = lifetime;
-        private readonly ApplicationLaunchOptions _launchOptions = launchOptions.Value;
-        private readonly IStartupCommandRunner _startupCommandRunner = startupCommandRunner;
+        private readonly ILogger<ApplicationUnlocker> _logger = logger;
+        private readonly IApplicationPasswordReader _passwordReader = passwordReader;
         private readonly IApplicationOutputWriter _outputWriter = outputWriter;
-        private readonly Menu.IApplicationMenu _applicationMenu = applicationMenu;
+        private readonly ITuviMailCoreProvider _coreProvider = coreProvider;
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        public async Task<bool> UnlockAsync(CancellationToken cancellationToken, bool readPasswordFromStandardInput = false)
         {
             _logger.LogMethodCall();
-            await Task.Yield();
 
-            if (!stoppingToken.IsCancellationRequested && await _startupCommandRunner.TryRunAsync(stoppingToken).ConfigureAwait(false))
+            bool isFirstTime = await _coreProvider.TuviMailCore.IsFirstApplicationStartAsync(cancellationToken).ConfigureAwait(false);
+
+            if (isFirstTime)
             {
-                _lifetime.StopApplication();
-                return;
+                _logger.LogWarning("The command failed. (Reason: The application hasn't been initialized yet).");
+                _outputWriter.Write(new UninitializedAppWarningOutput());
+                return false;
             }
 
-            if (!stoppingToken.IsCancellationRequested)
-            {
-                if (_launchOptions.NonInteractive)
-                {
-                    _outputWriter.Write(new NonInteractiveOperationNotSupportedErrorOutput(InteractiveMenuOperationName));
-                    _lifetime.StopApplication();
-                    return;
-                }
+            string password = readPasswordFromStandardInput
+                ? _passwordReader.ReadPasswordFromStandardInput()
+                : _passwordReader.AskPassword();
 
-                using CancellationTokenSource cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, _lifetime.ApplicationStopping);
-                await _applicationMenu.LoopAsync(cancellationTokenSource.Token).ConfigureAwait(false);
+            bool success = await _coreProvider.TuviMailCore.InitializeApplicationAsync(password, cancellationToken).ConfigureAwait(false);
+
+            if (!success)
+            {
+                _logger.LogWarning("The command failed. (Reason: Invalid Password).");
+                _outputWriter.Write(new InvalidPasswordWarningOutput());
             }
+
+            return success;
         }
     }
 }

@@ -18,17 +18,46 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-using Eppie.CLI.Common;
+using Eppie.CLI.Options;
 
-namespace Eppie.CLI.Options
+using Microsoft.Extensions.Configuration;
+
+namespace Eppie.CLI.Services
 {
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal class MailOptions : IConfigurationSectionOptions
+    internal class ApplicationLaunchOptions
     {
-        public string SectionName => nameof(MailOptions);
+        internal const string NonInteractiveConfigurationKey = "non-interactive";
+        internal const string OutputConfigurationKey = "output";
+        internal const string UnlockPasswordFromStandardInputConfigurationKey = "unlock-password-stdin";
+        internal const string AssumeYesConfigurationKey = "assume-yes";
 
-        public IReadOnlyDictionary<MailServer, MailServerConfiguration> Servers { get; init; } = new Dictionary<MailServer, MailServerConfiguration>();
+        [ConfigurationKeyName(NonInteractiveConfigurationKey)]
+        internal bool NonInteractive { get; init; }
+
+        [ConfigurationKeyName(OutputConfigurationKey)]
+        private string? OutputFormatKey { get; init; }
+
+        internal ApplicationOutputFormat OutputFormat => OptionConverter.ConvertEnumValue<ApplicationOutputFormat>(OutputFormatKey ?? string.Empty, ApplicationOutputFormat.Text, true);
+
+        [ConfigurationKeyName(UnlockPasswordFromStandardInputConfigurationKey)]
+        internal bool UnlockPasswordFromStandardInput { get; init; }
+
+        [ConfigurationKeyName(AssumeYesConfigurationKey)]
+        internal bool AssumeYes { get; init; }
+
+        internal static IReadOnlyList<string> LaunchOptionKeys { get; } =
+        [
+            UnlockPasswordFromStandardInputConfigurationKey,
+            NonInteractiveConfigurationKey,
+            AssumeYesConfigurationKey,
+            OutputConfigurationKey,
+        ];
     }
 
-    internal record MailServerConfiguration(string SMTP = "", int SMTPPort = 0, string IMAP = "", int IMAPPort = 0);
+    internal enum ApplicationOutputFormat
+    {
+        Text,
+        Json,
+    }
 }

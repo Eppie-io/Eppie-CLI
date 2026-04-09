@@ -16,19 +16,35 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
-using System.Diagnostics.CodeAnalysis;
-
-using Eppie.CLI.Common;
-
-namespace Eppie.CLI.Options
+namespace Eppie.CLI.Services
 {
-    [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal class MailOptions : IConfigurationSectionOptions
+    internal static class StartupCommandArguments
     {
-        public string SectionName => nameof(MailOptions);
+        internal const string CommandDelimiter = "--";
 
-        public IReadOnlyDictionary<MailServer, MailServerConfiguration> Servers { get; init; } = new Dictionary<MailServer, MailServerConfiguration>();
+        internal static string[] GetStartupCommandArguments(RawCommandLineArguments commandLineArguments)
+        {
+            ArgumentNullException.ThrowIfNull(commandLineArguments);
+
+            int commandStartIndex = GetCommandStartIndex(commandLineArguments.Values);
+            return commandStartIndex >= 0
+                ? [.. commandLineArguments.Values.Skip(commandStartIndex)]
+                : [];
+        }
+
+        private static int GetCommandStartIndex(IReadOnlyList<string> arguments)
+        {
+            ArgumentNullException.ThrowIfNull(arguments);
+
+            for (int index = 0; index < arguments.Count; index++)
+            {
+                if (string.Equals(arguments[index], CommandDelimiter, StringComparison.Ordinal))
+                {
+                    return index + 1 < arguments.Count ? index + 1 : -1;
+                }
+            }
+
+            return -1;
+        }
     }
-
-    internal record MailServerConfiguration(string SMTP = "", int SMTPPort = 0, string IMAP = "", int IMAPPort = 0);
 }

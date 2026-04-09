@@ -1,6 +1,6 @@
 // ---------------------------------------------------------------------------- //
 //                                                                              //
-//   Copyright 2024 Eppie (https://eppie.io)                                    //
+//   Copyright 2026 Eppie (https://eppie.io)                                    //
 //                                                                              //
 //   Licensed under the Apache License, Version 2.0 (the "License"),            //
 //   you may not use this file except in compliance with the License.           //
@@ -29,6 +29,7 @@ using Eppie.CLI.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 using Serilog;
 using Serilog.Enrichers.Sensitive;
@@ -50,7 +51,7 @@ namespace Eppie.CLI
 
                 Host.CreateDefaultBuilder(args)
                     .UseContentRoot(AppContext.BaseDirectory)
-                    .ConfigureServices(ConfigureServices)
+                    .ConfigureServices((context, services) => ConfigureServices(context, services, args))
                     .UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration), preserveStaticLogger: true)
                     .Build()
                     .Run();
@@ -67,22 +68,54 @@ namespace Eppie.CLI
             }
         }
 
-        private static void ConfigureServices(HostBuilderContext ctx, IServiceCollection services)
+        private static void ConfigureServices(HostBuilderContext ctx, IServiceCollection services, string[] args)
         {
             ArgumentNullException.ThrowIfNull(ctx);
 
-            services.ConfigureOptions<ConsoleOptions>(ctx.Configuration, new BinderOptions { BindNonPublicProperties = true });
-            services.ConfigureOptions<MailOptions>(ctx.Configuration, new BinderOptions { BindNonPublicProperties = true });
-            services.ConfigureOptions<AuthorizationOptions>(ctx.Configuration, new BinderOptions { BindNonPublicProperties = true });
+            BinderOptions bindNonPublicProperties = new() { BindNonPublicProperties = true };
+
+            services.ConfigureRootOptions<ApplicationLaunchOptions>(ctx.Configuration, bindNonPublicProperties);
+            services.ConfigureOptions<AuthorizationOptions>(ctx.Configuration, bindNonPublicProperties);
+            services.ConfigureOptions<ConsoleOptions>(ctx.Configuration, bindNonPublicProperties);
+            services.ConfigureOptions<MailOptions>(ctx.Configuration, bindNonPublicProperties);
+
+            static IApplicationOutputWriter GetApplicationOutputWriter(IServiceProvider serviceProvider)
+            {
+                ArgumentNullException.ThrowIfNull(serviceProvider);
+
+                ApplicationOutputFormat format = serviceProvider.GetRequiredService<IOptions<ApplicationLaunchOptions>>().Value.OutputFormat;
+                return serviceProvider.GetRequiredKeyedService<IApplicationOutputWriter>(format);
+            }
 
             services.AddLocalization()
                     .AddHttpClient()
                     .AddAuthorizationProvider()
-                    .AddSingleton<ResourceLoader>()
-                    .AddSingleton<CoreProvider>()
+
+                    .AddSingleton(new RawCommandLineArguments(args))
+
                     .AddSingleton<Application>()
+                    .AddSingleton<IApplicationPasswordReader>(serviceProvider => serviceProvider.GetRequiredService<Application>())
+
+                    .AddSingleton<ITuviMailCoreProvider, CoreProvider>()
+
+                    .AddSingleton<ResourceLoader>()
+
+                    .AddKeyedSingleton<IApplicationOutputWriter, TextApplicationOutputWriter>(ApplicationOutputFormat.Text)
+                    .AddKeyedSingleton<IApplicationOutputWriter, JsonApplicationOutputWriter>(ApplicationOutputFormat.Json)
+                    .AddSingleton<IApplicationOutputWriter>(GetApplicationOutputWriter)
+
+                    .AddSingleton<IApplicationFailureHandler, ApplicationFailureHandler>()
+                    .AddSingleton<IApplicationOutputCoordinator, ApplicationOutputCoordinator>()
+                    .AddSingleton<IApplicationPagingPolicy, ApplicationPagingPolicy>()
+
+                    .AddSingleton<IEmailAccountInputResolver, EmailAccountInputResolver>()
+                    .AddSingleton<IProtonAccountInputResolver, ProtonAccountInputResolver>()
+
+                    .AddSingleton<IApplicationMenu, MainMenu>()
+                    .AddSingleton<IApplicationUnlocker, ApplicationUnlocker>()
+                    .AddSingleton<IStartupCommandRunner, StartupCommandRunner>()
+
                     .AddSingleton<IHostLifetime, ApplicationLifetime>()
-                    .AddSingleton<MainMenu>()
                     .AddHostedService<ApplicationMenuLoop>();
         }
 

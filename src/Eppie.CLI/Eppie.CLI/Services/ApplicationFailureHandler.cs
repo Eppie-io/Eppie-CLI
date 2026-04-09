@@ -18,55 +18,64 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-using Eppie.CLI.Tools;
+using Eppie.CLI.Exceptions;
 
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Eppie.CLI.Services
 {
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal partial class ApplicationMenuLoop(
-        ILogger<ApplicationMenuLoop> logger,
-        IHostApplicationLifetime lifetime,
+    internal sealed class ApplicationFailureHandler(
+        ILogger<ApplicationFailureHandler> logger,
         IOptions<ApplicationLaunchOptions> launchOptions,
-        IStartupCommandRunner startupCommandRunner,
-        IApplicationOutputWriter outputWriter,
-        Menu.IApplicationMenu applicationMenu) : BackgroundService
+        IApplicationOutputWriter outputWriter) : IApplicationFailureHandler
     {
-        private const string InteractiveMenuOperationName = "interactive menu";
-
-        private readonly ILogger<ApplicationMenuLoop> _logger = logger;
-        private readonly IHostApplicationLifetime _lifetime = lifetime;
+        private readonly ILogger<ApplicationFailureHandler> _logger = logger;
         private readonly ApplicationLaunchOptions _launchOptions = launchOptions.Value;
-        private readonly IStartupCommandRunner _startupCommandRunner = startupCommandRunner;
         private readonly IApplicationOutputWriter _outputWriter = outputWriter;
-        private readonly Menu.IApplicationMenu _applicationMenu = applicationMenu;
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        public void HandleControlledCommandFailure(ApplicationCommandException exception)
         {
-            _logger.LogMethodCall();
-            await Task.Yield();
+            ArgumentNullException.ThrowIfNull(exception);
+            ArgumentNullException.ThrowIfNull(exception.Output);
 
-            if (!stoppingToken.IsCancellationRequested && await _startupCommandRunner.TryRunAsync(stoppingToken).ConfigureAwait(false))
+            if (exception.LogStackTrace && !IsAutomationOutput())
             {
-                _lifetime.StopApplication();
-                return;
+                _logger.LogError(exception, "Command failed with a controlled exception.");
+            }
+            else
+            {
+                _logger.LogDebug("Command failed with controlled output {OutputType} and exit code {ExitCode}", exception.Output.GetType().Name, exception.ExitCode);
             }
 
-            if (!stoppingToken.IsCancellationRequested)
+            if (_launchOptions.NonInteractive)
             {
-                if (_launchOptions.NonInteractive)
-                {
-                    _outputWriter.Write(new NonInteractiveOperationNotSupportedErrorOutput(InteractiveMenuOperationName));
-                    _lifetime.StopApplication();
-                    return;
-                }
-
-                using CancellationTokenSource cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, _lifetime.ApplicationStopping);
-                await _applicationMenu.LoopAsync(cancellationTokenSource.Token).ConfigureAwait(false);
+                Environment.ExitCode = exception.ExitCode;
             }
+
+            _outputWriter.Write(exception.Output);
+        }
+
+        public void HandleUnhandledException(Exception exception)
+        {
+            ArgumentNullException.ThrowIfNull(exception);
+
+            if (IsAutomationOutput())
+            {
+                _logger.LogDebug("Command failed with exception type {ExceptionType}: {ExceptionMessage}", exception.GetType().FullName, exception.Message);
+            }
+            else
+            {
+                _logger.LogError("An error has occurred {Exception}", exception);
+            }
+
+            _outputWriter.Write(new UnhandledExceptionOutput(exception));
+        }
+
+        private bool IsAutomationOutput()
+        {
+            return _launchOptions.NonInteractive || _outputWriter.Format == ApplicationOutputFormat.Json;
         }
     }
 }

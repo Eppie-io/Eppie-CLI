@@ -16,19 +16,21 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
-using System.Diagnostics.CodeAnalysis;
-
-using Eppie.CLI.Common;
-
-namespace Eppie.CLI.Options
+namespace Eppie.CLI.Services
 {
-    [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal class MailOptions : IConfigurationSectionOptions
+    internal interface IProtonAccountInputResolver
     {
-        public string SectionName => nameof(MailOptions);
-
-        public IReadOnlyDictionary<MailServer, MailServerConfiguration> Servers { get; init; } = new Dictionary<MailServer, MailServerConfiguration>();
+        Task<IProtonAccountInput> ResolveAsync(bool inputJsonFromStandardInput);
     }
 
-    internal record MailServerConfiguration(string SMTP = "", int SMTPPort = 0, string IMAP = "", int IMAPPort = 0);
+    internal interface IProtonAccountInput
+    {
+        string Email { get; }
+
+        string AccountPassword { get; }
+
+        string GetTwoFactorCode(bool firstAttempt);
+
+        string GetMailboxPassword(bool firstAttempt);
+    }
 }

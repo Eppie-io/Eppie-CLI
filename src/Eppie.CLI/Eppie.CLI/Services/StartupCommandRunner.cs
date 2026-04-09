@@ -18,55 +18,64 @@
 
 using System.Diagnostics.CodeAnalysis;
 
+using Eppie.CLI.Menu;
 using Eppie.CLI.Tools;
 
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Eppie.CLI.Services
 {
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal partial class ApplicationMenuLoop(
-        ILogger<ApplicationMenuLoop> logger,
-        IHostApplicationLifetime lifetime,
+    internal sealed class StartupCommandRunner(
+        ILogger<StartupCommandRunner> logger,
+        RawCommandLineArguments commandLineArguments,
         IOptions<ApplicationLaunchOptions> launchOptions,
-        IStartupCommandRunner startupCommandRunner,
         IApplicationOutputWriter outputWriter,
-        Menu.IApplicationMenu applicationMenu) : BackgroundService
+        IApplicationUnlocker applicationUnlocker,
+        IApplicationMenu applicationMenu) : IStartupCommandRunner
     {
-        private const string InteractiveMenuOperationName = "interactive menu";
-
-        private readonly ILogger<ApplicationMenuLoop> _logger = logger;
-        private readonly IHostApplicationLifetime _lifetime = lifetime;
+        private readonly ILogger<StartupCommandRunner> _logger = logger;
+        private readonly RawCommandLineArguments _commandLineArguments = commandLineArguments;
         private readonly ApplicationLaunchOptions _launchOptions = launchOptions.Value;
-        private readonly IStartupCommandRunner _startupCommandRunner = startupCommandRunner;
         private readonly IApplicationOutputWriter _outputWriter = outputWriter;
-        private readonly Menu.IApplicationMenu _applicationMenu = applicationMenu;
+        private readonly IApplicationUnlocker _applicationUnlocker = applicationUnlocker;
+        private readonly IApplicationMenu _applicationMenu = applicationMenu;
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        public async Task<bool> TryRunAsync(CancellationToken cancellationToken)
         {
             _logger.LogMethodCall();
-            await Task.Yield();
 
-            if (!stoppingToken.IsCancellationRequested && await _startupCommandRunner.TryRunAsync(stoppingToken).ConfigureAwait(false))
+            string[] startupCommandArguments = StartupCommandArguments.GetStartupCommandArguments(_commandLineArguments);
+
+            if (startupCommandArguments.Length == 0)
             {
-                _lifetime.StopApplication();
-                return;
+                return false;
             }
 
-            if (!stoppingToken.IsCancellationRequested)
+            string commandName = startupCommandArguments[0];
+
+            if (MenuCommand.RequiresUnlockedApplication(commandName))
             {
-                if (_launchOptions.NonInteractive)
+                if (_launchOptions.NonInteractive && !_launchOptions.UnlockPasswordFromStandardInput)
                 {
-                    _outputWriter.Write(new NonInteractiveOperationNotSupportedErrorOutput(InteractiveMenuOperationName));
-                    _lifetime.StopApplication();
-                    return;
+                    WriteUnlockPasswordFromStandardInputHint(commandName);
+                    return true;
                 }
 
-                using CancellationTokenSource cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, _lifetime.ApplicationStopping);
-                await _applicationMenu.LoopAsync(cancellationTokenSource.Token).ConfigureAwait(false);
+                if (!await _applicationUnlocker.UnlockAsync(cancellationToken, readPasswordFromStandardInput: _launchOptions.NonInteractive).ConfigureAwait(false))
+                {
+                    return true;
+                }
             }
+
+            await _applicationMenu.InvokeCommandAsync(startupCommandArguments).ConfigureAwait(false);
+            return true;
+        }
+
+        private void WriteUnlockPasswordFromStandardInputHint(string commandName)
+        {
+            _outputWriter.Write(new StartupCommandRequiresUnlockPasswordFromStandardInputWarningOutput(commandName));
         }
     }
 }

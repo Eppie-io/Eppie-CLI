@@ -1,6 +1,6 @@
 // ---------------------------------------------------------------------------- //
 //                                                                              //
-//   Copyright 2024 Eppie (https://eppie.io)                                    //
+//   Copyright 2026 Eppie (https://eppie.io)                                    //
 //                                                                              //
 //   Licensed under the Apache License, Version 2.0 (the "License"),            //
 //   you may not use this file except in compliance with the License.           //
@@ -31,7 +31,7 @@ namespace Eppie.CLI.Services
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
     internal class CoreProvider(ILogger<CoreProvider> logger,
                                 ILoggerFactory loggerFactory,
-                                ITokenRefresher tokenRefresher)
+                                ITokenRefresher tokenRefresher) : ITuviMailCoreProvider
     {
         private readonly ILogger<CoreProvider> _logger = logger;
         private readonly ILoggerFactory _loggerFactory = loggerFactory;
