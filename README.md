@@ -22,6 +22,12 @@ You might find Eppie-CLI interesting if
 
 In any case you are very welcome to fork, build and explore this module to your heart's content (see instructions below).
 
+## AI agent skill
+
+If you want to use `eppie-console` from an AI agent or automation workflow, see:
+
+- [docs/eppie-cli-agent-skill.md](docs/eppie-cli-agent-skill.md)
+
 ## Features
 
 The decentralized protoccol is still in development and its features are not yet available in Eppie-CLI. Meanwhile Eppie works as a conventional CLI email client with additional security features:
@@ -150,22 +156,30 @@ Launch:
 - **`list-contacts`**
 
   Displays contacts from all accounts.
+  Returns up to 20 contacts by default. Use `--page-size <count>` to control page size and `--limit <count>` to override the total number of returned contacts.
 
 - **`show-all-messages`**
 
   Shows all messages from all accounts.
+  Returns up to 20 messages by default. Use `--page-size <count>` to control page size and `--limit <count>` to override the total number of returned messages.
 
 - **`show-folder-messages`**
 
   Shows messages from a specific account folder.
+  Returns up to 20 messages by default. Use `--page-size <count>` to control page size and `--limit <count>` to override the total number of returned messages.
 
 - **`show-contact-messages`**
 
   Shows messages for a specific contact.
+  Returns up to 20 messages by default. Use `--page-size <count>` to control page size and `--limit <count>` to override the total number of returned messages.
 
 - **`show-message`**
 
   Shows details of a specific message.
+
+- **`delete-message`**
+
+  Deletes a specific message.
 
 - **`sync-folder`**
 
@@ -174,6 +188,7 @@ Launch:
 - **`send`**
 
   Sends a message.
+  In `--non-interactive=true` mode, the message body is read from `stdin` until end-of-stream.
 
 - **`restore`**
 
@@ -204,6 +219,9 @@ List your connected mailboxes with `list-accounts`. Show all messages with `show
 Next time you log in to Eppie, run `open` command and enter your password.
 
 Send a message with `send -s <sender address> -r <receiver address> -t <subject>`.
+In `--non-interactive=true` mode, pass the vault password as the first `stdin` line when using `--unlock-password-stdin=true`, then write the message body and close `stdin`.
+
+For destructive automation such as `reset`, use `--assume-yes=true` together with `--non-interactive=true`.
 
 ## Planned features
 
