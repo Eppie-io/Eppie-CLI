@@ -32,7 +32,7 @@ on:
 
 env:
   project: src/Eppie.CLI/Eppie.CLI/Eppie.CLI.csproj
-  test-project: ${{ null }}
+  test-project: src/Eppie.CLI/Eppie.CLI.Tests/Eppie.CLI.Tests.csproj
   test-report-root: src/Eppie.CLI/TestResults
   dotnet-version: 10.x
 
