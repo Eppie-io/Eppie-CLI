@@ -4,11 +4,13 @@
 ![WindowsBadge][windows-badge]
 ![LinuxBadge][linux-badge]
 ![macOSBadge][mac-badge]
+[![🦀 available on ClawHub](https://img.shields.io/badge/%F0%9F%A6%80%20Available%20on-ClawHub-6C47FF)](https://clawhub.ai/eppieapp/eppie-email-cli)
 [![FrameworkBadge][framework-badge]](https://dotnet.microsoft.com/en-us/download/dotnet)
 [![Build and Test][build-workflow-badge]](https://github.com/Eppie-io/Eppie-CLI/actions/workflows/build-and-test.yml?query=branch%3Amain+event%3Apush)
 [![CodeQL][codeql-workflow-badge]](https://github.com/Eppie-io/Eppie-CLI/actions/workflows/codeql.yml?query=branch%3Amain+event%3Aschedule)
 [![CrowdinBadge][crowdin-badge]](https://eppie.crowdin.com/eppie)
 [![Release][release-badge]](https://github.com/Eppie-io/Eppie-CLI/releases/latest)
+[![GitHub release downloads](https://img.shields.io/github/downloads/Eppie-io/Eppie-CLI/total)](https://github.com/Eppie-io/Eppie-CLI/releases)
 
 ## Intro
 
@@ -27,6 +29,7 @@ In any case you are very welcome to fork, build and explore this module to your 
 If you want to use `eppie-console` from an AI agent or automation workflow, see:
 
 - [docs/eppie-cli-agent-skill.md](docs/eppie-cli-agent-skill.md)
+- [Available on ClawHub🦀: Eppie Email CLI](https://clawhub.ai/eppieapp/eppie-email-cli)
 
 ## Features
 
