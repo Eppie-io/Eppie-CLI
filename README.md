@@ -95,6 +95,12 @@ To launch **Eppie Console** application, run the following command:
 dotnet run --project ./src/Eppie.CLI/Eppie.CLI/Eppie.CLI.csproj
 ```
 
+When passing a startup command, put global launch options before a `--` delimiter and put the startup command after it.
+
+```console
+dotnet run --project ./src/Eppie.CLI/Eppie.CLI/Eppie.CLI.csproj -- --non-interactive=true --output=json -- list-accounts
+```
+
 If you compile your own binaries, you will need to authorize the application in **Google Developer Console** and **Microsoft Azure Portal** in order to be able to connect **Gmail** and **Microsoft Outlook** mailboxes. Basically, Google and Microsoft want to know a little bit about the app before they allow it to access their users' data. [Here](docs/Register%20the%20application.md) is a little tutorial. When you get the **Client ID** and **Client Secret** (only Gmail) pass them as arguments with launch command, like this:
 
 ```console
@@ -222,6 +228,7 @@ Send a message with `send -s <sender address> -r <receiver address> -t <subject>
 In `--non-interactive=true` mode, pass the vault password as the first `stdin` line when using `--unlock-password-stdin=true`, then write the message body and close `stdin`.
 
 For destructive automation such as `reset`, use `--assume-yes=true` together with `--non-interactive=true`.
+For startup command execution, separate global launch options from the startup command with `--`, for example `eppie-console --non-interactive=true --unlock-password-stdin=true --output=json -- send -s <sender> -r <receiver> -t <subject>`.
 
 ## Planned features
 
