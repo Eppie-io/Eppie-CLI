@@ -76,13 +76,13 @@ jobs:
 
     - name: Read options "${{ github.event.inputs.config-file }}"
       id: read-options
-      uses: finebits/github-actions/toolset/file/read@39ec051fda4f00ab2ac5ffb6336ab0ea1ad9ad0f # v3.0.0
+      uses: finebits/github-actions/toolset/file/read@3b3b9346c9a22b70e763cbe808ea82eb1e3e8afd # v3.0.1
       with:
         file: ${{ steps.inputs.outputs.config-file }}
 
     - name: Select configuration "${{ github.event.inputs.config-file }}"
       id: select-config
-      uses: finebits/github-actions/toolset/select-configuration@39ec051fda4f00ab2ac5ffb6336ab0ea1ad9ad0f # v3.0.0
+      uses: finebits/github-actions/toolset/select-configuration@3b3b9346c9a22b70e763cbe808ea82eb1e3e8afd # v3.0.1
       with:
         json-file: ${{ env.config-file }}
         configs-set-jsonpath: ".profiles"
@@ -142,7 +142,7 @@ jobs:
         dotnet-version: ${{ env.dotnet-version }}
 
     - id: assign-version
-      uses: finebits/github-actions/toolset/assign-version@39ec051fda4f00ab2ac5ffb6336ab0ea1ad9ad0f # v3.0.0
+      uses: finebits/github-actions/toolset/assign-version@3b3b9346c9a22b70e763cbe808ea82eb1e3e8afd # v3.0.1
 
     - id: version
       shell: bash
@@ -150,19 +150,19 @@ jobs:
         echo "app=${{ steps.assign-version.outputs.preset-semantic-v2-extended }}e" >> $GITHUB_OUTPUT
         echo "artifact=${{ steps.assign-version.outputs.preset-semantic-v1 }}+${{ steps.assign-version.outputs.today }}.${{ steps.assign-version.outputs.run-number }}" >> $GITHUB_OUTPUT
 
-    - uses: finebits/github-actions/toolset/file/replace-text@39ec051fda4f00ab2ac5ffb6336ab0ea1ad9ad0f # v3.0.0
+    - uses: finebits/github-actions/toolset/file/replace-text@3b3b9346c9a22b70e763cbe808ea82eb1e3e8afd # v3.0.1
       with:
         file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
         find-what: '\"<Gmail-ClientId>\"'
         replace-with: "${{ secrets.GMAIL_CLIENT_ID }}"
 
-    - uses: finebits/github-actions/toolset/file/replace-text@39ec051fda4f00ab2ac5ffb6336ab0ea1ad9ad0f # v3.0.0
+    - uses: finebits/github-actions/toolset/file/replace-text@3b3b9346c9a22b70e763cbe808ea82eb1e3e8afd # v3.0.1
       with:
         file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
         find-what: '\"<Gmail-ClientSecret>\"'
         replace-with: "${{ secrets.GMAIL_CLIENT_SECRET }}"
 
-    - uses: finebits/github-actions/toolset/file/replace-text@39ec051fda4f00ab2ac5ffb6336ab0ea1ad9ad0f # v3.0.0
+    - uses: finebits/github-actions/toolset/file/replace-text@3b3b9346c9a22b70e763cbe808ea82eb1e3e8afd # v3.0.1
       with:
         file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
         find-what: '\"<Outlook-ClientId>\"'
@@ -271,7 +271,7 @@ jobs:
 
     - name: Setup appimagetool
       if: ${{ env.GITHUB_ACTION_GO_PACK == 'true' }}
-      uses: finebits/github-actions/package/appimage/setup-appimagetool@39ec051fda4f00ab2ac5ffb6336ab0ea1ad9ad0f # v3.0.0
+      uses: finebits/github-actions/package/appimage/setup-appimagetool@3b3b9346c9a22b70e763cbe808ea82eb1e3e8afd # v3.0.1
 
     - name: Download ${{ matrix.artifact_pattern }} Artifacts
       if: ${{ env.GITHUB_ACTION_GO_PACK == 'true' }}
@@ -297,7 +297,7 @@ jobs:
 
     - name: Pack appimagetool
       if: ${{ env.GITHUB_ACTION_GO_PACK == 'true' }}
-      uses: finebits/github-actions/package/appimage/pack@39ec051fda4f00ab2ac5ffb6336ab0ea1ad9ad0f # v3.0.0
+      uses: finebits/github-actions/package/appimage/pack@3b3b9346c9a22b70e763cbe808ea82eb1e3e8afd # v3.0.1
       with:
         package-runtime: ${{ matrix.appimage-arch }}
         package-app-dir: "${{ env.package-app-dir }}"
@@ -374,7 +374,7 @@ jobs:
         done
 
     - name: Upload All Assets
-      uses: finebits/github-actions/toolset/github/upload-release-asset@39ec051fda4f00ab2ac5ffb6336ab0ea1ad9ad0f # v3.0.0
+      uses: finebits/github-actions/toolset/github/upload-release-asset@3b3b9346c9a22b70e763cbe808ea82eb1e3e8afd # v3.0.1
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
         tag: ${{ github.event.release.tag_name }}
