@@ -25,6 +25,7 @@ using Eppie.CLI.Logging;
 using Eppie.CLI.Menu;
 using Eppie.CLI.Options;
 using Eppie.CLI.Services;
+using Eppie.CLI.Tools;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -91,13 +92,9 @@ namespace Eppie.CLI
             {
                 ArgumentNullException.ThrowIfNull(serviceProvider);
 
-                ProtonAuthOptions options = serviceProvider.GetRequiredService<IOptions<AuthorizationOptions>>().Value.Proton;
-                return ComponentBuilder.Components.GetProtonLoginHelper(new Tuvi.Proton.ProtonConfiguration()
-                {
-                    RedirectUri = options.RedirectUri,
-                    AppVersion = options.AppVersion,
-                    UserAgent = options.UserAgent
-                });
+                ProtonAuthOptions protonOptions = serviceProvider.GetRequiredService<IOptions<AuthorizationOptions>>().Value.Proton;
+                ResourceLoader resourceLoader = serviceProvider.GetRequiredService<ResourceLoader>();
+                return ComponentBuilder.Components.GetProtonLoginHelper(protonOptions.GetConfiguration(resourceLoader));
             }
 
             services.AddLocalization()

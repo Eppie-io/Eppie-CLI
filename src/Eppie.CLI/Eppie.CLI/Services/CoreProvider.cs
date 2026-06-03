@@ -35,30 +35,19 @@ namespace Eppie.CLI.Services
     internal class CoreProvider(ILogger<CoreProvider> logger,
                                 ILoggerFactory loggerFactory,
                                 ITokenRefresher tokenRefresher,
+                                ResourceLoader resourceLoader,
                                 IOptions<AuthorizationOptions> authorizationOptions) : ITuviMailCoreProvider
     {
         private readonly ILogger<CoreProvider> _logger = logger;
         private readonly ILoggerFactory _loggerFactory = loggerFactory;
         private readonly ITokenRefresher _tokenRefresher = tokenRefresher;
-        private readonly IOptions<AuthorizationOptions> _authorizationOptions = authorizationOptions;
+        private readonly AuthorizationOptions _authorizationOptions = authorizationOptions.Value;
+        private readonly ResourceLoader _resourceLoader = resourceLoader;
 
         private ITuviMail? _tuviMailCore;
         public ITuviMail TuviMailCore => _tuviMailCore ??= CreateTuviMail();
 
-        private ProtonConfiguration ProtonConfiguration
-        {
-            get
-            {
-                AuthorizationOptions authOptions = _authorizationOptions.Value;
-
-                return new ProtonConfiguration
-                {
-                    RedirectUri = authOptions.Proton.RedirectUri,
-                    AppVersion = authOptions.Proton.AppVersion,
-                    UserAgent = authOptions.Proton.UserAgent,
-                };
-            }
-        }
+        private ProtonConfiguration ProtonConfiguration => _authorizationOptions.Proton.GetConfiguration(_resourceLoader);
 
         public async Task ResetAsync()
         {
