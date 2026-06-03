@@ -206,7 +206,7 @@ jobs:
         replace-with: "${{ secrets.GMAIL_CLIENT_SECRET }}"
 
     - uses: finebits/github-actions/toolset/file/replace-text@3b3b9346c9a22b70e763cbe808ea82eb1e3e8afd # v3.0.1
-      if: ${{ steps.check-auth-secrets.outputs.outlook-client-secret-exist == 'true' }}
+      if: ${{ steps.check-auth-secrets.outputs.outlook-client-id-exist == 'true' }}
       with:
         file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
         find-what: '\"<Outlook-ClientId>\"'
