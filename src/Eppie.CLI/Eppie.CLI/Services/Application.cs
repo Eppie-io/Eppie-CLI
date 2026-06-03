@@ -38,7 +38,7 @@ namespace Eppie.CLI.Services
        IOptions<ApplicationLaunchOptions> launchOptions,
        IApplicationOutputWriter outputWriter,
        IOptions<MailOptions> mailOptions,
-        ResourceLoader resourceLoader) : IApplicationPasswordReader
+       ResourceLoader resourceLoader) : IApplicationPasswordReader
     {
         private readonly ResourceLoader _resourceLoader = resourceLoader;
         private readonly ILogger<Application> _logger = logger;

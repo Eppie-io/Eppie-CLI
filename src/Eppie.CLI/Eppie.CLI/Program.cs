@@ -25,6 +25,7 @@ using Eppie.CLI.Logging;
 using Eppie.CLI.Menu;
 using Eppie.CLI.Options;
 using Eppie.CLI.Services;
+using Eppie.CLI.Tools;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -87,6 +88,15 @@ namespace Eppie.CLI
                 return serviceProvider.GetRequiredKeyedService<IApplicationOutputWriter>(format);
             }
 
+            static Tuvi.Proton.IProtonLoginHelper GetProtonLoginHelper(IServiceProvider serviceProvider)
+            {
+                ArgumentNullException.ThrowIfNull(serviceProvider);
+
+                ProtonAuthOptions protonOptions = serviceProvider.GetRequiredService<IOptions<AuthorizationOptions>>().Value.Proton;
+                ResourceLoader resourceLoader = serviceProvider.GetRequiredService<ResourceLoader>();
+                return ComponentBuilder.Components.GetProtonLoginHelper(protonOptions.GetConfiguration(resourceLoader));
+            }
+
             services.AddLocalization()
                     .AddHttpClient()
                     .AddAuthorizationProvider()
@@ -110,6 +120,7 @@ namespace Eppie.CLI
 
                     .AddSingleton<IEmailAccountInputResolver, EmailAccountInputResolver>()
                     .AddSingleton<IProtonAccountInputResolver, ProtonAccountInputResolver>()
+                    .AddSingleton<Tuvi.Proton.IProtonLoginHelper>(GetProtonLoginHelper)
 
                     .AddSingleton<IApplicationMenu, MainMenu>()
                     .AddSingleton<IApplicationUnlocker, ApplicationUnlocker>()

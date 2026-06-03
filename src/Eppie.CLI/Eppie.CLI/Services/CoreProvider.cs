@@ -20,25 +20,34 @@ using System.Diagnostics.CodeAnalysis;
 
 using ComponentBuilder;
 
+using Eppie.CLI.Options;
 using Eppie.CLI.Tools;
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 using Tuvi.Core;
+using Tuvi.Proton;
 
 namespace Eppie.CLI.Services
 {
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
     internal class CoreProvider(ILogger<CoreProvider> logger,
                                 ILoggerFactory loggerFactory,
-                                ITokenRefresher tokenRefresher) : ITuviMailCoreProvider
+                                ITokenRefresher tokenRefresher,
+                                ResourceLoader resourceLoader,
+                                IOptions<AuthorizationOptions> authorizationOptions) : ITuviMailCoreProvider
     {
         private readonly ILogger<CoreProvider> _logger = logger;
         private readonly ILoggerFactory _loggerFactory = loggerFactory;
         private readonly ITokenRefresher _tokenRefresher = tokenRefresher;
+        private readonly AuthorizationOptions _authorizationOptions = authorizationOptions.Value;
+        private readonly ResourceLoader _resourceLoader = resourceLoader;
 
         private ITuviMail? _tuviMailCore;
         public ITuviMail TuviMailCore => _tuviMailCore ??= CreateTuviMail();
+
+        private ProtonConfiguration ProtonConfiguration => _authorizationOptions.Proton.GetConfiguration(_resourceLoader);
 
         public async Task ResetAsync()
         {
@@ -54,7 +63,11 @@ namespace Eppie.CLI.Services
         {
             _logger.LogMethodCall();
 
-            return Components.CreateTuviMailCore("data.db", new ImplementationDetailsProvider("Eppie seed", "Eppie.Package", "backup@system.service.eppie.io"), _tokenRefresher, _loggerFactory);
+            return Components.CreateTuviMailCore("data.db",
+                                                 new ImplementationDetailsProvider("Eppie seed", "Eppie.Package", "backup@system.service.eppie.io"),
+                                                 _tokenRefresher,
+                                                 ProtonConfiguration,
+                                                 _loggerFactory);
         }
     }
 }

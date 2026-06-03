@@ -51,6 +51,7 @@ namespace Eppie.CLI.Menu
             IApplicationOutputCoordinator outputCoordinator,
             IEmailAccountInputResolver emailAccountInputResolver,
             IProtonAccountInputResolver protonAccountInputResolver,
+            Tuvi.Proton.IProtonLoginHelper protonLoginHelper,
             AuthorizationProvider authProvider,
             ITuviMailCoreProvider coreProvider,
             ResourceLoader resourceLoader)
@@ -59,7 +60,17 @@ namespace Eppie.CLI.Menu
             _application = application;
             _resourceLoader = resourceLoader;
             _failureHandler = failureHandler;
-            _actions = new Actions(loggerFactory.CreateLogger<Actions>(), _application, launchOptions, outputWriter, failureHandler, outputCoordinator, emailAccountInputResolver, protonAccountInputResolver, authProvider, coreProvider);
+            _actions = new Actions(loggerFactory.CreateLogger<Actions>(),
+                                   _application,
+                                   launchOptions,
+                                   outputWriter,
+                                   failureHandler,
+                                   outputCoordinator,
+                                   emailAccountInputResolver,
+                                   protonAccountInputResolver,
+                                   protonLoginHelper,
+                                   authProvider,
+                                   coreProvider);
         }
 
         public async Task LoopAsync(CancellationToken stoppingToken)

@@ -44,6 +44,7 @@ namespace Eppie.CLI.Menu
         IApplicationOutputCoordinator outputCoordinator,
         IEmailAccountInputResolver emailAccountInputResolver,
         IProtonAccountInputResolver protonAccountInputResolver,
+        Tuvi.Proton.IProtonLoginHelper protonLoginHelper,
         AuthorizationProvider authProvider,
         ITuviMailCoreProvider coreProvider)
     {
@@ -55,6 +56,7 @@ namespace Eppie.CLI.Menu
         private readonly IApplicationOutputCoordinator _outputCoordinator = outputCoordinator;
         private readonly IEmailAccountInputResolver _emailAccountInputResolver = emailAccountInputResolver;
         private readonly IProtonAccountInputResolver _protonAccountInputResolver = protonAccountInputResolver;
+        private readonly Tuvi.Proton.IProtonLoginHelper _protonLoginHelper = protonLoginHelper;
         private readonly ITuviMailCoreProvider _coreProvider = coreProvider;
         private readonly AuthorizationProvider _authProvider = authProvider;
 
@@ -508,7 +510,7 @@ namespace Eppie.CLI.Menu
 
             IProtonAccountInput input = await _protonAccountInputResolver.ResolveAsync(options.InputJsonFromStandardInput).ConfigureAwait(false);
 
-            (string userId, string refreshToken, string saltedKeyPass) = await Tuvi.Proton.ClientAuth.LoginFullAsync(
+            ProtonCredentials protonCredentials = await _protonLoginHelper.LoginAsync(
                 input.Email,
                 input.AccountPassword,
                 (ex, ct) => Task.FromResult((true, input.GetTwoFactorCode(ex is null))),
@@ -522,9 +524,9 @@ namespace Eppie.CLI.Menu
             account.Type = MailBoxType.Proton;
             account.AuthData = new ProtonAuthData()
             {
-                UserId = userId,
-                RefreshToken = refreshToken,
-                SaltedPassword = saltedKeyPass
+                UserId = protonCredentials.UserId,
+                RefreshToken = protonCredentials.RefreshToken,
+                SaltedPassword = protonCredentials.SaltedPassword
             };
 
             await _coreProvider.TuviMailCore.AddAccountAsync(account).ConfigureAwait(false);
