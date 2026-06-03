@@ -53,7 +53,7 @@ indent_style = tab
 indent_size = 2
 
 ## Xml project files
-[*.{csproj,vbproj,vcxproj,vcxproj.filters,proj,nativeproj,locproj}]
+[*.{slnx,csproj,vbproj,vcxproj,vcxproj.filters,proj,nativeproj,locproj}]
 indent_size = 2
 
 ## Xml build files
