@@ -28,6 +28,7 @@ namespace Eppie.CLI.Options
 
         public GmailAuthOptions Gmail { get; init; } = GmailAuthOptions.CreateDefault();
         public OutlookAuthOptions Outlook { get; init; } = OutlookAuthOptions.CreateDefault();
+        public ProtonAuthOptions Proton { get; init; } = ProtonAuthOptions.CreateDefault();
     }
 
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
@@ -91,6 +92,32 @@ namespace Eppie.CLI.Options
                 // Or run eppie client in any environment with the argument: --Authorization:Outlook:ClientId="<client-id>"
 
                 ClientId = "<Outlook-ClientId>",
+            };
+        }
+    }
+
+    [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
+    internal record ProtonAuthOptions
+    {
+        public string? AppVersion { get; init; }
+        public string? UserAgent { get; init; }
+        public Uri? RedirectUri { get; init; }
+
+        internal static ProtonAuthOptions CreateDefault()
+        {
+            return new ProtonAuthOptions()
+            {
+                // For Eppie client launching in 'Development' environment,
+                // you can set the secrets by running the commands from the project directory:
+                //      > dotnet user-secrets set "Authorization:Proton:AppVersion" "<app-version>"
+                //      > dotnet user-secrets set "Authorization:Proton:UserAgent" "<user-agent>"
+                //
+                // Or run eppie client in any environment with arguments:
+                // --Authorization:Proton:AppVersion="<app-version>" --Authorization:Proton:UserAgent="<user-agent>"
+
+                AppVersion = "<Proton-AppVersion>",
+                UserAgent = "<Proton-UserAgent>",
+                RedirectUri = new Uri("https://protonmail.ch")
             };
         }
     }

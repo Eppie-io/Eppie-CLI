@@ -87,6 +87,19 @@ namespace Eppie.CLI
                 return serviceProvider.GetRequiredKeyedService<IApplicationOutputWriter>(format);
             }
 
+            static Tuvi.Proton.IProtonLoginHelper GetProtonLoginHelper(IServiceProvider serviceProvider)
+            {
+                ArgumentNullException.ThrowIfNull(serviceProvider);
+
+                ProtonAuthOptions options = serviceProvider.GetRequiredService<IOptions<AuthorizationOptions>>().Value.Proton;
+                return ComponentBuilder.Components.GetProtonLoginHelper(new Tuvi.Proton.ProtonConfiguration()
+                {
+                    RedirectUri = options.RedirectUri,
+                    AppVersion = options.AppVersion,
+                    UserAgent = options.UserAgent
+                });
+            }
+
             services.AddLocalization()
                     .AddHttpClient()
                     .AddAuthorizationProvider()
@@ -110,6 +123,7 @@ namespace Eppie.CLI
 
                     .AddSingleton<IEmailAccountInputResolver, EmailAccountInputResolver>()
                     .AddSingleton<IProtonAccountInputResolver, ProtonAccountInputResolver>()
+                    .AddSingleton<Tuvi.Proton.IProtonLoginHelper>(GetProtonLoginHelper)
 
                     .AddSingleton<IApplicationMenu, MainMenu>()
                     .AddSingleton<IApplicationUnlocker, ApplicationUnlocker>()
