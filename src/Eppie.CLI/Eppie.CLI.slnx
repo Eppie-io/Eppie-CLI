@@ -1,0 +1,51 @@
+<Solution>
+  <Folder Name="/Addresses/">
+    <Project Path="../../gitmodules/TuviCore/gitmodules/TuviBase32EConverterLib/TuviBytesToEmailConverterLib/TuviBase32EConverterLib/TuviBase32EConverterLib.csproj" />
+  </Folder>
+  <Folder Name="/Crypto/">
+    <Project Path="../../gitmodules/TuviCore/gitmodules/TuviPgpLib/gitmodules/TuviKeyDerivationLib/KeyDerivationInterface/KeyDerivation.csproj" />
+    <Project Path="../../gitmodules/TuviCore/gitmodules/TuviPgpLib/gitmodules/TuviKeyDerivationLib/KeyDerivationLib/KeyDerivationLib.csproj" />
+  </Folder>
+  <Folder Name="/PGP/">
+    <Project Path="../../gitmodules/TuviCore/gitmodules/TuviPgpLib/TuviPgpLib/TuviPgpLib.csproj" />
+    <Project Path="../../gitmodules/TuviCore/gitmodules/TuviPgpLib/TuviPgpLibImpl/TuviPgpLibImpl.csproj" />
+  </Folder>
+  <Folder Name="/Proton/">
+    <Project Path="../../gitmodules/TuviCore/gitmodules/proton-cs-client/gitmodules/TuviAuthProtonLib/gitmodules/TuviRestClientLib/source/TuviRestClientLib/TuviRestClientLib.csproj" />
+    <Project Path="../../gitmodules/TuviCore/gitmodules/proton-cs-client/gitmodules/TuviAuthProtonLib/gitmodules/TuviSRPLib/TuviSRPLib/ProtonBase64Lib/ProtonBase64Lib.csproj" />
+    <Project Path="../../gitmodules/TuviCore/gitmodules/proton-cs-client/gitmodules/TuviAuthProtonLib/gitmodules/TuviSRPLib/TuviSRPLib/TuviSRPLib/TuviSRPLib.csproj" />
+    <Project Path="../../gitmodules/TuviCore/gitmodules/proton-cs-client/gitmodules/TuviAuthProtonLib/source/TuviAuthProtonLib/TuviAuthProtonLib.csproj" />
+    <Project Path="../../gitmodules/TuviCore/gitmodules/proton-cs-client/gitmodules/TuviAuthProtonLib/source/TuviProtonPrimitiveLib/TuviProtonPrimitiveLib.csproj" />
+    <Project Path="../../gitmodules/TuviCore/gitmodules/proton-cs-client/source/proton-cs-client/proton-cs-client.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+  </Folder>
+  <Folder Name="/Toolkits/">
+    <Project Path="../../gitmodules/console-toolkit/source/console-toolkit/console-toolkit.csproj" />
+  </Folder>
+  <Folder Name="/Tuvi.Core/">
+    <Project Path="../../gitmodules/TuviCore/Sources/ComponentBuilder/ComponentBuilder.csproj" />
+    <Project Path="../../gitmodules/TuviCore/Sources/Tuvi.Core.Backup.Impl/Tuvi.Core.Backup.Impl.csproj" />
+    <Project Path="../../gitmodules/TuviCore/Sources/Tuvi.Core.Backup/Tuvi.Core.Backup.csproj" />
+    <Project Path="../../gitmodules/TuviCore/Sources/Tuvi.Core.DataStorage.Impl/Tuvi.Core.DataStorage.Impl.csproj" />
+    <Project Path="../../gitmodules/TuviCore/Sources/Tuvi.Core.DataStorage/Tuvi.Core.DataStorage.csproj" />
+    <Project Path="../../gitmodules/TuviCore/Sources/Tuvi.Core.Dec.Bitcoin/Tuvi.Core.Dec.Bitcoin.csproj" />
+    <Project Path="../../gitmodules/TuviCore/Sources/Tuvi.Core.Dec.Ethereum/Tuvi.Core.Dec.Ethereum.csproj" />
+    <Project Path="../../gitmodules/TuviCore/Sources/Tuvi.Core.Dec.Impl/Tuvi.Core.Dec.Impl.csproj" />
+    <Project Path="../../gitmodules/TuviCore/Sources/Tuvi.Core.Dec.Names/Tuvi.Core.Dec.Names.csproj" />
+    <Project Path="../../gitmodules/TuviCore/Sources/Tuvi.Core.Dec.Web.Impl/Tuvi.Core.Dec.Web.Impl.csproj" />
+    <Project Path="../../gitmodules/TuviCore/Sources/Tuvi.Core.Dec/Tuvi.Core.Dec.csproj" />
+    <Project Path="../../gitmodules/TuviCore/Sources/Tuvi.Core.Entities/Tuvi.Core.Entities.csproj" />
+    <Project Path="../../gitmodules/TuviCore/Sources/Tuvi.Core.Impl/Tuvi.Core.Impl.csproj" />
+    <Project Path="../../gitmodules/TuviCore/Sources/Tuvi.Core.Logging/Tuvi.Core.Logging.csproj" />
+    <Project Path="../../gitmodules/TuviCore/Sources/Tuvi.Core.Mail.Impl/Tuvi.Core.Mail.Impl.csproj" />
+    <Project Path="../../gitmodules/TuviCore/Sources/Tuvi.Core.Mail/Tuvi.Core.Mail.csproj" />
+    <Project Path="../../gitmodules/TuviCore/Sources/Tuvi.Core.Web.BackupService/Tuvi.Core.Web.BackupService.csproj" />
+    <Project Path="../../gitmodules/TuviCore/Sources/Tuvi.Core.Web.BackupServiceClient/Tuvi.Core.Web.BackupServiceClient.csproj" />
+    <Project Path="../../gitmodules/TuviCore/Sources/Tuvi.Core/Tuvi.Core.csproj" />
+    <Project Path="../../gitmodules/TuviCore/Sources/Tuvi.Proton.Impl/Tuvi.Proton.Impl.csproj" />
+    <Project Path="../../gitmodules/TuviCore/Sources/Tuvi.Proton/Tuvi.Proton.csproj" />
+  </Folder>
+  <Project Path="Eppie.CLI/Eppie.CLI.csproj" />
+</Solution>
