@@ -150,31 +150,77 @@ jobs:
         echo "app=${{ steps.assign-version.outputs.preset-semantic-v2-extended }}" >> $GITHUB_OUTPUT
         echo "artifact=${{ steps.assign-version.outputs.preset-semantic-v1 }}+${{ steps.assign-version.outputs.today }}.${{ steps.assign-version.outputs.run-number }}" >> $GITHUB_OUTPUT
 
+    - name: Check Authorization Secrets
+      id: check-auth-secrets
+      shell: bash
+      run: |
+        gmail_client_id_exist=true
+        gmail_client_secret_exist=true
+        outlook_client_id_exist=true
+        proton_app_version_exist=true
+        proton_user_agent_exist=true
+
+        if [ "${{ secrets.GMAIL_CLIENT_ID }}" == "" ]; then
+          gmail_client_id_exist=false
+          echo "::warning::'secrets.GMAIL_CLIENT_ID' is empty"
+        fi
+        
+        if [ "${{ secrets.GMAIL_CLIENT_SECRET }}" == "" ]; then
+          gmail_client_secret_exist=false
+          echo "::warning::'secrets.GMAIL_CLIENT_SECRET' is empty"
+        fi
+
+        if [ "${{ secrets.OUTLOOK_CLIENT_ID }}" == "" ]; then
+          outlook_client_id_exist=false
+          echo "::warning::'secrets.OUTLOOK_CLIENT_ID' is empty"
+        fi
+
+        if [ "${{ secrets.PROTON_APP_VERSION }}" == "" ]; then
+          proton_app_version_exist=false
+          echo "::warning::'secrets.PROTON_APP_VERSION' is empty"
+        fi
+
+        if [ "${{ secrets.PROTON_USER_AGENT }}" == "" ]; then
+          proton_user_agent_exist=false
+          echo "::warning::'secrets.PROTON_USER_AGENT' is empty"
+        fi
+
+        echo "gmail-client-id-exist=$gmail_client_id_exist" >> $GITHUB_OUTPUT
+        echo "gmail-client-secret-exist=$gmail_client_secret_exist" >> $GITHUB_OUTPUT
+        echo "outlook-client-id-exist=$outlook_client_id_exist" >> $GITHUB_OUTPUT
+        echo "proton-app-version-exist=$proton_app_version_exist" >> $GITHUB_OUTPUT
+        echo "proton-user-agent-exist=$proton_user_agent_exist" >> $GITHUB_OUTPUT
+
     - uses: finebits/github-actions/toolset/file/replace-text@3b3b9346c9a22b70e763cbe808ea82eb1e3e8afd # v3.0.1
+      if: ${{ steps.check-auth-secrets.outputs.gmail-client-id-exist == 'true' }}
       with:
         file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
         find-what: '\"<Gmail-ClientId>\"'
         replace-with: "${{ secrets.GMAIL_CLIENT_ID }}"
 
     - uses: finebits/github-actions/toolset/file/replace-text@3b3b9346c9a22b70e763cbe808ea82eb1e3e8afd # v3.0.1
+      if: ${{ steps.check-auth-secrets.outputs.gmail-client-secret-exist == 'true' }}
       with:
         file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
         find-what: '\"<Gmail-ClientSecret>\"'
         replace-with: "${{ secrets.GMAIL_CLIENT_SECRET }}"
 
     - uses: finebits/github-actions/toolset/file/replace-text@3b3b9346c9a22b70e763cbe808ea82eb1e3e8afd # v3.0.1
+      if: ${{ steps.check-auth-secrets.outputs.outlook-client-secret-exist == 'true' }}
       with:
         file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
         find-what: '\"<Outlook-ClientId>\"'
         replace-with: "${{ secrets.OUTLOOK_CLIENT_ID }}"
 
     - uses: finebits/github-actions/toolset/file/replace-text@3b3b9346c9a22b70e763cbe808ea82eb1e3e8afd # v3.0.1
+      if: ${{ steps.check-auth-secrets.outputs.proton-app-version-exist == 'true' }}
       with:
         file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
         find-what: '\"<Proton-AppVersion>\"'
         replace-with: "${{ secrets.PROTON_APP_VERSION }}"
 
     - uses: finebits/github-actions/toolset/file/replace-text@3b3b9346c9a22b70e763cbe808ea82eb1e3e8afd # v3.0.1
+      if: ${{ steps.check-auth-secrets.outputs.proton-user-agent-exist == 'true' }}
       with:
         file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
         find-what: '\"<Proton-UserAgent>\"'
