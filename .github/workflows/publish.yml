@@ -147,7 +147,7 @@ jobs:
     - id: version
       shell: bash
       run: |
-        echo "app=${{ steps.assign-version.outputs.preset-semantic-v2-extended }}e" >> $GITHUB_OUTPUT
+        echo "app=${{ steps.assign-version.outputs.preset-semantic-v2-extended }}" >> $GITHUB_OUTPUT
         echo "artifact=${{ steps.assign-version.outputs.preset-semantic-v1 }}+${{ steps.assign-version.outputs.today }}.${{ steps.assign-version.outputs.run-number }}" >> $GITHUB_OUTPUT
 
     - uses: finebits/github-actions/toolset/file/replace-text@3b3b9346c9a22b70e763cbe808ea82eb1e3e8afd # v3.0.1
@@ -167,6 +167,18 @@ jobs:
         file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
         find-what: '\"<Outlook-ClientId>\"'
         replace-with: "${{ secrets.OUTLOOK_CLIENT_ID }}"
+
+    - uses: finebits/github-actions/toolset/file/replace-text@3b3b9346c9a22b70e763cbe808ea82eb1e3e8afd # v3.0.1
+      with:
+        file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
+        find-what: '\"<Proton-AppVersion>\"'
+        replace-with: "${{ secrets.PROTON_APP_VERSION }}"
+
+    - uses: finebits/github-actions/toolset/file/replace-text@3b3b9346c9a22b70e763cbe808ea82eb1e3e8afd # v3.0.1
+      with:
+        file: ./src/Eppie.CLI/Eppie.CLI/Options/AuthorizationOptions.cs
+        find-what: '\"<Proton-UserAgent>\"'
+        replace-with: "${{ secrets.PROTON_USER_AGENT }}"
 
     - name: Publish ${{ env.output-name }} [${{ steps.assign-version.outputs.preset-semantic-v1 }}]
       shell: bash
