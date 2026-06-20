@@ -124,7 +124,7 @@ namespace Eppie.CLI.Tests.Services
         {
             ArgumentNullException.ThrowIfNull(startupCommandArguments);
 
-            string applicationPath = typeof(ApplicationLaunchOptions).Assembly.Location;
+            string applicationPath = typeof(Eppie.CLI.Program).Assembly.Location;
 
             ProcessStartInfo startInfo = new("dotnet")
             {
