@@ -21,6 +21,9 @@
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
   </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Eppie.CLI.Tests/Eppie.CLI.Tests.csproj" />
+  </Folder>
   <Folder Name="/Toolkits/">
     <Project Path="../../gitmodules/console-toolkit/source/console-toolkit/console-toolkit.csproj" />
   </Folder>
