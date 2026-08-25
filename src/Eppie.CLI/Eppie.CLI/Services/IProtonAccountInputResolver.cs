@@ -32,5 +32,7 @@ namespace Eppie.CLI.Services
         string GetTwoFactorCode(bool firstAttempt);
 
         string GetMailboxPassword(bool firstAttempt);
+
+        string GetHumanVerificationToken();
     }
 }

@@ -132,6 +132,9 @@ namespace Eppie.CLI.Services
                 case FolderSyncedOutput folderSyncedOutput:
                     WriteStatus("folderSynced", new { account = folderSyncedOutput.AccountAddress, folder = folderSyncedOutput.FolderName });
                     return true;
+                case ProtonHumanVerificationRequiredOutput humanVerificationRequiredOutput:
+                    WriteStatus("humanVerificationRequired", new { verificationUri = humanVerificationRequiredOutput.VerificationUri });
+                    return true;
                 default:
                     return false;
             }

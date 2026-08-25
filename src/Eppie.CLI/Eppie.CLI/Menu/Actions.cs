@@ -48,6 +48,8 @@ namespace Eppie.CLI.Menu
         AuthorizationProvider authProvider,
         ITuviMailCoreProvider coreProvider)
     {
+        private const string ProtonHumanVerificationType = "captcha";
+
         private readonly ILogger<Actions> _logger = logger;
         private readonly Application _application = application;
         private readonly ApplicationLaunchOptions _launchOptions = launchOptions.Value;
@@ -515,7 +517,7 @@ namespace Eppie.CLI.Menu
                 input.AccountPassword,
                 (ex, ct) => Task.FromResult((true, input.GetTwoFactorCode(ex is null))),
                 (ex, ct) => Task.FromResult((true, input.GetMailboxPassword(ex is null))),
-                null, // human verification does not supported in CLI
+                (uri, ex, ct) => ProvideProtonHumanVerificationToken(input, uri),
                 default).ConfigureAwait(false);
 
             Account account = Account.Default;
@@ -531,6 +533,16 @@ namespace Eppie.CLI.Menu
 
             await _coreProvider.TuviMailCore.AddAccountAsync(account).ConfigureAwait(false);
             _outputWriter.Write(new AccountAddedOutput(account.Email.Address, account.Type.ToString()));
+        }
+
+        private Task<(bool completed, string verificationType, string token)> ProvideProtonHumanVerificationToken(IProtonAccountInput input, Uri verificationUri)
+        {
+            _logger.LogMethodCall();
+            ArgumentNullException.ThrowIfNull(input);
+
+            _outputWriter.Write(new ProtonHumanVerificationRequiredOutput(verificationUri));
+
+            return Task.FromResult((true, ProtonHumanVerificationType, input.GetHumanVerificationToken()));
         }
 
         private async Task AddDecAccountAsync()
