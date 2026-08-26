@@ -108,6 +108,8 @@ namespace Eppie.CLI.Services
             public string? MailboxPassword { get; init; }
 
             public string? TwoFactorCode { get; init; }
+
+            public string? HumanVerificationToken { get; init; }
         }
 
         private sealed class InteractiveProtonAccountInput(string email, string accountPassword, Application application) : IProtonAccountInput
@@ -127,6 +129,11 @@ namespace Eppie.CLI.Services
             {
                 return _application.AskMailboxPassword(firstAttempt);
             }
+
+            public string GetHumanVerificationToken()
+            {
+                return _application.AskHumanVerificationToken();
+            }
         }
 
         private sealed class StructuredStandardInputProtonAccountInput(ProtonStructuredStandardInput input) : IProtonAccountInput
@@ -145,6 +152,11 @@ namespace Eppie.CLI.Services
             public string GetMailboxPassword(bool firstAttempt)
             {
                 return GetRequiredStructuredInputPropertyValue(_input.MailboxPassword, "mailboxPassword");
+            }
+
+            public string GetHumanVerificationToken()
+            {
+                return GetRequiredStructuredInputPropertyValue(_input.HumanVerificationToken, "humanVerificationToken");
             }
         }
     }

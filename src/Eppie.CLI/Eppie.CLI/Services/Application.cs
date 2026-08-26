@@ -141,6 +141,13 @@ namespace Eppie.CLI.Services
                 : ReadSecretValue(_resourceLoader.Strings.AskMailboxPassword);
         }
 
+        internal string AskHumanVerificationToken()
+        {
+            _logger.LogMethodCall();
+
+            return ReadValue(_resourceLoader.Strings.AskHumanVerificationToken, writePrompt: !_launchOptions.NonInteractive);
+        }
+
         internal string AskIMAPServer(MailServer mailServer)
         {
             _logger.LogMethodCall();

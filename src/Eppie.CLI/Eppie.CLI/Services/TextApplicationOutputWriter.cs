@@ -72,6 +72,9 @@ namespace Eppie.CLI.Services
                 case AuthorizationCompletedOutput:
                     Console.WriteLine(_resourceLoader.Strings.AuthorizationCompleted);
                     return;
+                case ProtonHumanVerificationRequiredOutput humanVerificationRequiredOutput:
+                    Console.WriteLine(_resourceLoader.Strings.GetProtonHumanVerificationRequiredText(humanVerificationRequiredOutput.VerificationUri));
+                    return;
                 case InvalidPasswordWarningOutput:
                     WriteWarning(_resourceLoader.Strings.InvalidPassword);
                     return;

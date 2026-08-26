@@ -523,7 +523,8 @@ JSON object:
   "email": "user@proton.me",
   "accountPassword": "account password",
   "mailboxPassword": "mailbox password",
-  "twoFactorCode": "123456"
+  "twoFactorCode": "123456",
+  "humanVerificationToken": "<challenge-token>:<captcha-response>"
 }
 ```
 
@@ -540,10 +541,42 @@ Notes:
 - `email` and `accountPassword` are required in structured input
 - `mailboxPassword` is required only if the Proton flow asks for it
 - `twoFactorCode` is required only if the Proton flow asks for it
+- `humanVerificationToken` is required only if the Proton flow asks for it; see `Proton human verification (captcha)`
 - if the mailbox password is the same as the account password, repeat the same value in `mailboxPassword`
 - invalid structured input returns one of these machine-readable errors:
   - `structuredStandardInputInvalidJson`
   - `structuredStandardInputMissingProperty`
+
+### Proton human verification (captcha)
+Proton can require human verification during `add-account -t proton`. The CLI cannot solve the captcha itself, so it reports the challenge and waits for the token.
+
+JSON mode emits:
+
+```json
+{"type":"status","code":"humanVerificationRequired","data":{"verificationUri":"https://account.proton.me/api/core/v4/captcha?Token=<challenge-token>"}}
+```
+
+Text mode prints the same address together with a link to this section.
+
+How to obtain the token:
+1. Open `verificationUri` in a web browser.
+2. Before solving the captcha, start listening for the result in the browser developer console:
+
+```js
+addEventListener('message', (e) => { if (e.data && e.data.type === 'pm_captcha') { console.log(e.data.token); } });
+```
+
+3. Solve the captcha. The page posts the result to its parent window; on a top-level page that is the page itself, so the listener above receives it.
+4. Copy the logged value. It has the form `<challenge-token>:<captcha-response>`.
+
+How to supply the token:
+- interactive mode: paste it at the `Enter human verification token: ` prompt
+- structured input: put it in the `humanVerificationToken` property
+
+Notes:
+- the token is single-use; a new challenge requires a new token
+- the token survives a process restart until it is consumed, so it can be prepared in one run and used in the next
+- the captcha page cannot be embedded in a local page; open the address directly
 
 ## Reference: recommended agent workflow
 
@@ -592,6 +625,7 @@ When `--output=json` is enabled, handle responses by `type` first:
 | `code` | Meaning | Typical agent response |
 | --- | --- | --- |
 | `invalidPassword` | vault password was rejected | stop; do not retry automatically with the same password |
+| `humanVerificationRequired` | Proton asked for a captcha and `data.verificationUri` holds the challenge address | solve the captcha, then retry with `humanVerificationToken` in the structured input; see `Proton human verification (captcha)` |
 | `structuredStandardInputInvalidJson` | structured payload is not valid JSON | fix serialization and retry once with corrected JSON |
 | `structuredStandardInputMissingProperty` | required JSON property is missing or empty | provide the missing property and retry once |
 | `unhandledException` | command failed and returned exception details | inspect `data.exceptionType` and command context; do not retry blindly |

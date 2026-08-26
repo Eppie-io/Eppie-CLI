@@ -43,6 +43,8 @@ namespace Eppie.CLI.Services
         /// </summary>
         internal class ProgramStringLoader
         {
+            private static readonly Uri ProtonHumanVerificationHelpUri = new("https://github.com/Eppie-io/Eppie-CLI/blob/main/docs/eppie-cli-agent-skill.md#proton-human-verification-captcha");
+
             private readonly IStringLocalizer _localizer;
 
             internal ProgramStringLoader(IStringLocalizer localizer)
@@ -79,6 +81,13 @@ namespace Eppie.CLI.Services
             internal string AskTwoFactorCode => field ??= _localizer.LoadString(GetStringResourceName());
 
             internal string AskMailboxPassword => field ??= _localizer.LoadString(GetStringResourceName());
+
+            internal string AskHumanVerificationToken => field ??= _localizer.LoadString(GetStringResourceName());
+
+            internal string GetProtonHumanVerificationRequiredText(Uri verificationUri)
+            {
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Message", name: "ProtonHumanVerificationRequired"), verificationUri, ProtonHumanVerificationHelpUri);
+            }
 
             private string GetServerAddressQuestionText(string resourceName, string? defaultServer)
             {

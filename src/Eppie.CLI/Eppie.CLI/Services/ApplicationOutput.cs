@@ -48,6 +48,8 @@ namespace Eppie.CLI.Services
 
     internal sealed record AuthorizationCompletedOutput() : ApplicationOutput;
 
+    internal sealed record ProtonHumanVerificationRequiredOutput(Uri VerificationUri) : ApplicationOutput;
+
     internal sealed record InvalidPasswordWarningOutput() : ApplicationOutput;
 
     internal sealed record SecondInitializationWarningOutput() : ApplicationOutput;

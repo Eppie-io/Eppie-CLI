@@ -546,6 +546,18 @@
     <value>Enter two-factor code: </value>
     <comment>This message asks the user to enter the two-factor code.</comment>
   </data>
+  <data name="Message.AskHumanVerificationToken" xml:space="preserve">
+    <value>Enter human verification token: </value>
+    <comment>This message asks the user to enter the proton human verification (captcha) token.</comment>
+  </data>
+  <data name="Message.ProtonHumanVerificationRequired" xml:space="preserve">
+    <value>Proton requires human verification. Open the following address in a web browser, solve the captcha and paste the resulting token:
+{0}
+See {1} for details.</value>
+    <comment>This message informs the user that the proton account requires human verification and explains how to obtain the token.
+{0} is a parameter containing the captcha address.
+{1} is a parameter containing the documentation address.</comment>
+  </data>
   <data name="Message.AskIMAPPort" xml:space="preserve">
     <value>IMAP Port (default is {0}): </value>
     <comment>This message prompts the user to enter the IMAP server port.
