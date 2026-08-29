@@ -18,6 +18,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 using Eppie.CLI.Exceptions;
 
@@ -54,7 +55,7 @@ namespace Eppie.CLI.Services
             }
             catch (JsonException ex)
             {
-                throw new ApplicationCommandException(new StructuredStandardInputInvalidJsonErrorOutput(AddAccountCommandName), exitCode: 1, innerException: ex);
+                throw new ApplicationCommandException(new StructuredStandardInputInvalidJsonErrorOutput(AddAccountCommandName), innerException: ex);
             }
 
             if (structuredInput is null)
@@ -64,12 +65,12 @@ namespace Eppie.CLI.Services
 
             EmailStructuredStandardInput validatedStructuredInput = structuredInput!;
 
-            EnsureStructuredInputPropertyIsPresent(validatedStructuredInput.Email, "email");
-            EnsureStructuredInputPropertyIsPresent(validatedStructuredInput.AccountPassword, "accountPassword");
-            EnsureStructuredInputPropertyIsPresent(validatedStructuredInput.ImapServer, "imapServer");
-            EnsureStructuredInputPropertyIsPresent(validatedStructuredInput.ImapPort, "imapPort");
-            EnsureStructuredInputPropertyIsPresent(validatedStructuredInput.SmtpServer, "smtpServer");
-            EnsureStructuredInputPropertyIsPresent(validatedStructuredInput.SmtpPort, "smtpPort");
+            EnsureStructuredInputPropertyIsPresent(validatedStructuredInput.Email, InputName.Email);
+            EnsureStructuredInputPropertyIsPresent(validatedStructuredInput.AccountPassword, InputName.AccountPassword);
+            EnsureStructuredInputPropertyIsPresent(validatedStructuredInput.ImapServer, InputName.ImapServer);
+            EnsureStructuredInputPropertyIsPresent(validatedStructuredInput.ImapPort, InputName.ImapPort);
+            EnsureStructuredInputPropertyIsPresent(validatedStructuredInput.SmtpServer, InputName.SmtpServer);
+            EnsureStructuredInputPropertyIsPresent(validatedStructuredInput.SmtpPort, InputName.SmtpPort);
 
             Account account = Account.Default;
             account.Type = MailBoxType.Email;
@@ -92,7 +93,7 @@ namespace Eppie.CLI.Services
         {
             if (string.IsNullOrWhiteSpace(value))
             {
-                throw new ApplicationCommandException(new StructuredStandardInputMissingPropertyErrorOutput(AddAccountCommandName, propertyName), exitCode: 1);
+                throw new ApplicationCommandException(new StructuredStandardInputMissingPropertyErrorOutput(AddAccountCommandName, propertyName));
             }
         }
 
@@ -100,27 +101,33 @@ namespace Eppie.CLI.Services
         {
             if (!value.HasValue || value.Value <= 0)
             {
-                throw new ApplicationCommandException(new StructuredStandardInputMissingPropertyErrorOutput(AddAccountCommandName, propertyName), exitCode: 1);
+                throw new ApplicationCommandException(new StructuredStandardInputMissingPropertyErrorOutput(AddAccountCommandName, propertyName));
             }
         }
 
         private static void ThrowStructuredStandardInputInvalidJsonError()
         {
-            throw new ApplicationCommandException(new StructuredStandardInputInvalidJsonErrorOutput(AddAccountCommandName), exitCode: 1);
+            throw new ApplicationCommandException(new StructuredStandardInputInvalidJsonErrorOutput(AddAccountCommandName));
         }
 
         private sealed record EmailStructuredStandardInput
         {
+            [JsonPropertyName(InputName.Email)]
             public string? Email { get; init; }
 
+            [JsonPropertyName(InputName.AccountPassword)]
             public string? AccountPassword { get; init; }
 
+            [JsonPropertyName(InputName.ImapServer)]
             public string? ImapServer { get; init; }
 
+            [JsonPropertyName(InputName.ImapPort)]
             public int? ImapPort { get; init; }
 
+            [JsonPropertyName(InputName.SmtpServer)]
             public string? SmtpServer { get; init; }
 
+            [JsonPropertyName(InputName.SmtpPort)]
             public int? SmtpPort { get; init; }
         }
     }

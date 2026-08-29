@@ -18,6 +18,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 using Eppie.CLI.Exceptions;
 
@@ -64,7 +65,7 @@ namespace Eppie.CLI.Services
             }
             catch (JsonException ex)
             {
-                throw new ApplicationCommandException(new StructuredStandardInputInvalidJsonErrorOutput(AddAccountCommandName), exitCode: 1, innerException: ex);
+                throw new ApplicationCommandException(new StructuredStandardInputInvalidJsonErrorOutput(AddAccountCommandName), innerException: ex);
             }
 
             if (structuredInput is null)
@@ -74,8 +75,8 @@ namespace Eppie.CLI.Services
 
             ProtonStructuredStandardInput validatedStructuredInput = structuredInput!;
 
-            EnsureStructuredInputPropertyIsPresent(validatedStructuredInput.Email, "email");
-            EnsureStructuredInputPropertyIsPresent(validatedStructuredInput.AccountPassword, "accountPassword");
+            EnsureStructuredInputPropertyIsPresent(validatedStructuredInput.Email, InputName.Email);
+            EnsureStructuredInputPropertyIsPresent(validatedStructuredInput.AccountPassword, InputName.AccountPassword);
 
             return new StructuredStandardInputProtonAccountInput(validatedStructuredInput);
         }
@@ -84,7 +85,7 @@ namespace Eppie.CLI.Services
         {
             if (string.IsNullOrWhiteSpace(value))
             {
-                throw new ApplicationCommandException(new StructuredStandardInputMissingPropertyErrorOutput(AddAccountCommandName, propertyName), exitCode: 1);
+                throw new ApplicationCommandException(new StructuredStandardInputMissingPropertyErrorOutput(AddAccountCommandName, propertyName));
             }
         }
 
@@ -96,25 +97,32 @@ namespace Eppie.CLI.Services
 
         private static void ThrowStructuredStandardInputInvalidJsonError()
         {
-            throw new ApplicationCommandException(new StructuredStandardInputInvalidJsonErrorOutput(AddAccountCommandName), exitCode: 1);
+            throw new ApplicationCommandException(new StructuredStandardInputInvalidJsonErrorOutput(AddAccountCommandName));
         }
 
         private sealed record ProtonStructuredStandardInput
         {
+            [JsonPropertyName(InputName.Email)]
             public string? Email { get; init; }
 
+            [JsonPropertyName(InputName.AccountPassword)]
             public string? AccountPassword { get; init; }
 
+            [JsonPropertyName(InputName.MailboxPassword)]
             public string? MailboxPassword { get; init; }
 
+            [JsonPropertyName(InputName.TwoFactorCode)]
             public string? TwoFactorCode { get; init; }
 
+            [JsonPropertyName(InputName.HumanVerificationToken)]
             public string? HumanVerificationToken { get; init; }
         }
 
         private sealed class InteractiveProtonAccountInput(string email, string accountPassword, Application application) : IProtonAccountInput
         {
             private readonly Application _application = application;
+
+            public bool SupportsRetry => _application.CanAskForNewValues;
 
             public string Email { get; } = email;
 
@@ -140,23 +148,25 @@ namespace Eppie.CLI.Services
         {
             private readonly ProtonStructuredStandardInput _input = input;
 
-            public string Email => GetRequiredStructuredInputPropertyValue(_input.Email, "email");
+            public bool SupportsRetry => false;
 
-            public string AccountPassword => GetRequiredStructuredInputPropertyValue(_input.AccountPassword, "accountPassword");
+            public string Email => GetRequiredStructuredInputPropertyValue(_input.Email, InputName.Email);
+
+            public string AccountPassword => GetRequiredStructuredInputPropertyValue(_input.AccountPassword, InputName.AccountPassword);
 
             public string GetTwoFactorCode(bool firstAttempt)
             {
-                return GetRequiredStructuredInputPropertyValue(_input.TwoFactorCode, "twoFactorCode");
+                return GetRequiredStructuredInputPropertyValue(_input.TwoFactorCode, InputName.TwoFactorCode);
             }
 
             public string GetMailboxPassword(bool firstAttempt)
             {
-                return GetRequiredStructuredInputPropertyValue(_input.MailboxPassword, "mailboxPassword");
+                return GetRequiredStructuredInputPropertyValue(_input.MailboxPassword, InputName.MailboxPassword);
             }
 
             public string GetHumanVerificationToken()
             {
-                return GetRequiredStructuredInputPropertyValue(_input.HumanVerificationToken, "humanVerificationToken");
+                return GetRequiredStructuredInputPropertyValue(_input.HumanVerificationToken, InputName.HumanVerificationToken);
             }
         }
     }

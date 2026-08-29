@@ -79,14 +79,25 @@ namespace Eppie.CLI.Menu
 
             while (!stoppingToken.IsCancellationRequested)
             {
+                string commandText;
+
                 try
                 {
-                    await InvokeCommandAsync(GetCommandParser(), _application.ReadValue($"{CommandMark} ")).ConfigureAwait(false);
+                    commandText = _application.ReadValue($"{CommandMark} ");
                 }
                 catch (ReadValueCanceledException)
                 {
                     OnCancelCommand();
+                    _application.StopApplication();
+                    return;
                 }
+
+                if (!Console.IsInputRedirected)
+                {
+                    Environment.ExitCode = 0;
+                }
+
+                await InvokeCommandAsync(GetCommandParser(), commandText).ConfigureAwait(false);
             }
         }
 
@@ -251,8 +262,13 @@ namespace Eppie.CLI.Menu
                 {
                     HandleControlledCommandFailure(ex);
                 }
-                catch (ReadValueCanceledException)
+                catch (ReadValueCanceledException ex)
                 {
+                    HandleControlledCommandFailure(new ApplicationCommandException(new StandardInputEndedErrorOutput(), innerException: ex));
+                }
+                catch (InputCanceledByUserException)
+                {
+                    Environment.ExitCode = ApplicationCommandException.FailureExitCode;
                     OnCancelCommand();
                 }
                 catch (Exception ex)
@@ -282,8 +298,13 @@ namespace Eppie.CLI.Menu
                 {
                     HandleControlledCommandFailure(ex);
                 }
-                catch (ReadValueCanceledException)
+                catch (ReadValueCanceledException ex)
                 {
+                    HandleControlledCommandFailure(new ApplicationCommandException(new StandardInputEndedErrorOutput(), innerException: ex));
+                }
+                catch (InputCanceledByUserException)
+                {
+                    Environment.ExitCode = ApplicationCommandException.FailureExitCode;
                     OnCancelCommand();
                 }
                 catch (Exception ex)
