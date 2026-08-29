@@ -20,6 +20,6 @@ namespace Eppie.CLI.Services
 {
     internal interface IApplicationUnlocker
     {
-        Task<bool> UnlockAsync(CancellationToken cancellationToken, bool readPasswordFromStandardInput = false);
+        Task UnlockAsync(CancellationToken cancellationToken, bool readPasswordFromStandardInput = false);
     }
 }

@@ -164,6 +164,21 @@ namespace Eppie.CLI.Tests.Services
         }
 
         [Test]
+        public void JsonWriterWhenProtonHumanVerificationRequiredOutputsStructuredStatus()
+        {
+            using JsonDocument document = CaptureJsonDocument(writer => writer.Write(new ProtonHumanVerificationRequiredOutput(new Uri(TestConstants.ProtonCaptchaUri))));
+            JsonElement data = GetData(document);
+
+            Assert.Multiple(() =>
+            {
+                AssertJsonTypeAndCode(document, TestConstants.JsonStatusType, TestConstants.HumanVerificationRequiredCode);
+                Assert.That(data.GetProperty(TestConstants.JsonVerificationUriProperty).GetString(), Is.EqualTo(TestConstants.ProtonCaptchaUri));
+                Assert.That(data.GetProperty(TestConstants.JsonHelpUriProperty).GetString(),
+                            Is.EqualTo(ProtonHumanVerificationRequiredOutput.HelpUri.ToString()));
+            });
+        }
+
+        [Test]
         public void JsonWriterWhenMessageDeletedOutputsStructuredStatus()
         {
             using JsonDocument document = CaptureJsonDocument(writer => writer.Write(new MessageDeletedOutput(TestConstants.AccountAddress, TestConstants.Inbox, 42, 7)));
@@ -251,14 +266,19 @@ namespace Eppie.CLI.Tests.Services
         }
 
         [Test]
-        public void JsonWriterWhenAuthorizationCanceledOutputsStructuredStatus()
+        public void JsonWriterWhenAuthorizationCanceledOutputsStructuredError()
         {
             string json = CaptureConsoleOutput(() => CreateJsonWriter().Write(new AuthorizationCanceledOutput()));
 
             using JsonDocument document = JsonDocument.Parse(json);
 
-            Assert.That(document.RootElement.GetProperty(TestConstants.JsonTypeProperty).GetString(), Is.EqualTo(TestConstants.JsonStatusType));
-            Assert.That(document.RootElement.GetProperty(TestConstants.JsonCodeProperty).GetString(), Is.EqualTo(TestConstants.AuthorizationCanceledCode));
+            Assert.Multiple(() =>
+            {
+                Assert.That(document.RootElement.GetProperty(TestConstants.JsonTypeProperty).GetString(), Is.EqualTo(TestConstants.JsonErrorType));
+                Assert.That(document.RootElement.GetProperty(TestConstants.JsonCodeProperty).GetString(), Is.EqualTo(TestConstants.AuthorizationCanceledCode));
+                Assert.That(document.RootElement.GetProperty(TestConstants.JsonMessageProperty).GetString(),
+                            Is.EqualTo(CreateResourceLoader().Strings.AuthorizationCanceled));
+            });
         }
 
         [Test]
@@ -518,6 +538,18 @@ namespace Eppie.CLI.Tests.Services
             string output = CaptureConsoleOutput(() => CreateTextWriter().Write(new FolderSyncedOutput(TestConstants.AccountAddress, TestConstants.Inbox)));
 
             Assert.That(output, Does.Contain($"Folder '{TestConstants.Inbox}' for account {TestConstants.AccountAddress} synchronized."));
+        }
+
+        [Test]
+        public void TextWriterWhenProtonHumanVerificationRequiredOutputsVerificationUri()
+        {
+            string output = CaptureConsoleOutput(() => CreateTextWriter().Write(new ProtonHumanVerificationRequiredOutput(new Uri(TestConstants.ProtonCaptchaUri))));
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(output, Does.Contain(TestConstants.ProtonCaptchaUri));
+                Assert.That(output, Does.Contain(ProtonHumanVerificationRequiredOutput.HelpUri.ToString()));
+            });
         }
 
         [Test]

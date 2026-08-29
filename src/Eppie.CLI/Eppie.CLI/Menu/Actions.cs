@@ -405,33 +405,35 @@ namespace Eppie.CLI.Menu
                                                       : await CreateOAuth2AccountAsync(mailServer).ConfigureAwait(false);
             }
 
+            Account account;
+
             try
             {
-                Account account = await CreateAccountAsync().ConfigureAwait(false);
-
-                ICredentialsProvider outgoingCredentialsProvider = _coreProvider.TuviMailCore.CredentialsManager.CreateOutgoingCredentialsProvider(account);
-                await _coreProvider.TuviMailCore.TestMailServerAsync(
-                    account.OutgoingServerAddress,
-                    account.OutgoingServerPort,
-                    account.OutgoingMailProtocol,
-                    outgoingCredentialsProvider
-                    ).ConfigureAwait(false);
-
-                ICredentialsProvider incomingCredentialsProvider = _coreProvider.TuviMailCore.CredentialsManager.CreateIncomingCredentialsProvider(account);
-                await _coreProvider.TuviMailCore.TestMailServerAsync(
-                    account.IncomingServerAddress,
-                    account.IncomingServerPort,
-                    account.IncomingMailProtocol,
-                    incomingCredentialsProvider).ConfigureAwait(false);
-
-                await _coreProvider.TuviMailCore.AddAccountAsync(account).ConfigureAwait(false);
-
-                _outputWriter.Write(new AccountAddedOutput(account.Email.Address, account.Type.ToString()));
+                account = await CreateAccountAsync().ConfigureAwait(false);
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException ex)
             {
-                WriteAuthorizationCanceledMessage();
+                throw new ApplicationCommandException(new AuthorizationCanceledOutput(), innerException: ex);
             }
+
+            ICredentialsProvider outgoingCredentialsProvider = _coreProvider.TuviMailCore.CredentialsManager.CreateOutgoingCredentialsProvider(account);
+            await _coreProvider.TuviMailCore.TestMailServerAsync(
+                account.OutgoingServerAddress,
+                account.OutgoingServerPort,
+                account.OutgoingMailProtocol,
+                outgoingCredentialsProvider
+                ).ConfigureAwait(false);
+
+            ICredentialsProvider incomingCredentialsProvider = _coreProvider.TuviMailCore.CredentialsManager.CreateIncomingCredentialsProvider(account);
+            await _coreProvider.TuviMailCore.TestMailServerAsync(
+                account.IncomingServerAddress,
+                account.IncomingServerPort,
+                account.IncomingMailProtocol,
+                incomingCredentialsProvider).ConfigureAwait(false);
+
+            await _coreProvider.TuviMailCore.AddAccountAsync(account).ConfigureAwait(false);
+
+            _outputWriter.Write(new AccountAddedOutput(account.Email.Address, account.Type.ToString()));
         }
 
         private Account CreateDefaultAccount()
@@ -510,15 +512,26 @@ namespace Eppie.CLI.Menu
         {
             _logger.LogMethodCall();
 
-            IProtonAccountInput input = await _protonAccountInputResolver.ResolveAsync(options.InputJsonFromStandardInput).ConfigureAwait(false);
+            ProtonLoginState state = new();
+            IProtonAccountInput input;
+            ProtonCredentials protonCredentials;
 
-            ProtonCredentials protonCredentials = await _protonLoginHelper.LoginAsync(
-                input.Email,
-                input.AccountPassword,
-                (ex, ct) => Task.FromResult((true, input.GetTwoFactorCode(ex is null))),
-                (ex, ct) => Task.FromResult((true, input.GetMailboxPassword(ex is null))),
-                (uri, ex, ct) => ProvideProtonHumanVerificationToken(input, uri),
-                default).ConfigureAwait(false);
+            try
+            {
+                input = await _protonAccountInputResolver.ResolveAsync(options.InputJsonFromStandardInput).ConfigureAwait(false);
+
+                protonCredentials = await _protonLoginHelper.LoginAsync(
+                    input.Email,
+                    input.AccountPassword,
+                    (ex, ct) => ProvideProtonTwoFactorCode(input, state, ex),
+                    (ex, ct) => ProvideProtonMailboxPassword(input, state, ex),
+                    (uri, ex, ct) => ProvideProtonHumanVerificationToken(input, state, uri, ex),
+                    default).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException ex) when (state.Declined)
+            {
+                throw new ApplicationCommandException(new AuthorizationCanceledOutput(), innerException: ex);
+            }
 
             Account account = Account.Default;
 
@@ -535,14 +548,102 @@ namespace Eppie.CLI.Menu
             _outputWriter.Write(new AccountAddedOutput(account.Email.Address, account.Type.ToString()));
         }
 
-        private Task<(bool completed, string verificationType, string token)> ProvideProtonHumanVerificationToken(IProtonAccountInput input, Uri verificationUri)
+        private sealed class ProtonLoginState
+        {
+            internal bool Declined { get; set; }
+        }
+
+        private Task<(bool completed, string code)> ProvideProtonTwoFactorCode(IProtonAccountInput input, ProtonLoginState state, Exception? previousAttemptException)
         {
             _logger.LogMethodCall();
+
             ArgumentNullException.ThrowIfNull(input);
+
+            if (!CanAskProtonInputAgain(input, state, previousAttemptException))
+            {
+                return Task.FromResult((false, string.Empty));
+            }
+
+            string code = input.GetTwoFactorCode(previousAttemptException is null).Trim();
+
+            if (code.Length == 0)
+            {
+                state.Declined = true;
+                return Task.FromResult((false, string.Empty));
+            }
+
+            return Task.FromResult((true, code));
+        }
+
+        private Task<(bool completed, string password)> ProvideProtonMailboxPassword(IProtonAccountInput input, ProtonLoginState state, Exception? previousAttemptException)
+        {
+            _logger.LogMethodCall();
+
+            ArgumentNullException.ThrowIfNull(input);
+
+            if (!CanAskProtonInputAgain(input, state, previousAttemptException))
+            {
+                return Task.FromResult((false, string.Empty));
+            }
+
+            string password = input.GetMailboxPassword(previousAttemptException is null);
+
+            if (password.Length == 0)
+            {
+                state.Declined = true;
+                return Task.FromResult((false, string.Empty));
+            }
+
+            return Task.FromResult((true, password));
+        }
+
+        private bool CanAskProtonInputAgain(IProtonAccountInput input, ProtonLoginState state, Exception? previousAttemptException)
+        {
+            ArgumentNullException.ThrowIfNull(input);
+            ArgumentNullException.ThrowIfNull(state);
+
+            if (previousAttemptException is null || input.SupportsRetry)
+            {
+                return true;
+            }
+
+            _outputWriter.Write(new UnsuccessfulAttemptWarningOutput());
+            state.Declined = true;
+            return false;
+        }
+
+        private Task<(bool completed, string verificationType, string token)> ProvideProtonHumanVerificationToken(IProtonAccountInput input,
+                                                                                                                 ProtonLoginState state,
+                                                                                                                 Uri verificationUri,
+                                                                                                                 Exception? previousAttemptException)
+        {
+            _logger.LogMethodCall();
+
+            ArgumentNullException.ThrowIfNull(input);
+            ArgumentNullException.ThrowIfNull(state);
+
+            if (previousAttemptException is not null)
+            {
+                _outputWriter.Write(new UnsuccessfulAttemptWarningOutput());
+            }
 
             _outputWriter.Write(new ProtonHumanVerificationRequiredOutput(verificationUri));
 
-            return Task.FromResult((true, ProtonHumanVerificationType, input.GetHumanVerificationToken()));
+            if (previousAttemptException is not null && !input.SupportsRetry)
+            {
+                state.Declined = true;
+                return Task.FromResult((false, string.Empty, string.Empty));
+            }
+
+            string token = input.GetHumanVerificationToken().Trim();
+
+            if (token.Length == 0)
+            {
+                state.Declined = true;
+                return Task.FromResult((false, string.Empty, string.Empty));
+            }
+
+            return Task.FromResult((true, ProtonHumanVerificationType, token));
         }
 
         private async Task AddDecAccountAsync()
@@ -573,7 +674,7 @@ namespace Eppie.CLI.Menu
 
             ArgumentNullException.ThrowIfNull(e);
 
-            _failureHandler.HandleUnhandledException(e.Exception);
+            _failureHandler.ReportBackgroundException(e.Exception);
         }
 
         private void WriteApplicationInitializationMessage(IReadOnlyCollection<string> seedPhrase)
@@ -600,12 +701,6 @@ namespace Eppie.CLI.Menu
             _outputWriter.Write(new ApplicationRestoredOutput());
         }
 
-        private void WriteAuthorizationCanceledMessage()
-        {
-            _logger.LogDebug("Authorization operation was canceled.");
-            _outputWriter.Write(new AuthorizationCanceledOutput());
-        }
-
         private void WriteAuthorizationToServiceMessage(string serviceName)
         {
             _logger.LogDebug("Authorization to {ServiceName} service starting.", serviceName);
@@ -620,27 +715,27 @@ namespace Eppie.CLI.Menu
 
         private static void ThrowInvalidPasswordWarning()
         {
-            throw new ApplicationCommandException(new InvalidPasswordWarningOutput(), exitCode: 0);
+            throw new ApplicationCommandException(new InvalidPasswordWarningOutput());
         }
 
         private static void ThrowSecondInitializationWarning()
         {
-            throw new ApplicationCommandException(new SecondInitializationWarningOutput(), exitCode: 0);
+            throw new ApplicationCommandException(new SecondInitializationWarningOutput());
         }
 
         private static void ThrowUninitializedAppWarning()
         {
-            throw new ApplicationCommandException(new UninitializedAppWarningOutput(), exitCode: 0);
+            throw new ApplicationCommandException(new UninitializedAppWarningOutput());
         }
 
         private static void ThrowImpossibleInitializationError()
         {
-            throw new ApplicationCommandException(new ImpossibleInitializationErrorOutput(), exitCode: 0);
+            throw new ApplicationCommandException(new ImpossibleInitializationErrorOutput());
         }
 
         private static void ThrowUnknownFolderWarning(string address, string folder)
         {
-            throw new ApplicationCommandException(new UnknownFolderWarningOutput(address, folder), exitCode: 0);
+            throw new ApplicationCommandException(new UnknownFolderWarningOutput(address, folder));
         }
 
         private void SubscribeToCoreExceptions()
@@ -659,7 +754,7 @@ namespace Eppie.CLI.Menu
             ArgumentException.ThrowIfNullOrWhiteSpace(commandName);
 
             return _launchOptions.NonInteractive && !_launchOptions.AssumeYes
-                ? throw new ApplicationCommandException(new CommandRequiresAssumeYesInNonInteractiveModeWarningOutput(commandName), exitCode: 0)
+                ? throw new ApplicationCommandException(new CommandRequiresAssumeYesInNonInteractiveModeWarningOutput(commandName))
                 : _application.ConfirmReset();
         }
 

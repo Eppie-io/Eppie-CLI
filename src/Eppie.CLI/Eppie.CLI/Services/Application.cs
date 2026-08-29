@@ -40,12 +40,46 @@ namespace Eppie.CLI.Services
        IOptions<MailOptions> mailOptions,
        ResourceLoader resourceLoader) : IApplicationPasswordReader
     {
+        private const string MessageBodyTerminator = "EOF";
+
         private readonly ResourceLoader _resourceLoader = resourceLoader;
         private readonly ILogger<Application> _logger = logger;
         private readonly IHostApplicationLifetime _lifetime = lifetime;
         private readonly ApplicationLaunchOptions _launchOptions = launchOptions.Value;
         private readonly IApplicationOutputWriter _outputWriter = outputWriter;
         private readonly IOptions<MailOptions> _mailOptions = mailOptions;
+
+        internal bool CanAskForNewValues => IsPromptVisible && !Console.IsInputRedirected;
+
+        private bool IsPromptVisible => !_launchOptions.NonInteractive;
+
+        private void EnsureInteractiveInputIsAvailable()
+        {
+            if (!_launchOptions.NonInteractive && _outputWriter.Format == ApplicationOutputFormat.Json)
+            {
+                throw new ApplicationCommandException(new InteractiveInputNotSupportedErrorOutput());
+            }
+        }
+
+        private string ReadNamedValue(string message, string inputName, ConsoleColor foreground = ConsoleColor.Gray)
+        {
+            return IsPromptVisible ? ReadValue(message, foreground) : ReadAnnouncedValue(message, inputName, foreground);
+        }
+
+        private string ReadNamedSecret(string message, string inputName, ConsoleColor foreground = ConsoleColor.Gray)
+        {
+            return IsPromptVisible ? ReadSecretValue(message, foreground) : ReadAnnouncedValue(message, inputName, foreground);
+        }
+
+        private string ReadAnnouncedValue(string message, string inputName, ConsoleColor foreground)
+        {
+            if (_outputWriter.Format == ApplicationOutputFormat.Json)
+            {
+                _outputWriter.Write(new InputRequiredOutput(inputName));
+            }
+
+            return ReadValue(message, writePrompt: false, foreground);
+        }
 
         internal void StopApplication()
         {
@@ -57,16 +91,14 @@ namespace Eppie.CLI.Services
         {
             _logger.LogMethodCall();
 
-            return _launchOptions.NonInteractive
-                ? ReadPasswordFromStandardInput()
-                : ReadSecretValue(_resourceLoader.Strings.AskPassword);
+            return ReadNamedSecret(_resourceLoader.Strings.AskPassword, InputName.VaultPassword);
         }
 
         internal string ReadPasswordFromStandardInput()
         {
             _logger.LogMethodCall();
 
-            return ReadValue(_resourceLoader.Strings.AskPassword, writePrompt: !_launchOptions.NonInteractive);
+            return ReadNamedValue(_resourceLoader.Strings.AskPassword, InputName.VaultPassword);
         }
 
         string IApplicationPasswordReader.AskPassword()
@@ -83,36 +115,28 @@ namespace Eppie.CLI.Services
         {
             _logger.LogMethodCall();
 
-            return _launchOptions.NonInteractive
-                ? ReadValue(_resourceLoader.Strings.AskNewPassword, writePrompt: false)
-                : ReadSecretValue(_resourceLoader.Strings.AskNewPassword);
+            return ReadNamedSecret(_resourceLoader.Strings.AskNewPassword, InputName.NewVaultPassword);
         }
 
         internal string ConfirmPassword()
         {
             _logger.LogMethodCall();
 
-            return _launchOptions.NonInteractive
-                ? ReadValue(_resourceLoader.Strings.ConfirmPassword, writePrompt: false)
-                : ReadSecretValue(_resourceLoader.Strings.ConfirmPassword);
+            return ReadNamedSecret(_resourceLoader.Strings.ConfirmPassword, InputName.VaultPasswordConfirmation);
         }
 
         internal string AskAccountAddress()
         {
             _logger.LogMethodCall();
 
-            return _launchOptions.NonInteractive
-                ? ReadValue(_resourceLoader.Strings.AskAccountAddress, writePrompt: false)
-                : ReadValue(_resourceLoader.Strings.AskAccountAddress);
+            return ReadNamedValue(_resourceLoader.Strings.AskAccountAddress, InputName.AccountAddress);
         }
 
         internal string AskAccountPassword()
         {
             _logger.LogMethodCall();
 
-            return _launchOptions.NonInteractive
-                ? ReadValue(_resourceLoader.Strings.AskAccountPassword, writePrompt: false)
-                : ReadSecretValue(_resourceLoader.Strings.AskAccountPassword);
+            return ReadNamedSecret(_resourceLoader.Strings.AskAccountPassword, InputName.AccountPassword);
         }
 
         internal string AskTwoFactorCode(bool firstAttempt)
@@ -124,7 +148,7 @@ namespace Eppie.CLI.Services
                 _outputWriter.Write(new UnsuccessfulAttemptWarningOutput());
             }
 
-            return ReadValue(_resourceLoader.Strings.AskTwoFactorCode);
+            return ReadNamedValue(_resourceLoader.Strings.AskTwoFactorCode, InputName.TwoFactorCode);
         }
 
         internal string AskMailboxPassword(bool firstAttempt)
@@ -136,16 +160,14 @@ namespace Eppie.CLI.Services
                 _outputWriter.Write(new UnsuccessfulAttemptWarningOutput());
             }
 
-            return _launchOptions.NonInteractive
-                ? ReadValue(_resourceLoader.Strings.AskMailboxPassword, writePrompt: false)
-                : ReadSecretValue(_resourceLoader.Strings.AskMailboxPassword);
+            return ReadNamedSecret(_resourceLoader.Strings.AskMailboxPassword, InputName.MailboxPassword);
         }
 
         internal string AskHumanVerificationToken()
         {
             _logger.LogMethodCall();
 
-            return ReadValue(_resourceLoader.Strings.AskHumanVerificationToken, writePrompt: !_launchOptions.NonInteractive);
+            return ReadNamedValue(_resourceLoader.Strings.AskHumanVerificationToken, InputName.HumanVerificationToken);
         }
 
         internal string AskIMAPServer(MailServer mailServer)
@@ -153,7 +175,7 @@ namespace Eppie.CLI.Services
             _logger.LogMethodCall();
 
             MailServerConfiguration config = GetMailServerConfiguration(mailServer);
-            return AskQuestionWithDefault(_resourceLoader.Strings.GetIMAPServerQuestionText(config.IMAP), config.IMAP);
+            return AskQuestionWithDefault(_resourceLoader.Strings.GetIMAPServerQuestionText(config.IMAP), InputName.ImapServer, config.IMAP);
         }
 
         internal string AskSMTPServer(MailServer mailServer)
@@ -161,7 +183,7 @@ namespace Eppie.CLI.Services
             _logger.LogMethodCall();
 
             MailServerConfiguration config = GetMailServerConfiguration(mailServer);
-            return AskQuestionWithDefault(_resourceLoader.Strings.GetSMTPServerQuestionText(config.SMTP), config.SMTP);
+            return AskQuestionWithDefault(_resourceLoader.Strings.GetSMTPServerQuestionText(config.SMTP), InputName.SmtpServer, config.SMTP);
         }
 
         internal int AskIMAPServerPort(MailServer mailServer)
@@ -169,7 +191,7 @@ namespace Eppie.CLI.Services
             _logger.LogMethodCall();
 
             MailServerConfiguration config = GetMailServerConfiguration(mailServer);
-            return AskQuestionWithDefault(_resourceLoader.Strings.GetIMAPPortQuestionText(config.IMAPPort), config.IMAPPort);
+            return AskQuestionWithDefault(_resourceLoader.Strings.GetIMAPPortQuestionText(config.IMAPPort), InputName.ImapPort, config.IMAPPort);
         }
 
         internal int AskSMTPServerPort(MailServer mailServer)
@@ -177,23 +199,23 @@ namespace Eppie.CLI.Services
             _logger.LogMethodCall();
 
             MailServerConfiguration config = GetMailServerConfiguration(mailServer);
-            return AskQuestionWithDefault(_resourceLoader.Strings.GetSMTPPortQuestionText(config.SMTPPort), config.SMTPPort);
+            return AskQuestionWithDefault(_resourceLoader.Strings.GetSMTPPortQuestionText(config.SMTPPort), InputName.SmtpPort, config.SMTPPort);
         }
 
-        internal int AskQuestionWithDefault(string text, int defaultValue)
+        internal int AskQuestionWithDefault(string text, string inputName, int defaultValue)
         {
             _logger.LogMethodCall();
 
-            return int.TryParse(ReadValue(text), out int port) && port > 0
+            return int.TryParse(ReadNamedValue(text, inputName), out int port) && port > 0
                 ? port
                 : defaultValue;
         }
 
-        internal string AskQuestionWithDefault(string text, string defaultValue)
+        internal string AskQuestionWithDefault(string text, string inputName, string defaultValue)
         {
             _logger.LogMethodCall();
 
-            string answer = ReadValue(text);
+            string answer = ReadNamedValue(text, inputName);
             return string.IsNullOrEmpty(answer) ? defaultValue : answer;
         }
 
@@ -206,16 +228,14 @@ namespace Eppie.CLI.Services
         {
             _logger.LogMethodCall();
 
-            return _launchOptions.NonInteractive
-                ? ReadValue(_resourceLoader.Strings.AskSeedPhrase, writePrompt: false)
-                : ReadSecretValue(_resourceLoader.Strings.AskSeedPhrase);
+            return ReadNamedSecret(_resourceLoader.Strings.AskSeedPhrase, InputName.SeedPhrase);
         }
 
         internal string AskRestorePath()
         {
             _logger.LogMethodCall();
 
-            return ReadValue(_resourceLoader.Strings.AskRestorePath);
+            return ReadNamedValue(_resourceLoader.Strings.AskRestorePath, InputName.RestorePath);
         }
 
         internal TEnum SelectOption<TEnum>(TEnum defaultOption, bool ignoreCase = false)
@@ -225,8 +245,10 @@ namespace Eppie.CLI.Services
 
             if (_launchOptions.NonInteractive)
             {
-                throw new InvalidOperationException(_resourceLoader.Strings.GetNonInteractiveOperationNotSupportedError("option selection"));
+                throw new ApplicationCommandException(new NonInteractiveOperationNotSupportedErrorOutput("option selection"));
             }
+
+            EnsureInteractiveInputIsAvailable();
 
             Console.WriteLine(_resourceLoader.Strings.SelectOptionHeader);
 
@@ -266,9 +288,14 @@ namespace Eppie.CLI.Services
         {
             _logger.LogMethodCall();
 
-            return _launchOptions.NonInteractive
-                ? ReadRemainingStandardInput()
-                : ConsoleExtension.ReadMultiLine(_resourceLoader.Strings.AskMessageBody, "EOF") ?? throw new ReadValueCanceledException();
+            if (_launchOptions.NonInteractive)
+            {
+                return ReadRemainingStandardInput();
+            }
+
+            EnsureInteractiveInputIsAvailable();
+
+            return ConsoleExtension.ReadMultiLine(_resourceLoader.Strings.AskMessageBody, MessageBodyTerminator) ?? throw new ReadValueCanceledException();
         }
 
         internal string GetPrintAllMessagesHeader()
@@ -294,12 +321,17 @@ namespace Eppie.CLI.Services
 
         internal string ReadValue(string message, ConsoleColor foreground = ConsoleColor.Gray)
         {
-            return ReadValue(message, writePrompt: true, foreground);
+            return ReadValue(message, writePrompt: IsPromptVisible, foreground);
         }
 
         internal string ReadValue(string message, bool writePrompt, ConsoleColor foreground = ConsoleColor.Gray)
         {
             _logger.LogMethodCall();
+
+            if (writePrompt)
+            {
+                EnsureInteractiveInputIsAvailable();
+            }
 
             return ConsoleExtension.ReadValue(writePrompt ? message : string.Empty,
                                               (message) =>
@@ -336,9 +368,13 @@ namespace Eppie.CLI.Services
         {
             _logger.LogMethodCall();
 
+            EnsureInteractiveInputIsAvailable();
+
             try
             {
-                return ConsoleExtension.ReadValue(message, (message) => ConsoleExtension.Write(message, foreground), () => ConsoleExtension.ReadSecretLine()) ?? throw new ReadValueCanceledException();
+                return ConsoleExtension.ReadValue(message,
+                                                  (message) => ConsoleExtension.Write(message, foreground),
+                                                  () => ConsoleExtension.ReadSecretLine()) ?? throw new InputCanceledByUserException();
             }
             catch (Exception ex) when (ex is IOException or InvalidOperationException)
             {
@@ -350,9 +386,14 @@ namespace Eppie.CLI.Services
         {
             _logger.LogMethodCall();
 
-            return !_launchOptions.NonInteractive
-                ? ConsoleExtension.ReadBool(message, (message) => ConsoleExtension.Write(message, foreground))
-                : throw new InvalidOperationException(_resourceLoader.Strings.GetNonInteractiveOperationNotSupportedError("confirmation prompt"));
+            if (_launchOptions.NonInteractive)
+            {
+                throw new ApplicationCommandException(new NonInteractiveOperationNotSupportedErrorOutput("confirmation prompt"));
+            }
+
+            EnsureInteractiveInputIsAvailable();
+
+            return ConsoleExtension.ReadBool(message, (message) => ConsoleExtension.Write(message, foreground));
         }
     }
 }
