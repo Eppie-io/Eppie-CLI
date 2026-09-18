@@ -22,6 +22,8 @@ namespace Eppie.CLI.Exceptions
 {
     internal sealed class ApplicationCommandException : Exception
     {
+        internal const int FailureExitCode = 1;
+
         public ApplicationCommandException()
         {
         }
@@ -36,19 +38,16 @@ namespace Eppie.CLI.Exceptions
         {
         }
 
-        internal ApplicationCommandException(ApplicationOutput output, int exitCode, bool logStackTrace = false, Exception? innerException = null)
+        internal ApplicationCommandException(ApplicationOutput output, bool logStackTrace = false, Exception? innerException = null)
             : base(message: null, innerException)
         {
             ArgumentNullException.ThrowIfNull(output);
 
             Output = output;
-            ExitCode = exitCode;
             LogStackTrace = logStackTrace;
         }
 
         internal ApplicationOutput? Output { get; }
-
-        internal int ExitCode { get; }
 
         internal bool LogStackTrace { get; }
     }

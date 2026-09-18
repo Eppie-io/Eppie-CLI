@@ -16,6 +16,7 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
+using Eppie.CLI.Exceptions;
 using Eppie.CLI.Services;
 using Eppie.CLI.Tests.TestDoubles;
 
@@ -31,112 +32,101 @@ namespace Eppie.CLI.Tests.Services
     public class ApplicationUnlockerTests
     {
         [Test]
-        public async Task UnlockAsyncWhenApplicationIsUninitializedReturnsFalseAndWritesUninitializedWarning()
+        public void UnlockAsyncWhenApplicationIsUninitializedReportsUninitializedFailure()
         {
-            FakeApplicationOutputWriter outputWriter = new();
             TuviMailInvocationState tuviMailState = new() { IsFirstApplicationStartResult = true };
-            ApplicationUnlocker unlocker = CreateUnlocker(outputWriter, tuviMailState);
+            ApplicationUnlocker unlocker = CreateUnlocker(tuviMailState);
 
-            bool result = await unlocker.UnlockAsync(CancellationToken.None, readPasswordFromStandardInput: true).ConfigureAwait(false);
+            ApplicationCommandException? exception = Assert.ThrowsAsync<ApplicationCommandException>(
+                () => unlocker.UnlockAsync(CancellationToken.None, readPasswordFromStandardInput: true));
 
             Assert.Multiple(() =>
             {
-                Assert.That(result, Is.False);
                 Assert.That(tuviMailState.InitializeApplicationCallCount, Is.Zero);
-                Assert.That(outputWriter.LastOutput, Is.TypeOf<UninitializedAppWarningOutput>());
+                Assert.That(exception!.Output, Is.TypeOf<UninitializedAppWarningOutput>());
             });
         }
 
         [Test]
         public async Task UnlockAsyncWhenReadPasswordFromStandardInputIsTrueReadsProvidedPasswordAndInitializesApplication()
         {
-            FakeApplicationOutputWriter outputWriter = new();
             TuviMailInvocationState tuviMailState = new();
             FakeApplicationPasswordReader passwordReader = new() { StandardInputPassword = TestConstants.VaultPassword };
-            ApplicationUnlocker unlocker = CreateUnlocker(outputWriter, tuviMailState, passwordReader);
+            ApplicationUnlocker unlocker = CreateUnlocker(tuviMailState, passwordReader);
 
-            bool result = await unlocker.UnlockAsync(CancellationToken.None, readPasswordFromStandardInput: true).ConfigureAwait(false);
+            await unlocker.UnlockAsync(CancellationToken.None, readPasswordFromStandardInput: true).ConfigureAwait(false);
 
             Assert.Multiple(() =>
             {
-                Assert.That(result, Is.True);
                 Assert.That(tuviMailState.InitializeApplicationCallCount, Is.EqualTo(1));
                 Assert.That(tuviMailState.LastPassword, Is.EqualTo(TestConstants.VaultPassword));
                 Assert.That(passwordReader.ReadPasswordFromStandardInputCallCount, Is.EqualTo(1));
                 Assert.That(passwordReader.AskPasswordCallCount, Is.Zero);
-                Assert.That(outputWriter.LastOutput, Is.Null);
             });
         }
 
         [Test]
         public async Task UnlockAsyncWhenReadPasswordFromStandardInputIsFalseUsesInteractivePasswordReader()
         {
-            FakeApplicationOutputWriter outputWriter = new();
             TuviMailInvocationState tuviMailState = new();
             FakeApplicationPasswordReader passwordReader = new() { Password = "interactive-password" };
-            ApplicationUnlocker unlocker = CreateUnlocker(outputWriter, tuviMailState, passwordReader);
+            ApplicationUnlocker unlocker = CreateUnlocker(tuviMailState, passwordReader);
 
-            bool result = await unlocker.UnlockAsync(CancellationToken.None, readPasswordFromStandardInput: false).ConfigureAwait(false);
+            await unlocker.UnlockAsync(CancellationToken.None, readPasswordFromStandardInput: false).ConfigureAwait(false);
 
             Assert.Multiple(() =>
             {
-                Assert.That(result, Is.True);
                 Assert.That(tuviMailState.InitializeApplicationCallCount, Is.EqualTo(1));
                 Assert.That(tuviMailState.LastPassword, Is.EqualTo("interactive-password"));
                 Assert.That(passwordReader.AskPasswordCallCount, Is.EqualTo(1));
                 Assert.That(passwordReader.ReadPasswordFromStandardInputCallCount, Is.Zero);
-                Assert.That(outputWriter.LastOutput, Is.Null);
             });
         }
 
         [Test]
-        public async Task UnlockAsyncWhenPasswordIsInvalidReturnsFalseAndWritesInvalidPasswordWarning()
+        public void UnlockAsyncWhenPasswordIsInvalidReportsInvalidPasswordFailure()
         {
-            FakeApplicationOutputWriter outputWriter = new();
             TuviMailInvocationState tuviMailState = new() { InitializeApplicationResult = false };
             FakeApplicationPasswordReader passwordReader = new() { StandardInputPassword = TestConstants.WrongPassword };
-            ApplicationUnlocker unlocker = CreateUnlocker(outputWriter, tuviMailState, passwordReader);
+            ApplicationUnlocker unlocker = CreateUnlocker(tuviMailState, passwordReader);
 
-            bool result = await unlocker.UnlockAsync(CancellationToken.None, readPasswordFromStandardInput: true).ConfigureAwait(false);
+            ApplicationCommandException? exception = Assert.ThrowsAsync<ApplicationCommandException>(
+                () => unlocker.UnlockAsync(CancellationToken.None, readPasswordFromStandardInput: true));
 
             Assert.Multiple(() =>
             {
-                Assert.That(result, Is.False);
+                Assert.That(exception!.Output, Is.TypeOf<InvalidPasswordWarningOutput>());
                 Assert.That(tuviMailState.InitializeApplicationCallCount, Is.EqualTo(1));
                 Assert.That(passwordReader.ReadPasswordFromStandardInputCallCount, Is.EqualTo(1));
-                Assert.That(outputWriter.LastOutput, Is.TypeOf<InvalidPasswordWarningOutput>());
             });
         }
 
         [Test]
         public async Task UnlockAsyncPassesCancellationTokenToCoreCalls()
         {
-            FakeApplicationOutputWriter outputWriter = new();
             TuviMailInvocationState tuviMailState = new();
             FakeApplicationPasswordReader passwordReader = new() { StandardInputPassword = TestConstants.VaultPassword };
-            ApplicationUnlocker unlocker = CreateUnlocker(outputWriter, tuviMailState, passwordReader);
+            ApplicationUnlocker unlocker = CreateUnlocker(tuviMailState, passwordReader);
             using CancellationTokenSource cancellationTokenSource = new();
 
-            bool result = await unlocker.UnlockAsync(cancellationTokenSource.Token, readPasswordFromStandardInput: true).ConfigureAwait(false);
+            await unlocker.UnlockAsync(cancellationTokenSource.Token, readPasswordFromStandardInput: true).ConfigureAwait(false);
 
             Assert.Multiple(() =>
             {
-                Assert.That(result, Is.True);
                 Assert.That(tuviMailState.LastIsFirstApplicationStartCancellationToken, Is.EqualTo(cancellationTokenSource.Token));
                 Assert.That(tuviMailState.LastInitializeApplicationCancellationToken, Is.EqualTo(cancellationTokenSource.Token));
             });
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "The fake core instance is assigned to the test core provider and lives for the lifetime of the unlocker under test.")]
-        private static ApplicationUnlocker CreateUnlocker(FakeApplicationOutputWriter outputWriter, TuviMailInvocationState tuviMailState, FakeApplicationPasswordReader? passwordReader = null)
+        private static ApplicationUnlocker CreateUnlocker(TuviMailInvocationState tuviMailState, FakeApplicationPasswordReader? passwordReader = null)
         {
-            ArgumentNullException.ThrowIfNull(outputWriter);
             ArgumentNullException.ThrowIfNull(tuviMailState);
 
             FakeTuviMailCoreProvider coreProvider = new(new FakeTuviMail(tuviMailState));
             passwordReader ??= new FakeApplicationPasswordReader();
 
-            return new ApplicationUnlocker(NullLogger<ApplicationUnlocker>.Instance, passwordReader, outputWriter, coreProvider);
+            return new ApplicationUnlocker(NullLogger<ApplicationUnlocker>.Instance, passwordReader, coreProvider);
         }
 
         private sealed class FakeApplicationPasswordReader : IApplicationPasswordReader

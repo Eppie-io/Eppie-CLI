@@ -18,6 +18,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 
+using Eppie.CLI.Exceptions;
 using Eppie.CLI.Tools;
 
 using Microsoft.Extensions.Logging;
@@ -28,15 +29,13 @@ namespace Eppie.CLI.Services
     internal sealed class ApplicationUnlocker(
         ILogger<ApplicationUnlocker> logger,
         IApplicationPasswordReader passwordReader,
-        IApplicationOutputWriter outputWriter,
         ITuviMailCoreProvider coreProvider) : IApplicationUnlocker
     {
         private readonly ILogger<ApplicationUnlocker> _logger = logger;
         private readonly IApplicationPasswordReader _passwordReader = passwordReader;
-        private readonly IApplicationOutputWriter _outputWriter = outputWriter;
         private readonly ITuviMailCoreProvider _coreProvider = coreProvider;
 
-        public async Task<bool> UnlockAsync(CancellationToken cancellationToken, bool readPasswordFromStandardInput = false)
+        public async Task UnlockAsync(CancellationToken cancellationToken, bool readPasswordFromStandardInput = false)
         {
             _logger.LogMethodCall();
 
@@ -45,8 +44,7 @@ namespace Eppie.CLI.Services
             if (isFirstTime)
             {
                 _logger.LogWarning("The command failed. (Reason: The application hasn't been initialized yet).");
-                _outputWriter.Write(new UninitializedAppWarningOutput());
-                return false;
+                throw new ApplicationCommandException(new UninitializedAppWarningOutput());
             }
 
             string password = readPasswordFromStandardInput
@@ -58,10 +56,8 @@ namespace Eppie.CLI.Services
             if (!success)
             {
                 _logger.LogWarning("The command failed. (Reason: Invalid Password).");
-                _outputWriter.Write(new InvalidPasswordWarningOutput());
+                throw new ApplicationCommandException(new InvalidPasswordWarningOutput());
             }
-
-            return success;
         }
     }
 }

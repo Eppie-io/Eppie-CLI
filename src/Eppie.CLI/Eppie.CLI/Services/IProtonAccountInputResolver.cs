@@ -25,6 +25,8 @@ namespace Eppie.CLI.Services
 
     internal interface IProtonAccountInput
     {
+        bool SupportsRetry { get; }
+
         string Email { get; }
 
         string AccountPassword { get; }

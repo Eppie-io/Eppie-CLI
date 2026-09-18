@@ -25,5 +25,7 @@ namespace Eppie.CLI.Services
         void HandleControlledCommandFailure(ApplicationCommandException exception);
 
         void HandleUnhandledException(Exception exception);
+
+        void ReportBackgroundException(Exception exception);
     }
 }

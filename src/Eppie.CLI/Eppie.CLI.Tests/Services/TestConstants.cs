@@ -41,6 +41,7 @@ namespace Eppie.CLI.Tests.Services
         internal const string Contact1FullName = "Contact 1";
         internal const string EmailPropertyName = "email";
         internal const string ImapServerPropertyName = "imapServer";
+        internal const string HumanVerificationTokenPropertyName = "humanVerificationToken";
         internal const string AccountAddress = "account@eppie.io";
         internal const string UserAddress = "user@example.com";
         internal const string ToAddress = "to@example.com";
@@ -132,6 +133,8 @@ namespace Eppie.CLI.Tests.Services
         internal const string JsonTextBodyProperty = "textBody";
         internal const string JsonUnreadCountProperty = "unreadCount";
         internal const string JsonTotalCountProperty = "totalCount";
+        internal const string JsonVerificationUriProperty = "verificationUri";
+        internal const string JsonHelpUriProperty = "helpUri";
 
         internal const string JsonResultType = "result";
         internal const string JsonStatusType = "status";
@@ -163,5 +166,9 @@ namespace Eppie.CLI.Tests.Services
         internal const string AuthorizationCanceledCode = "authorizationCanceled";
         internal const string AuthorizationStartedCode = "authorizationStarted";
         internal const string AuthorizationCompletedCode = "authorizationCompleted";
+        internal const string HumanVerificationRequiredCode = "humanVerificationRequired";
+        internal const string StandardInputEndedCode = "standardInputEnded";
+
+        internal const string ProtonCaptchaUri = "https://mail-api.proton.me/core/v4/captcha?Token=test-token";
     }
 }

@@ -16,6 +16,7 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
+using Eppie.CLI.Exceptions;
 using Eppie.CLI.Menu;
 using Eppie.CLI.Services;
 using Eppie.CLI.Tests.TestDoubles;
@@ -147,13 +148,83 @@ namespace Eppie.CLI.Tests.Services
             });
         }
 
+        [Test]
+        public async Task ExecuteAsyncWhenStartupCommandThrowsUnexpectedExceptionWritesUnhandledExceptionAndStopsApplication()
+        {
+            FakeApplicationMenu applicationMenu = new();
+            using FakeHostApplicationLifetime lifetime = new();
+            InvalidOperationException failure = new("the core failed outside a controlled outcome");
+            FakeStartupCommandRunner startupCommandRunner = new() { TryRunException = failure };
+            FakeApplicationOutputWriter outputWriter = new();
+            using TestApplicationMenuLoop loop = new(lifetime, TestApplicationFactory.CreateLaunchOptionsOptions(), startupCommandRunner, outputWriter, applicationMenu);
+
+            await loop.RunAsync(CancellationToken.None).ConfigureAwait(false);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(startupCommandRunner.TryRunCallCount, Is.EqualTo(1));
+                Assert.That(applicationMenu.LoopCallCount, Is.Zero);
+                Assert.That(lifetime.StopApplicationCallCount, Is.EqualTo(1));
+                Assert.That(outputWriter.LastOutput, Is.TypeOf<UnhandledExceptionOutput>());
+                Assert.That(((UnhandledExceptionOutput)outputWriter.LastOutput!).Exception, Is.SameAs(failure));
+            });
+        }
+
+        [Test]
+        public async Task ExecuteAsyncWhenTheRunIsCanceledStopsWithoutReportingAnError()
+        {
+            FakeApplicationMenu applicationMenu = new();
+            using FakeHostApplicationLifetime lifetime = new();
+            using CancellationTokenSource cancellationTokenSource = new();
+            FakeStartupCommandRunner startupCommandRunner = new()
+            {
+                OnTryRun = cancellationTokenSource.Cancel,
+                TryRunException = new OperationCanceledException()
+            };
+            FakeApplicationOutputWriter outputWriter = new();
+            using TestApplicationMenuLoop loop = new(lifetime, TestApplicationFactory.CreateLaunchOptionsOptions(), startupCommandRunner, outputWriter, applicationMenu);
+
+            await loop.RunAsync(cancellationTokenSource.Token).ConfigureAwait(false);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(outputWriter.Outputs, Is.Empty);
+                Assert.That(applicationMenu.LoopCallCount, Is.Zero);
+                Assert.That(lifetime.StopApplicationCallCount, Is.EqualTo(1));
+            });
+        }
+
+        [Test]
+        public async Task ExecuteAsyncWhenAPromptIsCanceledByTheUserStopsWithoutReportingAnError()
+        {
+            FakeApplicationMenu applicationMenu = new();
+            using FakeHostApplicationLifetime lifetime = new();
+            FakeStartupCommandRunner startupCommandRunner = new() { TryRunException = new InputCanceledByUserException() };
+            FakeApplicationOutputWriter outputWriter = new();
+            using TestApplicationMenuLoop loop = new(lifetime, TestApplicationFactory.CreateLaunchOptionsOptions(), startupCommandRunner, outputWriter, applicationMenu);
+
+            await loop.RunAsync(CancellationToken.None).ConfigureAwait(false);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(outputWriter.Outputs, Is.Empty);
+                Assert.That(applicationMenu.LoopCallCount, Is.Zero);
+                Assert.That(lifetime.StopApplicationCallCount, Is.EqualTo(1));
+            });
+        }
+
         private sealed class TestApplicationMenuLoop(
             IHostApplicationLifetime lifetime,
             IOptions<ApplicationLaunchOptions> launchOptions,
             IStartupCommandRunner startupCommandRunner,
             IApplicationOutputWriter outputWriter,
             IApplicationMenu applicationMenu)
-            : ApplicationMenuLoop(NullLogger<ApplicationMenuLoop>.Instance, lifetime, launchOptions, startupCommandRunner, outputWriter, applicationMenu)
+            : ApplicationMenuLoop(NullLogger<ApplicationMenuLoop>.Instance,
+                                  lifetime,
+                                  launchOptions,
+                                  startupCommandRunner,
+                                  new ApplicationFailureHandler(NullLogger<ApplicationFailureHandler>.Instance, launchOptions, outputWriter),
+                                  applicationMenu)
         {
             internal Task RunAsync(CancellationToken cancellationToken)
             {
@@ -165,11 +236,18 @@ namespace Eppie.CLI.Tests.Services
         {
             internal int TryRunCallCount { get; private set; }
             internal bool TryRunResult { get; init; }
+            internal Exception? TryRunException { get; init; }
+            internal Action? OnTryRun { get; init; }
 
             public Task<bool> TryRunAsync(CancellationToken cancellationToken)
             {
                 TryRunCallCount++;
-                return Task.FromResult(TryRunResult);
+
+                OnTryRun?.Invoke();
+
+                return TryRunException is null
+                    ? Task.FromResult(TryRunResult)
+                    : Task.FromException<bool>(TryRunException);
             }
         }
 

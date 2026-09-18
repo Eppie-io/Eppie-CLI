@@ -114,9 +114,6 @@ namespace Eppie.CLI.Services
                 case ApplicationRestoredOutput:
                     WriteStatus("restored");
                     return true;
-                case AuthorizationCanceledOutput:
-                    WriteStatus("authorizationCanceled");
-                    return true;
                 case AuthorizationToServiceOutput authorizationToServiceOutput:
                     WriteStatus("authorizationStarted", new { serviceName = authorizationToServiceOutput.ServiceName });
                     return true;
@@ -132,8 +129,15 @@ namespace Eppie.CLI.Services
                 case FolderSyncedOutput folderSyncedOutput:
                     WriteStatus("folderSynced", new { account = folderSyncedOutput.AccountAddress, folder = folderSyncedOutput.FolderName });
                     return true;
+                case InputRequiredOutput inputRequiredOutput:
+                    WriteStatus("inputRequired", new { input = inputRequiredOutput.Input });
+                    return true;
                 case ProtonHumanVerificationRequiredOutput humanVerificationRequiredOutput:
-                    WriteStatus("humanVerificationRequired", new { verificationUri = humanVerificationRequiredOutput.VerificationUri });
+                    WriteStatus("humanVerificationRequired", new
+                    {
+                        verificationUri = humanVerificationRequiredOutput.VerificationUri,
+                        helpUri = ProtonHumanVerificationRequiredOutput.HelpUri,
+                    });
                     return true;
                 default:
                     return false;
@@ -180,8 +184,17 @@ namespace Eppie.CLI.Services
         {
             switch (output)
             {
+                case InteractiveInputNotSupportedErrorOutput:
+                    WriteError("interactiveInputNotSupported", _resourceLoader.Strings.InteractiveInputNotSupported);
+                    return true;
+                case StandardInputEndedErrorOutput:
+                    WriteError("standardInputEnded", _resourceLoader.Strings.StandardInputEnded);
+                    return true;
                 case ImpossibleInitializationErrorOutput:
                     WriteError("impossibleInitialization", _resourceLoader.Strings.ImpossibleInitialization);
+                    return true;
+                case AuthorizationCanceledOutput:
+                    WriteError("authorizationCanceled", _resourceLoader.Strings.AuthorizationCanceled);
                     return true;
                 case NonInteractiveOperationNotSupportedErrorOutput nonInteractiveOperationNotSupportedOutput:
                     WriteError("nonInteractiveOperationNotSupported",

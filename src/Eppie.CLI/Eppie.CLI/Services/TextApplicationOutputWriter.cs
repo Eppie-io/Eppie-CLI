@@ -64,7 +64,7 @@ namespace Eppie.CLI.Services
                     Console.WriteLine(_resourceLoader.Strings.AppRestored);
                     return;
                 case AuthorizationCanceledOutput:
-                    Console.WriteLine(_resourceLoader.Strings.AuthorizationCanceled);
+                    WriteError(_resourceLoader.Strings.AuthorizationCanceled);
                     return;
                 case AuthorizationToServiceOutput authorizationToServiceOutput:
                     Console.WriteLine(_resourceLoader.Strings.GetAuthorizationToServiceText(authorizationToServiceOutput.ServiceName));
@@ -73,7 +73,8 @@ namespace Eppie.CLI.Services
                     Console.WriteLine(_resourceLoader.Strings.AuthorizationCompleted);
                     return;
                 case ProtonHumanVerificationRequiredOutput humanVerificationRequiredOutput:
-                    Console.WriteLine(_resourceLoader.Strings.GetProtonHumanVerificationRequiredText(humanVerificationRequiredOutput.VerificationUri));
+                    Console.WriteLine(_resourceLoader.Strings.GetProtonHumanVerificationRequiredText(humanVerificationRequiredOutput.VerificationUri,
+                                                                                                     ProtonHumanVerificationRequiredOutput.HelpUri));
                     return;
                 case InvalidPasswordWarningOutput:
                     WriteWarning(_resourceLoader.Strings.InvalidPassword);
@@ -108,6 +109,12 @@ namespace Eppie.CLI.Services
                 case StructuredStandardInputMissingPropertyErrorOutput structuredInputMissingPropertyOutput:
                     WriteError(_resourceLoader.Strings.GetStructuredStandardInputMissingPropertyError(structuredInputMissingPropertyOutput.CommandName,
                                                                                                       structuredInputMissingPropertyOutput.PropertyName));
+                    return;
+                case InteractiveInputNotSupportedErrorOutput:
+                    WriteError(_resourceLoader.Strings.InteractiveInputNotSupported);
+                    return;
+                case StandardInputEndedErrorOutput:
+                    WriteError(_resourceLoader.Strings.StandardInputEnded);
                     return;
                 case ImpossibleInitializationErrorOutput:
                     WriteError(_resourceLoader.Strings.ImpossibleInitialization);

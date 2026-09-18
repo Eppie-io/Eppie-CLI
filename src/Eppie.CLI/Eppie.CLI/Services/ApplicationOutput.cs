@@ -48,7 +48,10 @@ namespace Eppie.CLI.Services
 
     internal sealed record AuthorizationCompletedOutput() : ApplicationOutput;
 
-    internal sealed record ProtonHumanVerificationRequiredOutput(Uri VerificationUri) : ApplicationOutput;
+    internal sealed record ProtonHumanVerificationRequiredOutput(Uri VerificationUri) : ApplicationOutput
+    {
+        internal static Uri HelpUri { get; } = new("https://github.com/Eppie-io/Eppie-CLI/blob/main/docs/eppie-cli-agent-skill.md#proton-human-verification-captcha");
+    }
 
     internal sealed record InvalidPasswordWarningOutput() : ApplicationOutput;
 
@@ -57,6 +60,8 @@ namespace Eppie.CLI.Services
     internal sealed record UninitializedAppWarningOutput() : ApplicationOutput;
 
     internal sealed record UnsuccessfulAttemptWarningOutput() : ApplicationOutput;
+
+    internal sealed record InputRequiredOutput(string Input) : ApplicationOutput;
 
     internal sealed record UnknownFolderWarningOutput(string Address, string Folder) : ApplicationOutput;
 
@@ -77,6 +82,10 @@ namespace Eppie.CLI.Services
     internal sealed record FolderSyncedOutput(string AccountAddress, string FolderName) : ApplicationOutput;
 
     internal sealed record NonInteractiveOperationNotSupportedErrorOutput(string Operation) : ApplicationOutput;
+
+    internal sealed record StandardInputEndedErrorOutput() : ApplicationOutput;
+
+    internal sealed record InteractiveInputNotSupportedErrorOutput() : ApplicationOutput;
 
     internal sealed record ImpossibleInitializationErrorOutput() : ApplicationOutput;
 
