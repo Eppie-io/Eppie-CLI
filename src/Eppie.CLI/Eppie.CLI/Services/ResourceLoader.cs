@@ -43,8 +43,6 @@ namespace Eppie.CLI.Services
         /// </summary>
         internal class ProgramStringLoader
         {
-            private static readonly Uri ProtonHumanVerificationHelpUri = new("https://github.com/Eppie-io/Eppie-CLI/blob/main/docs/eppie-cli-agent-skill.md#proton-human-verification-captcha");
-
             private readonly IStringLocalizer _localizer;
 
             internal ProgramStringLoader(IStringLocalizer localizer)
@@ -84,9 +82,9 @@ namespace Eppie.CLI.Services
 
             internal string AskHumanVerificationToken => field ??= _localizer.LoadString(GetStringResourceName());
 
-            internal string GetProtonHumanVerificationRequiredText(Uri verificationUri)
+            internal string GetProtonHumanVerificationRequiredText(Uri verificationUri, Uri helpUri)
             {
-                return _localizer.LoadFormattedString(GetStringResourceName(category: "Message", name: "ProtonHumanVerificationRequired"), verificationUri, ProtonHumanVerificationHelpUri);
+                return _localizer.LoadFormattedString(GetStringResourceName(category: "Message", name: "ProtonHumanVerificationRequired"), verificationUri, helpUri);
             }
 
             private string GetServerAddressQuestionText(string resourceName, string? defaultServer)
@@ -151,7 +149,7 @@ namespace Eppie.CLI.Services
 
             internal string AskMessageBody => field ??= _localizer.LoadString(GetStringResourceName());
 
-            internal string AuthorizationCanceled => field ??= _localizer.LoadString(GetStringResourceName());
+            internal string AuthorizationCanceled => field ??= _localizer.LoadString(GetStringResourceName(category: "Error"));
 
             internal string AuthorizationCompleted => field ??= _localizer.LoadString(GetStringResourceName());
 
@@ -199,6 +197,10 @@ namespace Eppie.CLI.Services
             }
 
             internal string ImpossibleInitialization => field ??= _localizer.LoadString(GetStringResourceName(category: "Error"));
+
+            internal string StandardInputEnded => field ??= _localizer.LoadString(GetStringResourceName(category: "Error"));
+
+            internal string InteractiveInputNotSupported => field ??= _localizer.LoadString(GetStringResourceName(category: "Error"));
 
             internal string GetUnknownFolderWarning(string address, string folder)
             {

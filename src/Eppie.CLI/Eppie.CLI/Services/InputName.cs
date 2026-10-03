@@ -18,8 +18,22 @@
 
 namespace Eppie.CLI.Services
 {
-    internal interface IApplicationUnlocker
+    internal static class InputName
     {
-        Task UnlockAsync(CancellationToken cancellationToken, bool readPasswordFromStandardInput = false);
+        internal const string VaultPassword = "vaultPassword";
+        internal const string NewVaultPassword = "newVaultPassword";
+        internal const string VaultPasswordConfirmation = "vaultPasswordConfirmation";
+        internal const string SeedPhrase = "seedPhrase";
+        internal const string Email = "email";
+        internal const string RestorePath = "restorePath";
+        internal const string AccountAddress = "accountAddress";
+        internal const string AccountPassword = "accountPassword";
+        internal const string MailboxPassword = "mailboxPassword";
+        internal const string TwoFactorCode = "twoFactorCode";
+        internal const string HumanVerificationToken = "humanVerificationToken";
+        internal const string ImapServer = "imapServer";
+        internal const string ImapPort = "imapPort";
+        internal const string SmtpServer = "smtpServer";
+        internal const string SmtpPort = "smtpPort";
     }
 }

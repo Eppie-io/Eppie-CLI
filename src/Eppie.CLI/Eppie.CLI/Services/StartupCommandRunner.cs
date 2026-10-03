@@ -18,6 +18,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 
+using Eppie.CLI.Exceptions;
 using Eppie.CLI.Menu;
 using Eppie.CLI.Tools;
 
@@ -31,14 +32,12 @@ namespace Eppie.CLI.Services
         ILogger<StartupCommandRunner> logger,
         RawCommandLineArguments commandLineArguments,
         IOptions<ApplicationLaunchOptions> launchOptions,
-        IApplicationOutputWriter outputWriter,
         IApplicationUnlocker applicationUnlocker,
         IApplicationMenu applicationMenu) : IStartupCommandRunner
     {
         private readonly ILogger<StartupCommandRunner> _logger = logger;
         private readonly RawCommandLineArguments _commandLineArguments = commandLineArguments;
         private readonly ApplicationLaunchOptions _launchOptions = launchOptions.Value;
-        private readonly IApplicationOutputWriter _outputWriter = outputWriter;
         private readonly IApplicationUnlocker _applicationUnlocker = applicationUnlocker;
         private readonly IApplicationMenu _applicationMenu = applicationMenu;
 
@@ -59,23 +58,14 @@ namespace Eppie.CLI.Services
             {
                 if (_launchOptions.NonInteractive && !_launchOptions.UnlockPasswordFromStandardInput)
                 {
-                    WriteUnlockPasswordFromStandardInputHint(commandName);
-                    return true;
+                    throw new ApplicationCommandException(new StartupCommandRequiresUnlockPasswordFromStandardInputWarningOutput(commandName));
                 }
 
-                if (!await _applicationUnlocker.UnlockAsync(cancellationToken, readPasswordFromStandardInput: _launchOptions.NonInteractive).ConfigureAwait(false))
-                {
-                    return true;
-                }
+                await _applicationUnlocker.UnlockAsync(cancellationToken, readPasswordFromStandardInput: _launchOptions.NonInteractive).ConfigureAwait(false);
             }
 
             await _applicationMenu.InvokeCommandAsync(startupCommandArguments).ConfigureAwait(false);
             return true;
-        }
-
-        private void WriteUnlockPasswordFromStandardInputHint(string commandName)
-        {
-            _outputWriter.Write(new StartupCommandRequiresUnlockPasswordFromStandardInputWarningOutput(commandName));
         }
     }
 }

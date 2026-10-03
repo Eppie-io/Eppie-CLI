@@ -175,6 +175,14 @@
     <comment>This message informs the user that the requested operation requires interactive input.
 {0} is the operation description.</comment>
   </data>
+  <data name="Error.InteractiveInputNotSupported" xml:space="preserve">
+    <value>Error: This command needs interactive input, which cannot share the output stream with '--output=json'. Add '--non-interactive=true' and pass the values through standard input, or drop '--output=json'.</value>
+    <comment>This message informs the user that a command requiring interactive input cannot run while structured output is enabled.</comment>
+  </data>
+  <data name="Error.StandardInputEnded" xml:space="preserve">
+    <value>Error: Standard input ended before all the required values were supplied.</value>
+    <comment>This message informs the user that the command stopped because standard input ran out while a value was still being read.</comment>
+  </data>
   <data name="Error.StructuredStandardInputInvalidJson" xml:space="preserve">
     <value>Error: The remaining standard input for the '{0}' command is not valid JSON.</value>
     <comment>This message informs the user that the remaining standard input cannot be parsed as JSON.
@@ -530,8 +538,8 @@
     <comment>This message prompts the user to select one of the options.
 {0} is the parameter containing the default option.</comment>
   </data>
-  <data name="Message.AuthorizationCanceled" xml:space="preserve">
-    <value>Authorization operation has been canceled.</value>
+  <data name="Error.AuthorizationCanceled" xml:space="preserve">
+    <value>Error: Authorization operation has been canceled.</value>
     <comment>This message informs the user that the authorization operation was canceled.</comment>
   </data>
   <data name="Message.SelectOptionHeader" xml:space="preserve">

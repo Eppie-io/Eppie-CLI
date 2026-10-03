@@ -18,6 +18,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 
+using Eppie.CLI.Exceptions;
 using Eppie.CLI.Tools;
 
 using Microsoft.Extensions.Hosting;
@@ -32,7 +33,7 @@ namespace Eppie.CLI.Services
         IHostApplicationLifetime lifetime,
         IOptions<ApplicationLaunchOptions> launchOptions,
         IStartupCommandRunner startupCommandRunner,
-        IApplicationOutputWriter outputWriter,
+        IApplicationFailureHandler failureHandler,
         Menu.IApplicationMenu applicationMenu) : BackgroundService
     {
         private const string InteractiveMenuOperationName = "interactive menu";
@@ -41,32 +42,72 @@ namespace Eppie.CLI.Services
         private readonly IHostApplicationLifetime _lifetime = lifetime;
         private readonly ApplicationLaunchOptions _launchOptions = launchOptions.Value;
         private readonly IStartupCommandRunner _startupCommandRunner = startupCommandRunner;
-        private readonly IApplicationOutputWriter _outputWriter = outputWriter;
+        private readonly IApplicationFailureHandler _failureHandler = failureHandler;
         private readonly Menu.IApplicationMenu _applicationMenu = applicationMenu;
 
+        [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "to report the failure instead of letting it escape the background service")]
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _logger.LogMethodCall();
             await Task.Yield();
 
-            if (!stoppingToken.IsCancellationRequested && await _startupCommandRunner.TryRunAsync(stoppingToken).ConfigureAwait(false))
+            try
             {
-                _lifetime.StopApplication();
-                return;
-            }
-
-            if (!stoppingToken.IsCancellationRequested)
-            {
-                if (_launchOptions.NonInteractive)
+                if (_launchOptions.OutputFormat == ApplicationOutputFormat.Json && !_launchOptions.NonInteractive)
                 {
-                    _outputWriter.Write(new NonInteractiveOperationNotSupportedErrorOutput(InteractiveMenuOperationName));
+                    throw new ApplicationCommandException(new InteractiveInputNotSupportedErrorOutput());
+                }
+
+                if (!stoppingToken.IsCancellationRequested && await _startupCommandRunner.TryRunAsync(stoppingToken).ConfigureAwait(false))
+                {
                     _lifetime.StopApplication();
                     return;
                 }
 
-                using CancellationTokenSource cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, _lifetime.ApplicationStopping);
-                await _applicationMenu.LoopAsync(cancellationTokenSource.Token).ConfigureAwait(false);
+                if (!stoppingToken.IsCancellationRequested)
+                {
+                    if (_launchOptions.NonInteractive)
+                    {
+                        throw new ApplicationCommandException(new NonInteractiveOperationNotSupportedErrorOutput(InteractiveMenuOperationName));
+                    }
+
+                    using CancellationTokenSource cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, _lifetime.ApplicationStopping);
+                    await _applicationMenu.LoopAsync(cancellationTokenSource.Token).ConfigureAwait(false);
+                }
             }
+            catch (ReadValueCanceledException ex)
+            {
+                Fail(new ApplicationCommandException(new StandardInputEndedErrorOutput(), innerException: ex));
+            }
+            catch (ApplicationCommandException ex) when (ex.Output is not null)
+            {
+                Fail(ex);
+            }
+            catch (InputCanceledByUserException)
+            {
+                Abort();
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                Abort();
+            }
+            catch (Exception ex)
+            {
+                _failureHandler.HandleUnhandledException(ex);
+                _lifetime.StopApplication();
+            }
+        }
+
+        private void Abort()
+        {
+            Environment.ExitCode = ApplicationCommandException.FailureExitCode;
+            _lifetime.StopApplication();
+        }
+
+        private void Fail(ApplicationCommandException exception)
+        {
+            _failureHandler.HandleControlledCommandFailure(exception);
+            _lifetime.StopApplication();
         }
     }
 }

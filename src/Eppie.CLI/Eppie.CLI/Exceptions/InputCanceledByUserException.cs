@@ -16,10 +16,19 @@
 //                                                                              //
 // ---------------------------------------------------------------------------- //
 
-namespace Eppie.CLI.Services
+namespace Eppie.CLI.Exceptions
 {
-    internal interface IApplicationUnlocker
+    internal class InputCanceledByUserException : Exception
     {
-        Task UnlockAsync(CancellationToken cancellationToken, bool readPasswordFromStandardInput = false);
+        internal InputCanceledByUserException()
+        { }
+
+        internal InputCanceledByUserException(string message) : base(message)
+        {
+        }
+
+        internal InputCanceledByUserException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
     }
 }
