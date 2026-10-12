@@ -78,7 +78,7 @@ namespace Eppie.CLI.Tests.Services
 
             Assert.Multiple(() =>
             {
-                AssertProcessSucceeded(result);
+                AssertProcessFailed(result);
                 Assert.That(result.StandardOutput, Does.Contain(TestConstants.InteractiveMenu));
                 Assert.That(result.StandardOutput, Does.Contain(TestConstants.NonInteractiveOption));
                 Assert.That(result.StandardOutput, Does.Not.Contain(TestConstants.InteractivePrompt));
@@ -205,7 +205,7 @@ namespace Eppie.CLI.Tests.Services
 
             Assert.Multiple(() =>
             {
-                AssertJsonTypeAndCode(listAccountsResult, TestConstants.JsonWarningType, TestConstants.StartupCommandRequiresUnlockPasswordFromStandardInputCode);
+                AssertJsonTypeAndCode(listAccountsResult, TestConstants.JsonWarningType, TestConstants.StartupCommandRequiresUnlockPasswordFromStandardInputCode, expectSuccess: false);
                 Assert.That(warningData.GetProperty(TestConstants.JsonCommandNameProperty).GetString(), Is.EqualTo(TestConstants.ListAccountsCommand));
             });
         }
@@ -224,7 +224,7 @@ namespace Eppie.CLI.Tests.Services
 
             Assert.Multiple(() =>
             {
-                AssertJsonTypeAndCode(listAccountsResult, TestConstants.JsonWarningType, TestConstants.StartupCommandRequiresUnlockPasswordFromStandardInputCode);
+                AssertJsonTypeAndCode(listAccountsResult, TestConstants.JsonWarningType, TestConstants.StartupCommandRequiresUnlockPasswordFromStandardInputCode, expectSuccess: false);
                 Assert.That(warningData.GetProperty(TestConstants.JsonCommandNameProperty).GetString(), Is.EqualTo(TestConstants.ListAccountsCommand));
             });
         }
@@ -243,7 +243,7 @@ namespace Eppie.CLI.Tests.Services
                 unlockPasswordFromStandardInput: true,
                 nonInteractive: true).ConfigureAwait(false);
 
-            AssertJsonTypeAndCode(listAccountsResult, TestConstants.JsonWarningType, TestConstants.InvalidPasswordCode);
+            AssertJsonTypeAndCode(listAccountsResult, TestConstants.JsonWarningType, TestConstants.InvalidPasswordCode, expectSuccess: false);
         }
 
         [Test]
@@ -255,7 +255,7 @@ namespace Eppie.CLI.Tests.Services
 
             Assert.Multiple(() =>
             {
-                AssertProcessSucceeded(result);
+                AssertProcessFailed(result);
                 AssertContainsAllTerms(result.StandardOutput, TestConstants.InitializedCode);
                 Assert.That(result.StandardOutput, Does.Not.Contain(TestConstants.InteractivePrompt));
             });
@@ -274,7 +274,7 @@ namespace Eppie.CLI.Tests.Services
 
             using JsonCommandResult openResult = await harness.RunJsonCommandAsync(TestConstants.OpenCommand, nonInteractive: true).ConfigureAwait(false);
 
-            AssertJsonTypeAndCode(openResult, TestConstants.JsonWarningType, TestConstants.UninitializedCode);
+            AssertJsonTypeAndCode(openResult, TestConstants.JsonWarningType, TestConstants.UninitializedCode, expectSuccess: false);
         }
 
         [Test]
@@ -320,7 +320,7 @@ namespace Eppie.CLI.Tests.Services
 
             Assert.Multiple(() =>
             {
-                AssertProcessSucceeded(resetResult);
+                AssertProcessFailed(resetResult);
                 Assert.That(resetResult.StandardOutput, Does.Contain(TestConstants.AssumeYesOption));
                 Assert.That(resetResult.StandardOutput, Does.Not.Contain("An error has occurred:"));
                 Assert.That(resetResult.StandardOutput, Does.Not.Contain("System.InvalidOperationException"));
@@ -339,7 +339,7 @@ namespace Eppie.CLI.Tests.Services
 
             Assert.Multiple(() =>
             {
-                AssertJsonTypeAndCode(resetResult, TestConstants.JsonWarningType, TestConstants.CommandRequiresAssumeYesInNonInteractiveModeCode);
+                AssertJsonTypeAndCode(resetResult, TestConstants.JsonWarningType, TestConstants.CommandRequiresAssumeYesInNonInteractiveModeCode, expectSuccess: false);
                 Assert.That(resetResult.RootElement.GetProperty(TestConstants.JsonMessageProperty).GetString(), Does.Contain(TestConstants.AssumeYesOption));
             });
         }
@@ -390,7 +390,7 @@ namespace Eppie.CLI.Tests.Services
 
             Assert.Multiple(() =>
             {
-                AssertJsonTypeAndCode(result, TestConstants.JsonWarningType, TestConstants.UninitializedCode);
+                AssertJsonTypeAndCode(result, TestConstants.JsonWarningType, TestConstants.UninitializedCode, expectSuccess: false);
                 Assert.That(GetJsonMessage(result), Does.Contain("hasn't been initialized yet"));
             });
         }
@@ -425,7 +425,7 @@ namespace Eppie.CLI.Tests.Services
 
             Assert.Multiple(() =>
             {
-                AssertProcessSucceeded(listAccountsResult);
+                AssertProcessFailed(listAccountsResult);
                 Assert.That(listAccountsResult.StandardOutput, Does.Contain(TestConstants.UnlockPasswordStdinOption));
                 Assert.That(listAccountsResult.StandardOutput, Does.Not.Contain("There are no accounts yet."));
             });
@@ -469,7 +469,7 @@ namespace Eppie.CLI.Tests.Services
         }
 
         [Test]
-        public async Task ProcessWhenAddProtonAccountRunsInNonInteractiveModeOmitsAccountAddressPrompt()
+        public async Task ProcessWhenAddProtonAccountRunsInNonInteractiveModeWithoutInputFailsWithoutPrompting()
         {
             using ApplicationCommandTestHarness harness = ApplicationCommandTestHarness.Create("eppie-cli-proton-non-interactive-");
 
@@ -485,7 +485,8 @@ namespace Eppie.CLI.Tests.Services
 
             Assert.Multiple(() =>
             {
-                AssertProcessSucceeded(addAccountResult);
+                AssertProcessFailed(addAccountResult);
+                AssertContainsAllTerms(addAccountResult.StandardOutput, TestConstants.StandardInputEndedCode);
                 AssertOutputOmitsSetupPrompts(addAccountResult.StandardOutput);
             });
         }
@@ -598,7 +599,7 @@ namespace Eppie.CLI.Tests.Services
 
             Assert.Multiple(() =>
             {
-                AssertProcessSucceeded(sendResult);
+                AssertProcessFailed(sendResult.ProcessResult);
                 Assert.That(sendResult.ProcessResult.StandardError, Is.Empty);
                 Assert.That(sendResult.RootElement.GetProperty(TestConstants.JsonTypeProperty).GetString(), Is.EqualTo(TestConstants.JsonErrorType));
                 Assert.That(sendResult.RootElement.GetProperty(TestConstants.JsonCodeProperty).GetString(), Is.EqualTo(TestConstants.UnhandledExceptionCode));

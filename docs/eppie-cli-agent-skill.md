@@ -173,6 +173,12 @@ JSON responses use a normalized envelope:
 
 In `--non-interactive=true --output=json` mode, structured responses are emitted on `stdout` without a preceding stack trace on `stderr` for handled command failures such as `unhandledException`.
 
+In that mode the prompts are gone, so before each value it reads as a single line the run emits `{"type":"status","code":"inputRequired","data":{"input":"<name>"}}`, naming the value being read. A command therefore emits several envelopes even in the ordinary case: parse `stdout` line by line and act on the last one. Text output carries no announcements. The message body of `send` is the exception: it is read to end-of-stream rather than as a single line and is not announced, so write it straight after the vault password and close `stdin`.
+
+`data.input` is one of nine names: `vaultPassword` for any run with `--unlock-password-stdin=true` and for `open`; `newVaultPassword` for `init` and `restore`; `seedPhrase` and `restorePath` for `restore`; `accountAddress` and `accountPassword` for `add-account -t proton` without `--input-json-stdin`, followed in that same run by `twoFactorCode`, `mailboxPassword` and `humanVerificationToken` whenever Proton asks for them. Nothing else is announced -- `add-account -t email` takes its values as one payload or refuses, and a vault password is never confirmed in this mode.
+
+`--output=json` requires `--non-interactive=true`. Reading from a console writes the prompt and the typed characters to `stdout`, which cannot share the stream with the envelopes, so the run is refused with `interactiveInputNotSupported` and exit code `1` before any command starts, leaving nothing half-done.
+
 In non-interactive mode, do not use `open` as part of the agent workflow. It does not establish reusable state for later process launches. For stateful non-interactive commands, use `--unlock-password-stdin=true` instead.
 
 For all agent examples in this file, `<account>` means the account address returned by `list-accounts` in `data[].address`. Prefer that address string for `-a` instead of the numeric `id`, unless a command explicitly documents another identifier format.
@@ -543,6 +549,7 @@ Notes:
 - `twoFactorCode` is required only if the Proton flow asks for it
 - `humanVerificationToken` is required only if the Proton flow asks for it; see `Proton human verification (captcha)`
 - if the mailbox password is the same as the account password, repeat the same value in `mailboxPassword`
+- structured input is fixed for the whole run, so a value Proton rejects is never resent: the command stops with `authorizationCanceled` instead of replaying the same `twoFactorCode`, `mailboxPassword`, or `humanVerificationToken`
 - invalid structured input returns one of these machine-readable errors:
   - `structuredStandardInputInvalidJson`
   - `structuredStandardInputMissingProperty`
@@ -553,10 +560,10 @@ Proton can require human verification during `add-account -t proton`. The CLI ca
 JSON mode emits:
 
 ```json
-{"type":"status","code":"humanVerificationRequired","data":{"verificationUri":"https://account.proton.me/api/core/v4/captcha?Token=<challenge-token>"}}
+{"type":"status","code":"humanVerificationRequired","data":{"verificationUri":"https://mail-api.proton.me/core/v4/captcha?Token=<challenge-token>","helpUri":"<address of this section>"}}
 ```
 
-Text mode prints the same address together with a link to this section.
+Text mode prints the same two addresses. `data.helpUri` always points at this section, so a run can be diagnosed without the command line at hand.
 
 How to obtain the token:
 1. Open `verificationUri` in a web browser.
@@ -577,6 +584,8 @@ Notes:
 - the token is single-use; a new challenge requires a new token
 - the token survives a process restart until it is consumed, so it can be prepared in one run and used in the next
 - the captcha page cannot be embedded in a local page; open the address directly
+- an empty line is never sent to Proton, for `humanVerificationToken`, `twoFactorCode` and `mailboxPassword` alike, so watch for stray newlines in a `stdin` payload; the first two are trimmed before that check, while a `mailboxPassword` of only spaces counts as a real password and is sent
+- a missing or blank token in `--input-json-stdin` gives `structuredStandardInputMissingProperty`; a rejected one gives `unsuccessfulAttempt`, a replacement `humanVerificationRequired`, then `authorizationCanceled`; a line-based `stdin` that ends first gives `standardInputEnded`. Each exits `1`, and a redirected `stdin` is never asked twice
 
 ## Reference: recommended agent workflow
 
@@ -626,6 +635,10 @@ When `--output=json` is enabled, handle responses by `type` first:
 | --- | --- | --- |
 | `invalidPassword` | vault password was rejected | stop; do not retry automatically with the same password |
 | `humanVerificationRequired` | Proton asked for a captcha and `data.verificationUri` holds the challenge address | solve the captcha, then retry with `humanVerificationToken` in the structured input; see `Proton human verification (captcha)` |
+| `inputRequired` | the run is waiting for `data.input` on standard input | supply that value; not an outcome -- another envelope follows |
+| `interactiveInputNotSupported` | `--output=json` was used without `--non-interactive=true` on a command that reads a value | add `--non-interactive=true` and supply the values on `stdin` |
+| `authorizationCanceled` | a value was rejected and could not be replaced, so the login was abandoned | supply a corrected value and run again; do not replay the rejected one |
+| `standardInputEnded` | `stdin` ran out before a required value was read | extend the `stdin` payload with the missing value |
 | `structuredStandardInputInvalidJson` | structured payload is not valid JSON | fix serialization and retry once with corrected JSON |
 | `structuredStandardInputMissingProperty` | required JSON property is missing or empty | provide the missing property and retry once |
 | `unhandledException` | command failed and returned exception details | inspect `data.exceptionType` and command context; do not retry blindly |
