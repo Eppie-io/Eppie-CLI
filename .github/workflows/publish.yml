@@ -53,7 +53,6 @@ jobs:
       matrix: ${{ steps.select-config.outputs.matrix }}
       project-file: ${{ fromJSON(steps.read-options.outputs.content).project-file }}
       output-name: ${{ fromJSON(steps.read-options.outputs.content).output-name }}
-      nuget-config: ${{ fromJSON(steps.read-options.outputs.content).nuget-config }}
 
     steps:
     - name: Checkout
@@ -120,7 +119,6 @@ jobs:
       dotnet-version: ${{ matrix.dotnet }}
       output-name: ${{ needs.prepare.outputs.output-name }}
       project-file: ${{ needs.prepare.outputs.project-file }}
-      nuget-config: ${{ needs.prepare.outputs.nuget-config }}
       configuration: ${{ matrix.configuration }}
       framework: ${{ matrix.framework }}
       runtime: ${{ matrix.runtime }}
@@ -234,7 +232,6 @@ jobs:
         dotnet publish "${{ env.project-file }}" --output "${{ env.output-path }}" --configuration "${{ env.configuration }}" \
                        --framework "${{ env.framework }}" --runtime "${{ env.runtime }}" \
                        --property:Version="${{ env.version-app }}" \
-                       --configfile="${{ env.nuget-config }}" \
                        ${{ env.publish-options }} 
       env:
         version-app: "${{ steps.version.outputs.app }}"
