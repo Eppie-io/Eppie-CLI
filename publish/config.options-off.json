@@ -1,6 +1,7 @@
 {
   "project-file": "src/Eppie.CLI/Eppie.CLI/Eppie.CLI.csproj",
   "output-name": "Eppie.CLI",
+  "nuget-config": "src/Eppie.CLI/nuget.config",
 
   "profiles" :
   [

@@ -32,6 +32,7 @@ on:
 
 env:
   project: src/Eppie.CLI/Eppie.CLI/Eppie.CLI.csproj
+  nuget-config: src/Eppie.CLI/nuget.config
   test-project: src/Eppie.CLI/Eppie.CLI.Tests/Eppie.CLI.Tests.csproj
   test-report-root: src/Eppie.CLI/TestResults
   dotnet-version: 10.x
@@ -83,7 +84,7 @@ jobs:
         dotnet-version: ${{ env.dotnet-version }}
 
     - name: Build
-      run: dotnet build ${{ env.project }} --configuration ${{ env.configuration }}
+      run: dotnet build ${{ env.project }} --configuration ${{ env.configuration }} --configfile ${{ env.nuget-config }}
         
     - name: Test
       if: env.test-project != ''
