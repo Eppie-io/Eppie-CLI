@@ -20,6 +20,7 @@
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
+    <File Path="nuget.config" />
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="Eppie.CLI.Tests/Eppie.CLI.Tests.csproj" />
