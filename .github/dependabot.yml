@@ -9,6 +9,9 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 20
+    commit-message:
+      prefix: "build"
+      include: "scope"
     groups:
       Finebits:
         patterns:
@@ -24,6 +27,12 @@ updates:
     directory: "/"                                  # Path to '.gitmodules' directory
     schedule:
       interval: "daily"
+    cooldown:
+      default-days: 0
+    open-pull-requests-limit: 20      
+    commit-message:
+      prefix: "build"
+      include: "scope"      
     groups:
       submodules:
         patterns:
@@ -33,6 +42,12 @@ updates:
     directory: "/"                                  # Workflow files stored in the default location
     schedule:
       interval: "monthly"
+    labels:
+      - "github-actions"
+      - "dependencies"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
     groups:
       Common-actions:
         patterns:
