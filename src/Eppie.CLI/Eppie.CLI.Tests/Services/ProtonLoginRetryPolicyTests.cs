@@ -60,13 +60,13 @@ namespace Eppie.CLI.Tests.Services
         [TestCase(ProtonLoginStage.HumanVerification)]
         [TestCase(ProtonLoginStage.TwoFactorCode)]
         [TestCase(ProtonLoginStage.MailboxPassword)]
-        public void WhenStructuredValueIsRejectedTheLoginIsNotRetriedForever(ProtonLoginStage stage)
+        public async Task WhenStructuredValueIsRejectedTheLoginIsNotRetriedForever(ProtonLoginStage stage)
         {
             RecordingOutputWriter writer = new();
             RetryingLoginHelper loginHelper = new(stage);
 
-            ApplicationCommandException? exception = Assert.ThrowsAsync<ApplicationCommandException>(
-                () => RunAddProtonAccountAsync(writer, loginHelper, new StubProtonAccountInput(ValidToken)));
+            ApplicationCommandException? exception = await Assert.ThrowsAsync<ApplicationCommandException>(
+                () => RunAddProtonAccountAsync(writer, loginHelper, new StubProtonAccountInput(ValidToken))).ConfigureAwait(false);
 
             Assert.Multiple(() =>
             {
@@ -83,13 +83,13 @@ namespace Eppie.CLI.Tests.Services
         }
 
         [Test]
-        public void WhenAnEmptyTokenIsEnteredVerificationIsDeclinedWithoutContactingProton()
+        public async Task WhenAnEmptyTokenIsEnteredVerificationIsDeclinedWithoutContactingProton()
         {
             RecordingOutputWriter writer = new();
             RetryingLoginHelper loginHelper = new(ProtonLoginStage.HumanVerification);
 
-            ApplicationCommandException? exception = Assert.ThrowsAsync<ApplicationCommandException>(
-                () => RunAddProtonAccountAsync(writer, loginHelper, new StubProtonAccountInput("   ", supportsRetry: true)));
+            ApplicationCommandException? exception = await Assert.ThrowsAsync<ApplicationCommandException>(
+                () => RunAddProtonAccountAsync(writer, loginHelper, new StubProtonAccountInput("   ", supportsRetry: true))).ConfigureAwait(false);
 
             Assert.Multiple(() =>
             {
@@ -102,13 +102,13 @@ namespace Eppie.CLI.Tests.Services
         [TestCase(ProtonLoginStage.HumanVerification)]
         [TestCase(ProtonLoginStage.TwoFactorCode)]
         [TestCase(ProtonLoginStage.MailboxPassword)]
-        public void WhenAValueIsBlankItIsDeclinedWithoutContactingProton(ProtonLoginStage stage)
+        public async Task WhenAValueIsBlankItIsDeclinedWithoutContactingProton(ProtonLoginStage stage)
         {
             RecordingOutputWriter writer = new();
             RetryingLoginHelper loginHelper = new(stage);
 
-            ApplicationCommandException? exception = Assert.ThrowsAsync<ApplicationCommandException>(
-                () => RunAddProtonAccountAsync(writer, loginHelper, new StubProtonAccountInput(string.Empty, supportsRetry: true)));
+            ApplicationCommandException? exception = await Assert.ThrowsAsync<ApplicationCommandException>(
+                () => RunAddProtonAccountAsync(writer, loginHelper, new StubProtonAccountInput(string.Empty, supportsRetry: true))).ConfigureAwait(false);
 
             Assert.Multiple(() =>
             {
@@ -119,37 +119,37 @@ namespace Eppie.CLI.Tests.Services
         }
 
         [Test]
-        public void WhenTheLoginIsCancelledWithoutAnOperatorDecliningItKeepsItsOwnIdentity()
+        public async Task WhenTheLoginIsCancelledWithoutAnOperatorDecliningItKeepsItsOwnIdentity()
         {
             RecordingOutputWriter writer = new();
             TimingOutLoginHelper loginHelper = new();
 
-            Assert.ThrowsAsync<TaskCanceledException>(
-                () => RunAddProtonAccountAsync(writer, loginHelper, new StubProtonAccountInput(ValidToken)));
+            await Assert.ThrowsAsync<TaskCanceledException>(
+                () => RunAddProtonAccountAsync(writer, loginHelper, new StubProtonAccountInput(ValidToken))).ConfigureAwait(false);
 
             Assert.That(writer.Written, Has.None.InstanceOf<AuthorizationCanceledOutput>());
         }
 
         [Test]
-        public void WhenStandardInputRunsOutTheLoginLeavesTheReasonIntact()
+        public async Task WhenStandardInputRunsOutTheLoginLeavesTheReasonIntact()
         {
             RecordingOutputWriter writer = new();
             RetryingLoginHelper loginHelper = new(ProtonLoginStage.HumanVerification);
 
-            Assert.ThrowsAsync<ReadValueCanceledException>(
-                () => RunAddProtonAccountAsync(writer, loginHelper, new ExhaustedStandardInput()));
+            await Assert.ThrowsAsync<ReadValueCanceledException>(
+                () => RunAddProtonAccountAsync(writer, loginHelper, new ExhaustedStandardInput())).ConfigureAwait(false);
 
             Assert.That(writer.Written, Has.None.InstanceOf<AuthorizationCanceledOutput>());
         }
 
         [Test]
-        public void SurroundingWhitespaceIsStrippedFromTheVerificationToken()
+        public async Task SurroundingWhitespaceIsStrippedFromTheVerificationToken()
         {
             RecordingOutputWriter writer = new();
             CapturingLoginHelper loginHelper = new();
 
-            Assert.ThrowsAsync<NotSupportedException>(
-                () => RunAddProtonAccountAsync(writer, loginHelper, new StubProtonAccountInput($"  {ValidToken}\t")));
+            await Assert.ThrowsAsync<NotSupportedException>(
+                () => RunAddProtonAccountAsync(writer, loginHelper, new StubProtonAccountInput($"  {ValidToken}\t"))).ConfigureAwait(false);
 
             Assert.That(loginHelper.CapturedToken, Is.EqualTo(ValidToken));
         }
@@ -157,13 +157,13 @@ namespace Eppie.CLI.Tests.Services
         [TestCase(ProtonLoginStage.HumanVerification)]
         [TestCase(ProtonLoginStage.TwoFactorCode)]
         [TestCase(ProtonLoginStage.MailboxPassword)]
-        public void WhenInputCanChangeTheValueTheLoginKeepsAskingAgain(ProtonLoginStage stage)
+        public async Task WhenInputCanChangeTheValueTheLoginKeepsAskingAgain(ProtonLoginStage stage)
         {
             RecordingOutputWriter writer = new();
             RetryingLoginHelper loginHelper = new(stage, maxCalls: 3);
 
-            Assert.ThrowsAsync<NotSupportedException>(
-                () => RunAddProtonAccountAsync(writer, loginHelper, new StubProtonAccountInput(ValidToken, supportsRetry: true)));
+            await Assert.ThrowsAsync<NotSupportedException>(
+                () => RunAddProtonAccountAsync(writer, loginHelper, new StubProtonAccountInput(ValidToken, supportsRetry: true))).ConfigureAwait(false);
 
             Assert.Multiple(() =>
             {
@@ -219,6 +219,11 @@ namespace Eppie.CLI.Tests.Services
 
             internal bool LimitReached { get; private set; }
 
+            public bool TryDeserializeHumanVerificationResponse(string json, out IHumanVerificationData data)
+            {
+                throw new InvalidOperationException("Human-verification response parsing is not used by this retry-policy test.");
+            }
+
             public async Task<ProtonCredentials> LoginAsync(string userName,
                                                             string password,
                                                             TwoFactorCodeProvider twoFactorCodeProvider,
@@ -260,6 +265,11 @@ namespace Eppie.CLI.Tests.Services
 
         private sealed class TimingOutLoginHelper : IProtonLoginHelper
         {
+            public bool TryDeserializeHumanVerificationResponse(string json, out IHumanVerificationData data)
+            {
+                throw new InvalidOperationException("Human-verification response parsing is not used by this retry-policy test.");
+            }
+
             public Task<ProtonCredentials> LoginAsync(string userName,
                                                       string password,
                                                       TwoFactorCodeProvider twoFactorCodeProvider,
@@ -276,6 +286,11 @@ namespace Eppie.CLI.Tests.Services
             private static readonly Uri VerifierUri = new(TestConstants.ProtonCaptchaUri);
 
             internal string? CapturedToken { get; private set; }
+
+            public bool TryDeserializeHumanVerificationResponse(string json, out IHumanVerificationData data)
+            {
+                throw new InvalidOperationException("Human-verification response parsing is not used by this retry-policy test.");
+            }
 
             public async Task<ProtonCredentials> LoginAsync(string userName,
                                                             string password,
