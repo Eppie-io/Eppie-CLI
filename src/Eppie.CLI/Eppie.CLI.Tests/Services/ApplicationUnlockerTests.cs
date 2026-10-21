@@ -32,13 +32,13 @@ namespace Eppie.CLI.Tests.Services
     public class ApplicationUnlockerTests
     {
         [Test]
-        public void UnlockAsyncWhenApplicationIsUninitializedReportsUninitializedFailure()
+        public async Task UnlockAsyncWhenApplicationIsUninitializedReportsUninitializedFailure()
         {
             TuviMailInvocationState tuviMailState = new() { IsFirstApplicationStartResult = true };
             ApplicationUnlocker unlocker = CreateUnlocker(tuviMailState);
 
-            ApplicationCommandException? exception = Assert.ThrowsAsync<ApplicationCommandException>(
-                () => unlocker.UnlockAsync(CancellationToken.None, readPasswordFromStandardInput: true));
+            ApplicationCommandException? exception = await Assert.ThrowsAsync<ApplicationCommandException>(
+                () => unlocker.UnlockAsync(CancellationToken.None, readPasswordFromStandardInput: true)).ConfigureAwait(false);
 
             Assert.Multiple(() =>
             {
@@ -84,14 +84,14 @@ namespace Eppie.CLI.Tests.Services
         }
 
         [Test]
-        public void UnlockAsyncWhenPasswordIsInvalidReportsInvalidPasswordFailure()
+        public async Task UnlockAsyncWhenPasswordIsInvalidReportsInvalidPasswordFailure()
         {
             TuviMailInvocationState tuviMailState = new() { InitializeApplicationResult = false };
             FakeApplicationPasswordReader passwordReader = new() { StandardInputPassword = TestConstants.WrongPassword };
             ApplicationUnlocker unlocker = CreateUnlocker(tuviMailState, passwordReader);
 
-            ApplicationCommandException? exception = Assert.ThrowsAsync<ApplicationCommandException>(
-                () => unlocker.UnlockAsync(CancellationToken.None, readPasswordFromStandardInput: true));
+            ApplicationCommandException? exception = await Assert.ThrowsAsync<ApplicationCommandException>(
+                () => unlocker.UnlockAsync(CancellationToken.None, readPasswordFromStandardInput: true)).ConfigureAwait(false);
 
             Assert.Multiple(() =>
             {

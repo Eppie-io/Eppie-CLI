@@ -91,14 +91,14 @@ namespace Eppie.CLI.Tests.Services
         }
 
         [Test]
-        public void TryRunAsyncWhenLockedInteractiveStartupCommandUnlockFailsDoesNotExecuteCommand()
+        public async Task TryRunAsyncWhenLockedInteractiveStartupCommandUnlockFailsDoesNotExecuteCommand()
         {
             IOptions<ApplicationLaunchOptions> launchOptions = CreateLaunchOptions();
             FakeApplicationUnlocker applicationUnlocker = new() { UnlockResult = false };
             FakeApplicationMenu applicationMenu = new();
             StartupCommandRunner runner = new(NullLogger<StartupCommandRunner>.Instance, new RawCommandLineArguments([StartupCommandArguments.CommandDelimiter, TestConstants.ListAccountsCommand]), launchOptions, applicationUnlocker, applicationMenu);
 
-            _ = Assert.ThrowsAsync<ApplicationCommandException>(() => runner.TryRunAsync(CancellationToken.None));
+            _ = await Assert.ThrowsAsync<ApplicationCommandException>(() => runner.TryRunAsync(CancellationToken.None)).ConfigureAwait(false);
 
             Assert.Multiple(() =>
             {
@@ -247,14 +247,14 @@ namespace Eppie.CLI.Tests.Services
         }
 
         [Test]
-        public void TryRunAsyncWhenNonInteractiveUnlockFailsDoesNotExecuteCommand()
+        public async Task TryRunAsyncWhenNonInteractiveUnlockFailsDoesNotExecuteCommand()
         {
             IOptions<ApplicationLaunchOptions> launchOptions = CreateLaunchOptions(unlockPasswordFromStandardInput: true, nonInteractive: true);
             FakeApplicationUnlocker applicationUnlocker = new() { UnlockResult = false };
             FakeApplicationMenu applicationMenu = new();
             StartupCommandRunner runner = new(NullLogger<StartupCommandRunner>.Instance, new RawCommandLineArguments([$"--{ApplicationLaunchOptions.UnlockPasswordFromStandardInputConfigurationKey}={TestConstants.True}", $"--{ApplicationLaunchOptions.NonInteractiveConfigurationKey}={TestConstants.True}", StartupCommandArguments.CommandDelimiter, TestConstants.ListAccountsCommand]), launchOptions, applicationUnlocker, applicationMenu);
 
-            _ = Assert.ThrowsAsync<ApplicationCommandException>(() => runner.TryRunAsync(CancellationToken.None));
+            _ = await Assert.ThrowsAsync<ApplicationCommandException>(() => runner.TryRunAsync(CancellationToken.None)).ConfigureAwait(false);
 
             Assert.Multiple(() =>
             {
@@ -265,14 +265,14 @@ namespace Eppie.CLI.Tests.Services
         }
 
         [Test]
-        public void TryRunAsyncWhenUnlockPasswordFromStandardInputIsMissingForLockedNonInteractiveStartupCommandDoesNotUnlockOrExecuteCommand()
+        public async Task TryRunAsyncWhenUnlockPasswordFromStandardInputIsMissingForLockedNonInteractiveStartupCommandDoesNotUnlockOrExecuteCommand()
         {
             IOptions<ApplicationLaunchOptions> launchOptions = CreateLaunchOptions(nonInteractive: true);
             FakeApplicationUnlocker applicationUnlocker = new();
             FakeApplicationMenu applicationMenu = new();
             StartupCommandRunner runner = new(NullLogger<StartupCommandRunner>.Instance, new RawCommandLineArguments([StartupCommandArguments.CommandDelimiter, TestConstants.ListAccountsCommand]), launchOptions, applicationUnlocker, applicationMenu);
 
-            ApplicationCommandException? exception = Assert.ThrowsAsync<ApplicationCommandException>(() => runner.TryRunAsync(CancellationToken.None));
+            ApplicationCommandException? exception = await Assert.ThrowsAsync<ApplicationCommandException>(() => runner.TryRunAsync(CancellationToken.None)).ConfigureAwait(false);
 
             Assert.Multiple(() =>
             {
@@ -284,7 +284,7 @@ namespace Eppie.CLI.Tests.Services
         }
 
         [Test]
-        public void TryRunAsyncWhenLockedNonInteractiveStartupCommandHasExplicitUnlockPasswordFromStandardInputFalseReportsFailureAndSkipsCommand()
+        public async Task TryRunAsyncWhenLockedNonInteractiveStartupCommandHasExplicitUnlockPasswordFromStandardInputFalseReportsFailureAndSkipsCommand()
         {
             RawCommandLineArguments commandLineArguments = new([$"--{ApplicationLaunchOptions.UnlockPasswordFromStandardInputConfigurationKey}={TestConstants.False}", $"--{ApplicationLaunchOptions.NonInteractiveConfigurationKey}={TestConstants.True}", StartupCommandArguments.CommandDelimiter, TestConstants.ListAccountsCommand]);
             IOptions<ApplicationLaunchOptions> launchOptions = TestApplicationFactory.CreateLaunchOptionsOptions(TestApplicationFactory.CreateLaunchOptionsFromCommandLine(commandLineArguments.Values.ToArray()));
@@ -292,7 +292,7 @@ namespace Eppie.CLI.Tests.Services
             FakeApplicationMenu applicationMenu = new();
             StartupCommandRunner runner = new(NullLogger<StartupCommandRunner>.Instance, commandLineArguments, launchOptions, applicationUnlocker, applicationMenu);
 
-            ApplicationCommandException? exception = Assert.ThrowsAsync<ApplicationCommandException>(() => runner.TryRunAsync(CancellationToken.None));
+            ApplicationCommandException? exception = await Assert.ThrowsAsync<ApplicationCommandException>(() => runner.TryRunAsync(CancellationToken.None)).ConfigureAwait(false);
 
             Assert.Multiple(() =>
             {
