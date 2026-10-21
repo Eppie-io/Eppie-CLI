@@ -256,6 +256,11 @@ namespace Eppie.CLI.Tests.Services
 
                 try
                 {
+                    for (int i = 0; i < envelopes.Length - 1; i++)
+                    {
+                        using JsonDocument envelope = JsonDocument.Parse(envelopes[i]);
+                    }
+
                     return new JsonCommandResult(processResult, JsonDocument.Parse(envelopes[^1]));
                 }
                 catch (JsonException ex)
