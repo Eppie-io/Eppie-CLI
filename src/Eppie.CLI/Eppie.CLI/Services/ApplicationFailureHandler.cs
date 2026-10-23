@@ -46,18 +46,25 @@ namespace Eppie.CLI.Services
             }
             else
             {
-                _logger.LogDebug("Command failed with controlled output {OutputType} and exit code {ExitCode}", exception.Output.GetType().Name, exception.ExitCode);
+                _logger.LogDebug("Command failed with controlled output {OutputType}", exception.Output.GetType().Name);
             }
 
-            if (_launchOptions.NonInteractive)
-            {
-                Environment.ExitCode = exception.ExitCode;
-            }
+            Environment.ExitCode = ApplicationCommandException.FailureExitCode;
 
             _outputWriter.Write(exception.Output);
         }
 
         public void HandleUnhandledException(Exception exception)
+        {
+            ReportException(exception, commandFailed: true);
+        }
+
+        public void ReportBackgroundException(Exception exception)
+        {
+            ReportException(exception, commandFailed: false);
+        }
+
+        private void ReportException(Exception exception, bool commandFailed)
         {
             ArgumentNullException.ThrowIfNull(exception);
 
@@ -68,6 +75,11 @@ namespace Eppie.CLI.Services
             else
             {
                 _logger.LogError("An error has occurred {Exception}", exception);
+            }
+
+            if (commandFailed)
+            {
+                Environment.ExitCode = ApplicationCommandException.FailureExitCode;
             }
 
             _outputWriter.Write(new UnhandledExceptionOutput(exception));

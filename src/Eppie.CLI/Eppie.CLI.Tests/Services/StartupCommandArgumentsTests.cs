@@ -57,7 +57,7 @@ namespace Eppie.CLI.Tests.Services
         public void GetStartupCommandArgumentsWhenDelimiterIsMissingReturnsEmptyArray()
         {
             RawCommandLineArguments arguments = new([
-                TestConstants.ShowMessageCommand,
+                MenuCommand.ShowMessage.Name,
                 $"--{ApplicationLaunchOptions.OutputConfigurationKey}",
                 TestConstants.Json,
                 TestConstants.AccountOption,
@@ -75,7 +75,7 @@ namespace Eppie.CLI.Tests.Services
             RawCommandLineArguments arguments = new([
                 $"--{ApplicationLaunchOptions.OutputConfigurationKey}={TestConstants.Json}",
                 StartupCommandArguments.CommandDelimiter,
-                TestConstants.ShowMessageCommand,
+                MenuCommand.ShowMessage.Name,
                 $"--{ApplicationLaunchOptions.OutputConfigurationKey}",
                 TestConstants.Json,
                 TestConstants.AccountOption,
@@ -85,7 +85,7 @@ namespace Eppie.CLI.Tests.Services
             string[] result = StartupCommandArguments.GetStartupCommandArguments(arguments);
 
             Assert.That(result, Is.EqualTo([
-                TestConstants.ShowMessageCommand,
+                MenuCommand.ShowMessage.Name,
                 $"--{ApplicationLaunchOptions.OutputConfigurationKey}",
                 TestConstants.Json,
                 TestConstants.AccountOption,

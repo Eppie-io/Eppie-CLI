@@ -247,9 +247,21 @@ namespace Eppie.CLI.Tests.Services
             {
                 ArgumentNullException.ThrowIfNull(processResult);
 
+                string[] envelopes = processResult.StandardOutput.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+                if (envelopes.Length == 0)
+                {
+                    Assert.Fail($"The command produced no output.{Environment.NewLine}Exit code: {processResult.ExitCode}");
+                }
+
                 try
                 {
-                    return new JsonCommandResult(processResult, JsonDocument.Parse(processResult.StandardOutput));
+                    for (int i = 0; i < envelopes.Length - 1; i++)
+                    {
+                        using JsonDocument envelope = JsonDocument.Parse(envelopes[i]);
+                    }
+
+                    return new JsonCommandResult(processResult, JsonDocument.Parse(envelopes[^1]));
                 }
                 catch (JsonException ex)
                 {

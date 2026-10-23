@@ -41,6 +41,7 @@ namespace Eppie.CLI.Tests.Services
         internal const string Contact1FullName = "Contact 1";
         internal const string EmailPropertyName = "email";
         internal const string ImapServerPropertyName = "imapServer";
+        internal const string HumanVerificationTokenPropertyName = "humanVerificationToken";
         internal const string AccountAddress = "account@eppie.io";
         internal const string UserAddress = "user@example.com";
         internal const string ToAddress = "to@example.com";
@@ -53,6 +54,8 @@ namespace Eppie.CLI.Tests.Services
         internal const string InboxHeader = "Inbox header";
         internal const string InteractiveMenu = "interactive menu";
         internal const string HelpOption = "-h";
+
+        // Independent CLI spellings let process tests catch accidental command renames.
         internal const string ListAccountsCommand = "list-accounts";
         internal const string ListFoldersCommand = "list-folders";
         internal const string ShowAllMessagesCommand = "show-all-messages";
@@ -63,6 +66,7 @@ namespace Eppie.CLI.Tests.Services
         internal const string OpenCommand = "open";
         internal const string SendCommand = "send";
         internal const string DeleteMessageCommand = "delete-message";
+
         internal const string DecAccountType = "Dec";
         internal const string EmailAccountType = "Email";
         internal const string ProtonServiceName = "Proton";
@@ -132,7 +136,10 @@ namespace Eppie.CLI.Tests.Services
         internal const string JsonTextBodyProperty = "textBody";
         internal const string JsonUnreadCountProperty = "unreadCount";
         internal const string JsonTotalCountProperty = "totalCount";
+        internal const string JsonVerificationUriProperty = "verificationUri";
+        internal const string JsonHelpUriProperty = "helpUri";
 
+        // Keep JSON contract values independent of the writer to catch accidental protocol changes.
         internal const string JsonResultType = "result";
         internal const string JsonStatusType = "status";
         internal const string JsonWarningType = "warning";
@@ -163,5 +170,9 @@ namespace Eppie.CLI.Tests.Services
         internal const string AuthorizationCanceledCode = "authorizationCanceled";
         internal const string AuthorizationStartedCode = "authorizationStarted";
         internal const string AuthorizationCompletedCode = "authorizationCompleted";
+        internal const string HumanVerificationRequiredCode = "humanVerificationRequired";
+        internal const string StandardInputEndedCode = "standardInputEnded";
+
+        internal const string ProtonCaptchaUri = "https://mail-api.proton.me/core/v4/captcha?Token=test-token";
     }
 }
