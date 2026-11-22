@@ -18,7 +18,6 @@
 
 using Eppie.CLI.Services;
 
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Eppie.CLI.Options
@@ -27,10 +26,9 @@ namespace Eppie.CLI.Options
     {
         extension(IServiceCollection services)
         {
-            public IServiceCollection ConfigureOptions(IConfiguration configuration)
+            public IServiceCollection ConfigureOptions()
             {
                 ArgumentNullException.ThrowIfNull(services, nameof(services));
-                ArgumentNullException.ThrowIfNull(configuration, nameof(configuration));
 
                 services.AddOptions<ApplicationLaunchOptions>()
                         .BindConfiguration(string.Empty);

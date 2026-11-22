@@ -73,7 +73,7 @@ namespace Eppie.CLI
             ArgumentNullException.ThrowIfNull(ctx);
             ArgumentNullException.ThrowIfNull(services);
 
-            services.ConfigureOptions(ctx.Configuration)
+            services.ConfigureOptions()
                     .AddLocalization()
                     .AddHttpClient()
                     .AddAuthorizationProvider()
