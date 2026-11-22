@@ -20,31 +20,35 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
 
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
 namespace Eppie.CLI.Options
 {
+    // ToDo : ConfigurationBindingGenerator cannot read private properties or use `init`.
+    // We can fix this by using a mutable DTO for binding, and then mapping to an immutable record type.
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal class ConsoleOptions : IConfigurationSectionOptions
+    internal class ConsoleOptions
     {
-        public string SectionName => "Console";
+        public static string SectionName => "Console";
 
         /// <summary>
         /// Gets a configuration value that can be read from the '--Console:CultureInfo' or '/Console:CultureInfo' command-line argument,
         /// or from the '$.Console.CultureInfo' parameter in the 'appsettings.json' or 'appsettings.[<see cref="IHostEnvironment.EnvironmentName"/>].json' file.
         /// </summary>
-        public CultureInfo CultureInfo { get; init; } = CultureInfo.CurrentCulture;
+        public CultureInfo CultureInfo { get; set; } = CultureInfo.CurrentCulture;
 
         /// <summary>
-        /// Gets a configuration value that can be read from the '--Console:Encoding' or '/Console:Encoding' command-line argument,
-        /// or from the '$.Console.Encoding' parameter in the 'appsettings.json' or 'appsettings.[<see cref="IHostEnvironment.EnvironmentName"/>].json' file.
+        /// Gets a configuration value that can be read from the '--Console:EncodingName' or '/Console:EncodingName' command-line argument,
+        /// or from the '$.Console.EncodingName' parameter in the 'appsettings.json' or 'appsettings.[<see cref="IHostEnvironment.EnvironmentName"/>].json' file.
         /// </summary>
+        public string? EncodingName { get; set; }
+
+        [ConfigurationIgnore]
         public Encoding Encoding => field ??= OptionConverter.ConvertValue(
             value: EncodingName,
             defaultValue: Encoding.Unicode,
             converter: Encoding.GetEncoding,
             ignore: (exception) => exception is ArgumentException or NotSupportedException);
-
-        private string? EncodingName { get; init; }
     }
 }
