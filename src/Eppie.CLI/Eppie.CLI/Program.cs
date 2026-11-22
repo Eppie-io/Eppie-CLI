@@ -27,7 +27,6 @@ using Eppie.CLI.Options;
 using Eppie.CLI.Services;
 using Eppie.CLI.Tools;
 
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -72,32 +71,10 @@ namespace Eppie.CLI
         private static void ConfigureServices(HostBuilderContext ctx, IServiceCollection services, string[] args)
         {
             ArgumentNullException.ThrowIfNull(ctx);
+            ArgumentNullException.ThrowIfNull(services);
 
-            BinderOptions bindNonPublicProperties = new() { BindNonPublicProperties = true };
-
-            services.ConfigureRootOptions<ApplicationLaunchOptions>(ctx.Configuration, bindNonPublicProperties);
-            services.ConfigureOptions<AuthorizationOptions>(ctx.Configuration, bindNonPublicProperties);
-            services.ConfigureOptions<ConsoleOptions>(ctx.Configuration, bindNonPublicProperties);
-            services.ConfigureOptions<MailOptions>(ctx.Configuration, bindNonPublicProperties);
-
-            static IApplicationOutputWriter GetApplicationOutputWriter(IServiceProvider serviceProvider)
-            {
-                ArgumentNullException.ThrowIfNull(serviceProvider);
-
-                ApplicationOutputFormat format = serviceProvider.GetRequiredService<IOptions<ApplicationLaunchOptions>>().Value.OutputFormat;
-                return serviceProvider.GetRequiredKeyedService<IApplicationOutputWriter>(format);
-            }
-
-            static Tuvi.Proton.IProtonLoginHelper GetProtonLoginHelper(IServiceProvider serviceProvider)
-            {
-                ArgumentNullException.ThrowIfNull(serviceProvider);
-
-                ProtonAuthOptions protonOptions = serviceProvider.GetRequiredService<IOptions<AuthorizationOptions>>().Value.Proton;
-                ResourceLoader resourceLoader = serviceProvider.GetRequiredService<ResourceLoader>();
-                return ComponentBuilder.Components.GetProtonLoginHelper(protonOptions.GetConfiguration(resourceLoader));
-            }
-
-            services.AddLocalization()
+            services.ConfigureOptions()
+                    .AddLocalization()
                     .AddHttpClient()
                     .AddAuthorizationProvider()
 
@@ -128,6 +105,23 @@ namespace Eppie.CLI
 
                     .AddSingleton<IHostLifetime, ApplicationLifetime>()
                     .AddHostedService<ApplicationMenuLoop>();
+
+            static IApplicationOutputWriter GetApplicationOutputWriter(IServiceProvider serviceProvider)
+            {
+                ArgumentNullException.ThrowIfNull(serviceProvider);
+
+                ApplicationOutputFormat format = serviceProvider.GetRequiredService<IOptions<ApplicationLaunchOptions>>().Value.OutputFormat;
+                return serviceProvider.GetRequiredKeyedService<IApplicationOutputWriter>(format);
+            }
+
+            static Tuvi.Proton.IProtonLoginHelper GetProtonLoginHelper(IServiceProvider serviceProvider)
+            {
+                ArgumentNullException.ThrowIfNull(serviceProvider);
+
+                ProtonAuthOptions protonOptions = serviceProvider.GetRequiredService<IOptions<AuthorizationOptions>>().Value.Proton;
+                ResourceLoader resourceLoader = serviceProvider.GetRequiredService<ResourceLoader>();
+                return ComponentBuilder.Components.GetProtonLoginHelper(protonOptions.GetConfiguration(resourceLoader));
+            }
         }
 
         private static void ConfigureDefaultLogger()

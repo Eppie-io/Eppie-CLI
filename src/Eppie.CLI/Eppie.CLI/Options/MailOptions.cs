@@ -22,12 +22,14 @@ using Eppie.CLI.Common;
 
 namespace Eppie.CLI.Options
 {
+    // ToDo : ConfigurationBindingGenerator cannot read private properties or use `init`.
+    // We can fix this by using a mutable DTO for binding, and then mapping to an immutable record type.
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal class MailOptions : IConfigurationSectionOptions
+    internal class MailOptions
     {
-        public string SectionName => nameof(MailOptions);
+        public static string SectionName => nameof(MailOptions);
 
-        public IReadOnlyDictionary<MailServer, MailServerConfiguration> Servers { get; init; } = new Dictionary<MailServer, MailServerConfiguration>();
+        public IReadOnlyDictionary<MailServer, MailServerConfiguration> Servers { get; set; } = new Dictionary<MailServer, MailServerConfiguration>();
     }
 
     internal record MailServerConfiguration(string SMTP = "", int SMTPPort = 0, string IMAP = "", int IMAPPort = 0);

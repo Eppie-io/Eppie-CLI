@@ -24,6 +24,8 @@ using Microsoft.Extensions.Configuration;
 
 namespace Eppie.CLI.Services
 {
+    // ToDo : ConfigurationBindingGenerator cannot read private properties or use `init`.
+    // We can fix this by using a mutable DTO for binding, and then mapping to an immutable record type.
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
     internal class ApplicationLaunchOptions
     {
@@ -33,19 +35,21 @@ namespace Eppie.CLI.Services
         internal const string AssumeYesConfigurationKey = "assume-yes";
 
         [ConfigurationKeyName(NonInteractiveConfigurationKey)]
-        internal bool NonInteractive { get; init; }
+        public bool NonInteractive { get; set; }
 
         [ConfigurationKeyName(OutputConfigurationKey)]
-        private string? OutputFormatKey { get; init; }
+        public string? OutputFormatKey { get; set; }
 
+        [ConfigurationIgnore]
         internal ApplicationOutputFormat OutputFormat => OptionConverter.ConvertEnumValue<ApplicationOutputFormat>(OutputFormatKey ?? string.Empty, ApplicationOutputFormat.Text, true);
 
         [ConfigurationKeyName(UnlockPasswordFromStandardInputConfigurationKey)]
-        internal bool UnlockPasswordFromStandardInput { get; init; }
+        public bool UnlockPasswordFromStandardInput { get; set; }
 
         [ConfigurationKeyName(AssumeYesConfigurationKey)]
-        internal bool AssumeYes { get; init; }
+        public bool AssumeYes { get; set; }
 
+        [ConfigurationIgnore]
         internal static IReadOnlyList<string> LaunchOptionKeys { get; } =
         [
             UnlockPasswordFromStandardInputConfigurationKey,

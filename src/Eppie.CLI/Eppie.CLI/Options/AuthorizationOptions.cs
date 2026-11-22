@@ -19,24 +19,30 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 
+using Microsoft.Extensions.Configuration;
+
 namespace Eppie.CLI.Options
 {
+    // ToDo : ConfigurationBindingGenerator cannot read private properties or use `init`.
+    // We can fix this by using a mutable DTO for binding, and then mapping to an immutable record type.
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
-    internal class AuthorizationOptions : IConfigurationSectionOptions
+    internal class AuthorizationOptions
     {
-        public string SectionName => "Authorization";
+        public static string SectionName => "Authorization";
 
-        public GmailAuthOptions Gmail { get; init; } = GmailAuthOptions.CreateDefault();
-        public OutlookAuthOptions Outlook { get; init; } = OutlookAuthOptions.CreateDefault();
-        public ProtonAuthOptions Proton { get; init; } = ProtonAuthOptions.CreateDefault();
+        public GmailAuthOptions Gmail { get; set; } = GmailAuthOptions.CreateDefault();
+        public OutlookAuthOptions Outlook { get; set; } = OutlookAuthOptions.CreateDefault();
+        public ProtonAuthOptions Proton { get; set; } = ProtonAuthOptions.CreateDefault();
     }
 
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
     internal record GmailAuthOptions
     {
-        public string? ClientId { get; init; }
-        public string? ClientSecret { get; init; }
-        public Uri? RedirectUri { get; init; }
+        public string? ClientId { get; set; }
+        public string? ClientSecret { get; set; }
+        public Uri? RedirectUri { get; set; }
+
+        [ConfigurationIgnore]
         public Collection<string>? Scope => ScopeList ??
             [
                 "https://mail.google.com/",
@@ -45,7 +51,7 @@ namespace Eppie.CLI.Options
                 "email"
             ];
 
-        private Collection<string>? ScopeList { get; init; }
+        public Collection<string>? ScopeList { get; set; }
 
         internal static GmailAuthOptions CreateDefault()
         {
@@ -68,8 +74,10 @@ namespace Eppie.CLI.Options
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
     internal record OutlookAuthOptions
     {
-        public string? ClientId { get; init; }
-        public Uri? RedirectUri { get; init; }
+        public string? ClientId { get; set; }
+        public Uri? RedirectUri { get; set; }
+
+        [ConfigurationIgnore]
         public Collection<string>? Scope => ScopeList ??
             [
                 "offline_access",
@@ -80,7 +88,7 @@ namespace Eppie.CLI.Options
                 "https://outlook.office.com/SMTP.Send",
             ];
 
-        private Collection<string>? ScopeList { get; init; }
+        public Collection<string>? ScopeList { get; set; }
 
         internal static OutlookAuthOptions CreateDefault()
         {
@@ -99,9 +107,9 @@ namespace Eppie.CLI.Options
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
     internal record ProtonAuthOptions
     {
-        public string? AppVersion { get; init; }
-        public string? UserAgent { get; init; }
-        public Uri? RedirectUri { get; init; }
+        public string? AppVersion { get; set; }
+        public string? UserAgent { get; set; }
+        public Uri? RedirectUri { get; set; }
 
         internal static ProtonAuthOptions CreateDefault()
         {
