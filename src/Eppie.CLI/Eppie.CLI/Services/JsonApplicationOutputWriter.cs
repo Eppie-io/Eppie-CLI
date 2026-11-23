@@ -17,17 +17,14 @@
 // ---------------------------------------------------------------------------- //
 
 using System.Diagnostics.CodeAnalysis;
-using System.Text.Json;
 
-using Tuvi.Core.Entities;
+using Eppie.CLI.Json;
 
 namespace Eppie.CLI.Services
 {
     [SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes", Justification = "Class is instantiated via dependency injection")]
     internal sealed class JsonApplicationOutputWriter(ResourceLoader resourceLoader) : IApplicationOutputWriter
     {
-        private static readonly JsonSerializerOptions JsonSerializerOptions = new(JsonSerializerDefaults.Web);
-
         private readonly ResourceLoader _resourceLoader = resourceLoader;
 
         public ApplicationOutputFormat Format => ApplicationOutputFormat.Json;
@@ -49,50 +46,32 @@ namespace Eppie.CLI.Services
             switch (output)
             {
                 case AccountsOutput accountsOutput:
-                    WriteResult("accounts", accountsOutput.Accounts.Select(static account => new
-                    {
-                        id = account.Id,
-                        address = account.Email.Address,
-                        accountType = account.Type.ToString(),
-                    }));
+                    Write(AccountsStructuredResultOutput.Create(accountsOutput));
                     return true;
+
                 case ContactsOutput contactsOutput:
-                    WriteResult("contacts", contactsOutput.Contacts.Select(static contact => new
-                    {
-                        id = contact.Id,
-                        address = contact.Email.Address,
-                        fullName = contact.FullName,
-                        unreadCount = contact.UnreadCount,
-                    }));
+                    Write(ContactsStructuredResultOutput.Create(contactsOutput));
                     return true;
+
                 case FoldersOutput foldersOutput:
-                    WriteResult("folders",
-                                foldersOutput.Folders.Select(static folder => new
-                                {
-                                    fullName = folder.FullName,
-                                    unreadCount = folder.UnreadCount,
-                                    totalCount = folder.TotalCount,
-                                    roles = GetFolderRoles(folder),
-                                }),
-                                meta: new { account = foldersOutput.AccountAddress });
+                    Write(FoldersStructuredResultOutput.Create(foldersOutput));
                     return true;
+
                 case MessageOutput messageOutput:
-                    WriteResult("message", ToMessageOutput(messageOutput.Message, messageOutput.Compact));
+                    StructuredOutput msgOutput = messageOutput.Compact
+                        ? CompactMessageStructuredResultOutput.Create(messageOutput)
+                        : MessageStructuredResultOutput.Create(messageOutput);
+                    Write(msgOutput);
                     return true;
+
                 case MessagesOutput messagesOutput:
-                    WriteResult("messages", messagesOutput.Messages.Select(static message => ToMessageOutput(message, compact: true)),
-                                meta: string.IsNullOrWhiteSpace(messagesOutput.Header)
-                                    ? null
-                                    : new
-                                    {
-                                        header = messagesOutput.Header,
-                                        returned = messagesOutput.Paging?.Returned,
-                                        hasMore = messagesOutput.Paging?.HasMore,
-                                    });
+                    Write(MessagesStructuredResultOutput.Create(messagesOutput));
                     return true;
+
                 case AccountAddedOutput accountAddedOutput:
-                    WriteResult("accountAdded", new { address = accountAddedOutput.Address, accountType = accountAddedOutput.AccountType });
+                    Write(AccountAddedStructuredResultOutput.Create(accountAddedOutput));
                     return true;
+
                 default:
                     return false;
             }
@@ -103,41 +82,37 @@ namespace Eppie.CLI.Services
             switch (output)
             {
                 case ApplicationInitializedOutput initializedOutput:
-                    WriteStatus("initialized", new { seedPhrase = initializedOutput.SeedPhrase });
+                    Write(InitializedStructuredStatusOutput.Create(initializedOutput));
                     return true;
                 case ApplicationResetOutput:
-                    WriteStatus("reset");
+                    Write(ResetStructuredStatusOutput.Create());
                     return true;
                 case ApplicationOpenedOutput:
-                    WriteStatus("opened");
+                    Write(OpenedStructuredStatusOutput.Create());
                     return true;
                 case ApplicationRestoredOutput:
-                    WriteStatus("restored");
+                    Write(RestoredStructuredStatusOutput.Create());
                     return true;
                 case AuthorizationToServiceOutput authorizationToServiceOutput:
-                    WriteStatus("authorizationStarted", new { serviceName = authorizationToServiceOutput.ServiceName });
+                    Write(AuthorizationStartedStructuredStatusOutput.Create(authorizationToServiceOutput));
                     return true;
                 case AuthorizationCompletedOutput:
-                    WriteStatus("authorizationCompleted");
+                    Write(AuthorizationCompletedStructuredStatusOutput.Create());
                     return true;
                 case MessageSentOutput messageSentOutput:
-                    WriteStatus("messageSent", new { subject = messageSentOutput.Subject, to = messageSentOutput.To, from = messageSentOutput.From });
+                    Write(MessageSentStructuredStatusOutput.Create(messageSentOutput));
                     return true;
                 case MessageDeletedOutput messageDeletedOutput:
-                    WriteStatus("messageDeleted", new { account = messageDeletedOutput.AccountAddress, folder = messageDeletedOutput.FolderName, id = messageDeletedOutput.Id, pk = messageDeletedOutput.Pk });
+                    Write(MessageDeletedStructuredStatusOutput.Create(messageDeletedOutput));
                     return true;
                 case FolderSyncedOutput folderSyncedOutput:
-                    WriteStatus("folderSynced", new { account = folderSyncedOutput.AccountAddress, folder = folderSyncedOutput.FolderName });
+                    Write(FolderSyncedStructuredStatusOutput.Create(folderSyncedOutput));
                     return true;
                 case InputRequiredOutput inputRequiredOutput:
-                    WriteStatus("inputRequired", new { input = inputRequiredOutput.Input });
+                    Write(InputRequiredStructuredStatusOutput.Create(inputRequiredOutput));
                     return true;
                 case ProtonHumanVerificationRequiredOutput humanVerificationRequiredOutput:
-                    WriteStatus("humanVerificationRequired", new
-                    {
-                        verificationUri = humanVerificationRequiredOutput.VerificationUri,
-                        helpUri = ProtonHumanVerificationRequiredOutput.HelpUri,
-                    });
+                    Write(HumanVerificationRequiredStructuredStatusOutput.Create(humanVerificationRequiredOutput));
                     return true;
                 default:
                     return false;
@@ -149,31 +124,36 @@ namespace Eppie.CLI.Services
             switch (output)
             {
                 case InvalidPasswordWarningOutput:
-                    WriteWarning("invalidPassword", _resourceLoader.Strings.InvalidPassword);
+                    string invalidPasswordMessage = _resourceLoader.Strings.InvalidPassword;
+                    Write(InvalidPasswordStructuredWarningOutput.Create(invalidPasswordMessage));
                     return true;
                 case SecondInitializationWarningOutput:
-                    WriteWarning("alreadyInitialized", _resourceLoader.Strings.SecondInitialization);
+                    string secondInitializationMessage = _resourceLoader.Strings.SecondInitialization;
+                    Write(SecondInitializationStructuredWarningOutput.Create(secondInitializationMessage));
                     return true;
                 case UninitializedAppWarningOutput:
-                    WriteWarning("uninitialized", _resourceLoader.Strings.Uninitialized);
+                    string uninitializedAppMessage = _resourceLoader.Strings.Uninitialized;
+                    Write(UninitializedAppStructuredWarningOutput.Create(uninitializedAppMessage));
                     return true;
                 case UnsuccessfulAttemptWarningOutput:
-                    WriteWarning("unsuccessfulAttempt", _resourceLoader.Strings.UnsuccessfulAttempt);
+                    string unsuccessfulAttemptMessage = _resourceLoader.Strings.UnsuccessfulAttempt;
+                    Write(UnsuccessfulAttemptStructuredWarningOutput.Create(unsuccessfulAttemptMessage));
                     return true;
                 case UnknownFolderWarningOutput unknownFolderWarningOutput:
-                    WriteWarning("unknownFolder",
-                                 _resourceLoader.Strings.GetUnknownFolderWarning(unknownFolderWarningOutput.Address, unknownFolderWarningOutput.Folder),
-                                 new { address = unknownFolderWarningOutput.Address, folder = unknownFolderWarningOutput.Folder });
+                    string unknownFolderMessage = _resourceLoader.Strings.GetUnknownFolderWarning(unknownFolderWarningOutput.Address,
+                                                                                                  unknownFolderWarningOutput.Folder);
+                    Write(UnknownFolderStructuredWarningOutput.Create(unknownFolderMessage,
+                                                                      unknownFolderWarningOutput));
                     return true;
                 case CommandRequiresAssumeYesInNonInteractiveModeWarningOutput commandRequiresAssumeYesWarningOutput:
-                    WriteWarning("commandRequiresAssumeYesInNonInteractiveMode",
-                                 _resourceLoader.Strings.GetCommandRequiresAssumeYesInNonInteractiveModeWarning(commandRequiresAssumeYesWarningOutput.CommandName),
-                                 new { commandName = commandRequiresAssumeYesWarningOutput.CommandName });
+                    string commandName = commandRequiresAssumeYesWarningOutput.CommandName;
+                    string commandMessage = _resourceLoader.Strings.GetCommandRequiresAssumeYesInNonInteractiveModeWarning(commandName);
+                    Write(CommandStructuredWarningOutput.Create(commandMessage, commandName));
                     return true;
                 case StartupCommandRequiresUnlockPasswordFromStandardInputWarningOutput startupWarningOutput:
-                    WriteWarning("startupCommandRequiresUnlockPasswordFromStandardInput",
-                                 _resourceLoader.Strings.GetStartupCommandRequiresUnlockPasswordFromStandardInputWarning(startupWarningOutput.CommandName),
-                                 new { commandName = startupWarningOutput.CommandName });
+                    string startupCommandName = startupWarningOutput.CommandName;
+                    string startupCommandMessage = _resourceLoader.Strings.GetStartupCommandRequiresUnlockPasswordFromStandardInputWarning(startupCommandName);
+                    Write(UnlockPasswordStructuredWarningOutput.Create(startupCommandMessage, startupCommandName));
                     return true;
                 default:
                     return false;
@@ -185,41 +165,38 @@ namespace Eppie.CLI.Services
             switch (output)
             {
                 case InteractiveInputNotSupportedErrorOutput:
-                    WriteError("interactiveInputNotSupported", _resourceLoader.Strings.InteractiveInputNotSupported);
+                    string interactiveMessage = _resourceLoader.Strings.InteractiveInputNotSupported;
+                    Write(InteractiveStructuredErrorOutput.Create(interactiveMessage));
                     return true;
                 case StandardInputEndedErrorOutput:
-                    WriteError("standardInputEnded", _resourceLoader.Strings.StandardInputEnded);
+                    string standardInputEndedMessage = _resourceLoader.Strings.StandardInputEnded;
+                    Write(StandardInputEndedStructuredErrorOutput.Create(standardInputEndedMessage));
                     return true;
                 case ImpossibleInitializationErrorOutput:
-                    WriteError("impossibleInitialization", _resourceLoader.Strings.ImpossibleInitialization);
+                    string impossibleInitializationMessage = _resourceLoader.Strings.ImpossibleInitialization;
+                    Write(ImpossibleInitializationStructuredErrorOutput.Create(impossibleInitializationMessage));
                     return true;
                 case AuthorizationCanceledOutput:
-                    WriteError("authorizationCanceled", _resourceLoader.Strings.AuthorizationCanceled);
+                    string authorizationCanceledMessage = _resourceLoader.Strings.AuthorizationCanceled;
+                    Write(AuthorizationCanceledStructuredErrorOutput.Create(authorizationCanceledMessage));
                     return true;
                 case NonInteractiveOperationNotSupportedErrorOutput nonInteractiveOperationNotSupportedOutput:
-                    WriteError("nonInteractiveOperationNotSupported",
-                               _resourceLoader.Strings.GetNonInteractiveOperationNotSupportedError(nonInteractiveOperationNotSupportedOutput.Operation),
-                               new { operation = nonInteractiveOperationNotSupportedOutput.Operation });
+                    string operationMessage = _resourceLoader.Strings.GetNonInteractiveOperationNotSupportedError(nonInteractiveOperationNotSupportedOutput.Operation);
+                    Write(OperationStructuredErrorOutput.Create(operationMessage, nonInteractiveOperationNotSupportedOutput));
                     return true;
                 case StructuredStandardInputInvalidJsonErrorOutput structuredInputInvalidJsonOutput:
-                    WriteError("structuredStandardInputInvalidJson",
-                               _resourceLoader.Strings.GetStructuredStandardInputInvalidJsonError(structuredInputInvalidJsonOutput.CommandName),
-                               new { commandName = structuredInputInvalidJsonOutput.CommandName });
+                    string invalidJsonMessage = _resourceLoader.Strings.GetStructuredStandardInputInvalidJsonError(structuredInputInvalidJsonOutput.CommandName);
+                    Write(InputInvalidStructuredErrorOutput.Create(invalidJsonMessage, structuredInputInvalidJsonOutput));
                     return true;
                 case StructuredStandardInputMissingPropertyErrorOutput structuredInputMissingPropertyOutput:
-                    WriteError("structuredStandardInputMissingProperty",
-                               _resourceLoader.Strings.GetStructuredStandardInputMissingPropertyError(structuredInputMissingPropertyOutput.CommandName,
-                                                                                                      structuredInputMissingPropertyOutput.PropertyName),
-                               new
-                               {
-                                   commandName = structuredInputMissingPropertyOutput.CommandName,
-                                   propertyName = structuredInputMissingPropertyOutput.PropertyName,
-                               });
+                    string missingPropertyMessage = _resourceLoader.Strings.GetStructuredStandardInputMissingPropertyError(structuredInputMissingPropertyOutput.CommandName,
+                                                                                                                           structuredInputMissingPropertyOutput.PropertyName);
+                    Write(MissingPropertyStructuredErrorOutput.Create(missingPropertyMessage,
+                                                                      structuredInputMissingPropertyOutput));
                     return true;
                 case UnhandledExceptionOutput unhandledExceptionOutput:
-                    WriteError("unhandledException",
-                               _resourceLoader.Strings.GetUnhandledException(GetUnhandledExceptionMessage(unhandledExceptionOutput.Exception)),
-                               new { exceptionType = unhandledExceptionOutput.Exception.GetType().FullName });
+                    string unhandledExceptionMessage = _resourceLoader.Strings.GetUnhandledException(GetUnhandledExceptionMessage(unhandledExceptionOutput.Exception));
+                    Write(UnhandledExceptionStructuredErrorOutput.Create(unhandledExceptionMessage, unhandledExceptionOutput));
                     return true;
                 default:
                     return false;
@@ -235,128 +212,10 @@ namespace Eppie.CLI.Services
                 : exception.Message;
         }
 
-        private static void WriteResult<TData>(string code, TData data, object? meta = null)
+        private static void Write(StructuredOutput output)
         {
-            WriteJson(new
-            {
-                type = "result",
-                code,
-                data,
-                meta,
-            });
-        }
-
-        private static void WriteStatus(string code, object? data = null)
-        {
-            WriteJson(new
-            {
-                type = "status",
-                code,
-                data,
-            });
-        }
-
-        private static void WriteWarning(string code, string message, object? data = null)
-        {
-            WriteJson(new
-            {
-                type = "warning",
-                code,
-                message,
-                data,
-            });
-        }
-
-        private static void WriteError(string code, string message, object? data = null)
-        {
-            WriteJson(new
-            {
-                type = "error",
-                code,
-                message,
-                data,
-            });
-        }
-
-        private static object ToMessageOutput(Message message, bool compact)
-        {
-            ArgumentNullException.ThrowIfNull(message);
-
-            return compact
-                ? new
-                {
-                    id = message.Id,
-                    pk = message.Pk,
-                    date = message.Date,
-                    to = message.To.Select(static address => address.Address),
-                    from = message.From.Select(static address => address.Address),
-                    folder = message.Folder.FullName,
-                    subject = message.Subject,
-                }
-                : new
-                {
-                    id = message.Id,
-                    pk = message.Pk,
-                    date = message.Date,
-                    to = message.To.Select(static address => address.Address),
-                    from = message.From.Select(static address => address.Address),
-                    cc = message.Cc.Select(static address => address.Address),
-                    bcc = message.Bcc.Select(static address => address.Address),
-                    folder = message.Folder.FullName,
-                    subject = message.Subject,
-                    textBody = message.TextBody,
-                    htmlBody = message.HtmlBody,
-                    attachmentsCount = message.Attachments.Count,
-                };
-        }
-
-        private static string[] GetFolderRoles(Folder folder)
-        {
-            ArgumentNullException.ThrowIfNull(folder);
-
-            List<string> roles = [];
-
-            if (folder.IsInbox)
-            {
-                roles.Add("inbox");
-            }
-
-            if (folder.IsDraft)
-            {
-                roles.Add("draft");
-            }
-
-            if (folder.IsJunk)
-            {
-                roles.Add("junk");
-            }
-
-            if (folder.IsTrash)
-            {
-                roles.Add("trash");
-            }
-
-            if (folder.IsSent)
-            {
-                roles.Add("sent");
-            }
-
-            if (folder.IsImportant)
-            {
-                roles.Add("important");
-            }
-
-            if (folder.IsAll)
-            {
-                roles.Add("all");
-            }
-
-            return [.. roles];
-        }
-
-        private static void WriteJson<T>(T value)
-        {
-            Console.WriteLine(JsonSerializer.Serialize(value, JsonSerializerOptions));
+            ArgumentNullException.ThrowIfNull(output);
+            Console.WriteLine(output.ToJson());
         }
     }
 }

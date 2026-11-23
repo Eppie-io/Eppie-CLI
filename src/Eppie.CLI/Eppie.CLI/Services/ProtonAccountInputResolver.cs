@@ -18,9 +18,9 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 using Eppie.CLI.Exceptions;
+using Eppie.CLI.Json;
 
 namespace Eppie.CLI.Services
 {
@@ -28,11 +28,6 @@ namespace Eppie.CLI.Services
     internal sealed class ProtonAccountInputResolver(Application application) : IProtonAccountInputResolver
     {
         private const string AddAccountCommandName = "add-account";
-
-        private static readonly JsonSerializerOptions StructuredStandardInputJsonSerializerOptions = new(JsonSerializerDefaults.Web)
-        {
-            PropertyNameCaseInsensitive = true,
-        };
 
         private readonly Application _application = application;
 
@@ -61,7 +56,7 @@ namespace Eppie.CLI.Services
 
             try
             {
-                structuredInput = JsonSerializer.Deserialize<ProtonStructuredStandardInput>(json, StructuredStandardInputJsonSerializerOptions);
+                structuredInput = JsonSerializer.Deserialize(json, StructuredStandardInput.Default.ProtonStructuredStandardInput);
             }
             catch (JsonException ex)
             {
@@ -73,7 +68,7 @@ namespace Eppie.CLI.Services
                 ThrowStructuredStandardInputInvalidJsonError();
             }
 
-            ProtonStructuredStandardInput validatedStructuredInput = structuredInput!;
+            ProtonStructuredStandardInput validatedStructuredInput = structuredInput;
 
             EnsureStructuredInputPropertyIsPresent(validatedStructuredInput.Email, InputName.Email);
             EnsureStructuredInputPropertyIsPresent(validatedStructuredInput.AccountPassword, InputName.AccountPassword);
@@ -81,7 +76,7 @@ namespace Eppie.CLI.Services
             return new StructuredStandardInputProtonAccountInput(validatedStructuredInput);
         }
 
-        private static void EnsureStructuredInputPropertyIsPresent(string? value, string propertyName)
+        private static void EnsureStructuredInputPropertyIsPresent([NotNull] string? value, string propertyName)
         {
             if (string.IsNullOrWhiteSpace(value))
             {
@@ -89,33 +84,16 @@ namespace Eppie.CLI.Services
             }
         }
 
-        private static string GetRequiredStructuredInputPropertyValue(string? value, string propertyName)
+        private static string GetRequiredStructuredInputPropertyValue([NotNull] string? value, string propertyName)
         {
             EnsureStructuredInputPropertyIsPresent(value, propertyName);
-            return value!;
+            return value;
         }
 
+        [DoesNotReturn]
         private static void ThrowStructuredStandardInputInvalidJsonError()
         {
             throw new ApplicationCommandException(new StructuredStandardInputInvalidJsonErrorOutput(AddAccountCommandName));
-        }
-
-        private sealed record ProtonStructuredStandardInput
-        {
-            [JsonPropertyName(InputName.Email)]
-            public string? Email { get; init; }
-
-            [JsonPropertyName(InputName.AccountPassword)]
-            public string? AccountPassword { get; init; }
-
-            [JsonPropertyName(InputName.MailboxPassword)]
-            public string? MailboxPassword { get; init; }
-
-            [JsonPropertyName(InputName.TwoFactorCode)]
-            public string? TwoFactorCode { get; init; }
-
-            [JsonPropertyName(InputName.HumanVerificationToken)]
-            public string? HumanVerificationToken { get; init; }
         }
 
         private sealed class InteractiveProtonAccountInput(string email, string accountPassword, Application application) : IProtonAccountInput

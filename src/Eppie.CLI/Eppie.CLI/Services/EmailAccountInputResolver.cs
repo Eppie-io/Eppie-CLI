@@ -18,9 +18,9 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 using Eppie.CLI.Exceptions;
+using Eppie.CLI.Json;
 
 using Tuvi.Core.Entities;
 
@@ -30,11 +30,6 @@ namespace Eppie.CLI.Services
     internal sealed class EmailAccountInputResolver(Application application) : IEmailAccountInputResolver
     {
         private const string AddAccountCommandName = "add-account";
-
-        private static readonly JsonSerializerOptions StructuredStandardInputJsonSerializerOptions = new(JsonSerializerDefaults.Web)
-        {
-            PropertyNameCaseInsensitive = true,
-        };
 
         private readonly Application _application = application;
 
@@ -51,7 +46,7 @@ namespace Eppie.CLI.Services
 
             try
             {
-                structuredInput = JsonSerializer.Deserialize<EmailStructuredStandardInput>(json, StructuredStandardInputJsonSerializerOptions);
+                structuredInput = JsonSerializer.Deserialize(json, StructuredStandardInput.Default.EmailStructuredStandardInput);
             }
             catch (JsonException ex)
             {
@@ -63,7 +58,7 @@ namespace Eppie.CLI.Services
                 ThrowStructuredStandardInputInvalidJsonError();
             }
 
-            EmailStructuredStandardInput validatedStructuredInput = structuredInput!;
+            EmailStructuredStandardInput validatedStructuredInput = structuredInput;
 
             EnsureStructuredInputPropertyIsPresent(validatedStructuredInput.Email, InputName.Email);
             EnsureStructuredInputPropertyIsPresent(validatedStructuredInput.AccountPassword, InputName.AccountPassword);
@@ -74,22 +69,22 @@ namespace Eppie.CLI.Services
 
             Account account = Account.Default;
             account.Type = MailBoxType.Email;
-            account.Email = new EmailAddress(validatedStructuredInput.Email!);
+            account.Email = new EmailAddress(validatedStructuredInput.Email);
             account.AuthData = new BasicAuthData()
             {
-                Password = validatedStructuredInput.AccountPassword!
+                Password = validatedStructuredInput.AccountPassword
             };
-            account.IncomingServerAddress = validatedStructuredInput.ImapServer!;
-            account.IncomingServerPort = validatedStructuredInput.ImapPort!.Value;
+            account.IncomingServerAddress = validatedStructuredInput.ImapServer;
+            account.IncomingServerPort = validatedStructuredInput.ImapPort.Value;
             account.IncomingMailProtocol = MailProtocol.IMAP;
-            account.OutgoingServerAddress = validatedStructuredInput.SmtpServer!;
-            account.OutgoingServerPort = validatedStructuredInput.SmtpPort!.Value;
+            account.OutgoingServerAddress = validatedStructuredInput.SmtpServer;
+            account.OutgoingServerPort = validatedStructuredInput.SmtpPort.Value;
             account.OutgoingMailProtocol = MailProtocol.SMTP;
 
             return account;
         }
 
-        private static void EnsureStructuredInputPropertyIsPresent(string? value, string propertyName)
+        private static void EnsureStructuredInputPropertyIsPresent([NotNull] string? value, string propertyName)
         {
             if (string.IsNullOrWhiteSpace(value))
             {
@@ -97,7 +92,7 @@ namespace Eppie.CLI.Services
             }
         }
 
-        private static void EnsureStructuredInputPropertyIsPresent(int? value, string propertyName)
+        private static void EnsureStructuredInputPropertyIsPresent([NotNull] int? value, string propertyName)
         {
             if (!value.HasValue || value.Value <= 0)
             {
@@ -105,30 +100,10 @@ namespace Eppie.CLI.Services
             }
         }
 
+        [DoesNotReturn]
         private static void ThrowStructuredStandardInputInvalidJsonError()
         {
             throw new ApplicationCommandException(new StructuredStandardInputInvalidJsonErrorOutput(AddAccountCommandName));
-        }
-
-        private sealed record EmailStructuredStandardInput
-        {
-            [JsonPropertyName(InputName.Email)]
-            public string? Email { get; init; }
-
-            [JsonPropertyName(InputName.AccountPassword)]
-            public string? AccountPassword { get; init; }
-
-            [JsonPropertyName(InputName.ImapServer)]
-            public string? ImapServer { get; init; }
-
-            [JsonPropertyName(InputName.ImapPort)]
-            public int? ImapPort { get; init; }
-
-            [JsonPropertyName(InputName.SmtpServer)]
-            public string? SmtpServer { get; init; }
-
-            [JsonPropertyName(InputName.SmtpPort)]
-            public int? SmtpPort { get; init; }
         }
     }
 }
