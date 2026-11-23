@@ -21,18 +21,15 @@ using System.Text.Json.Serialization.Metadata;
 
 using Eppie.CLI.Services;
 
-using static Eppie.CLI.Json.AuthorizationStartedStructuredStatusOutput;
-using static Eppie.CLI.Json.InitializedStructuredStatusOutput;
-
 namespace Eppie.CLI.Json
 {
-    internal abstract record StructuredStatusOutput(string Code) : StructuredOutput("status")
+    internal abstract record StructuredStatusOutput<TData>(string Code, TData Data) : StructuredOutput("status")
     { }
 
-    internal abstract record StructuredStatusOutput<TData>(string Code, TData Data) : StructuredStatusOutput(Code)
+    internal abstract record StructuredStatusOutput(string Code) : StructuredStatusOutput<object?>(Code, null)
     { }
 
-    internal sealed record InitializedStructuredStatusOutput : StructuredStatusOutput<InitializedData>
+    internal sealed record InitializedStructuredStatusOutput : StructuredStatusOutput<InitializedStructuredStatusOutput.InitializedData>
     {
         internal record InitializedData(IEnumerable<string> SeedPhrase);
 
@@ -98,7 +95,7 @@ namespace Eppie.CLI.Json
         }
     }
 
-    internal sealed record AuthorizationStartedStructuredStatusOutput : StructuredStatusOutput<AuthorizationStartedData>
+    internal sealed record AuthorizationStartedStructuredStatusOutput : StructuredStatusOutput<AuthorizationStartedStructuredStatusOutput.AuthorizationStartedData>
     {
         internal record AuthorizationStartedData(string ServiceName);
 

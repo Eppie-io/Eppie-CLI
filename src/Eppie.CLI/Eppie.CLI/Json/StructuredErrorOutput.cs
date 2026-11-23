@@ -23,11 +23,10 @@ using Eppie.CLI.Services;
 
 namespace Eppie.CLI.Json
 {
-    internal abstract record StructuredErrorOutput(string Code, string Message) : StructuredOutput("error")
+    internal abstract record StructuredErrorOutput<TData>(string Code, string Message, TData Data) : StructuredOutput("error")
     { }
 
-    internal abstract record StructuredErrorOutput<TData>(string Code, string Message, TData Data)
-        : StructuredErrorOutput(Code, Message)
+    internal abstract record StructuredErrorOutput(string Code, string Message) : StructuredErrorOutput<object?>(Code, Message, null)
     { }
 
     internal sealed record InteractiveStructuredErrorOutput : StructuredErrorOutput

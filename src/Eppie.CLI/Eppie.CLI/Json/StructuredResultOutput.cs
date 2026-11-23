@@ -23,19 +23,12 @@ using Eppie.CLI.Services;
 
 using Tuvi.Core.Entities;
 
-using static Eppie.CLI.Json.MessagesStructuredResultOutput;
-
 namespace Eppie.CLI.Json
 {
-    internal abstract record StructuredResultOutput(string Code) : StructuredOutput("result")
+    internal abstract record StructuredResultOutput<TData, TMeta>(string Code, TData Data, TMeta Meta) : StructuredOutput("result")
     { }
 
-    internal abstract record StructuredResultOutput<TData>(string Code, TData Data)
-        : StructuredResultOutput(Code)
-    { }
-
-    internal abstract record ResultOutput<TData, TMeta>(string Code, TData Data, TMeta Meta)
-        : StructuredResultOutput<TData>(Code, Data)
+    internal abstract record StructuredResultOutput<TData>(string Code, TData Data) : StructuredResultOutput<TData, object?>(Code, Data, null)
     { }
 
     internal sealed record AccountsStructuredResultOutput : StructuredResultOutput<IEnumerable<AccountsStructuredResultOutput.AccountData>>
@@ -92,8 +85,8 @@ namespace Eppie.CLI.Json
         }
     }
 
-    internal sealed record FoldersStructuredResultOutput : ResultOutput<IEnumerable<FoldersStructuredResultOutput.FolderData>,
-                                                                        FoldersStructuredResultOutput.AccountMeta>
+    internal sealed record FoldersStructuredResultOutput : StructuredResultOutput<IEnumerable<FoldersStructuredResultOutput.FolderData>,
+                                                                                  FoldersStructuredResultOutput.AccountMeta>
     {
         internal record FolderData(string FullName, int UnreadCount, int TotalCount, IEnumerable<string> Roles);
         internal record AccountMeta(string Account);
@@ -243,7 +236,8 @@ namespace Eppie.CLI.Json
         }
     }
 
-    internal sealed record MessagesStructuredResultOutput : ResultOutput<IEnumerable<CompactMessageData>, MessagesMeta?>
+    internal sealed record MessagesStructuredResultOutput : StructuredResultOutput<IEnumerable<CompactMessageData>,
+                                                                                   MessagesStructuredResultOutput.MessagesMeta?>
     {
         internal record MessagesMeta(string Header, int? Returned, bool? HasMore);
 

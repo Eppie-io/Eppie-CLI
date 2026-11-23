@@ -23,11 +23,10 @@ using Eppie.CLI.Services;
 
 namespace Eppie.CLI.Json
 {
-    internal abstract record StructuredWarningOutput(string Code, string Message) : StructuredOutput("warning")
+    internal abstract record StructuredWarningOutput<TData>(string Code, string Message, TData Data) : StructuredOutput("warning")
     { }
 
-    internal abstract record StructuredWarningOutput<TData>(string Code, string Message, TData Data)
-        : StructuredWarningOutput(Code, Message)
+    internal abstract record StructuredWarningOutput(string Code, string Message) : StructuredWarningOutput<object?>(Code, Message, null)
     { }
 
     internal sealed record InvalidPasswordStructuredWarningOutput : StructuredWarningOutput
