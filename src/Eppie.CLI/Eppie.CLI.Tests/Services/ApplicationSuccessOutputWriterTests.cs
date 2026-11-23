@@ -131,6 +131,33 @@ namespace Eppie.CLI.Tests.Services
                 Assert.That(data.GetProperty(TestConstants.JsonTextBodyProperty).GetString(), Is.EqualTo(TestConstants.TextBody));
                 Assert.That(data.GetProperty(TestConstants.JsonToProperty)[0].GetString(), Is.EqualTo(TestConstants.ToAddress));
                 Assert.That(data.GetProperty(TestConstants.JsonFromProperty)[0].GetString(), Is.EqualTo(TestConstants.FromAddress));
+                Assert.That(data.TryGetProperty(TestConstants.JsonTextBodyProperty, out _), Is.True);
+                Assert.That(data.TryGetProperty(TestConstants.JsonHtmlBodyProperty, out _), Is.True);
+                Assert.That(data.TryGetProperty(TestConstants.JsonCcProperty, out _), Is.True);
+                Assert.That(data.TryGetProperty(TestConstants.JsonBccProperty, out _), Is.True);
+                Assert.That(data.TryGetProperty(TestConstants.JsonAttachmentsCountProperty, out _), Is.True);
+            });
+        }
+
+        [Test]
+        public void JsonWriterWhenMessageOutputIsCompactOutputsStructuredResult()
+        {
+            Message message = CreateMessage(subject: TestConstants.Subject1);
+            using JsonDocument document = CaptureJsonDocument(writer => writer.Write(new MessageOutput(message, Compact: true)));
+            JsonElement data = GetData(document);
+
+            Assert.Multiple(() =>
+            {
+                AssertJsonTypeAndCode(document, TestConstants.JsonResultType, TestConstants.MessageCode);
+                Assert.That(data.GetProperty(TestConstants.JsonSubjectProperty).GetString(), Is.EqualTo(TestConstants.Subject1));
+                Assert.That(data.GetProperty(TestConstants.JsonToProperty)[0].GetString(), Is.EqualTo(TestConstants.ToAddress));
+                Assert.That(data.GetProperty(TestConstants.JsonFromProperty)[0].GetString(), Is.EqualTo(TestConstants.FromAddress));
+                Assert.That(data.TryGetProperty(TestConstants.JsonTextBodyProperty, out _), Is.False);
+                Assert.That(data.TryGetProperty(TestConstants.JsonHtmlBodyProperty, out _), Is.False);
+                Assert.That(data.TryGetProperty(TestConstants.JsonCcProperty, out _), Is.False);
+                Assert.That(data.TryGetProperty(TestConstants.JsonBccProperty, out _), Is.False);
+                Assert.That(data.TryGetProperty(TestConstants.JsonAttachmentsCountProperty, out _), Is.False);
+                Assert.That(GetMeta(document).ValueKind, Is.EqualTo(JsonValueKind.Null));
             });
         }
 
