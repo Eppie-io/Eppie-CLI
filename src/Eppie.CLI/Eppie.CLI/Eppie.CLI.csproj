@@ -15,6 +15,10 @@
 
     <AnalysisLevel>6.0-all</AnalysisLevel>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <EnableAotAnalyzer>true</EnableAotAnalyzer>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <EnableSingleFileAnalyzer>true</EnableSingleFileAnalyzer>
+    <TrimmerSingleWarn>false</TrimmerSingleWarn>
 
     <UserSecretsId>c86a1928-bcaf-4406-8765-da45d40fb25d</UserSecretsId>
   </PropertyGroup>
