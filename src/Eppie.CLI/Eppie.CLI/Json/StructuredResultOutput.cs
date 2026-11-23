@@ -33,7 +33,7 @@ namespace Eppie.CLI.Json
 
     internal sealed record AccountsStructuredResultOutput : StructuredResultOutput<IEnumerable<AccountsStructuredResultOutput.AccountData>>
     {
-        internal record AccountData(int Id, string Address, string AccountType);
+        internal record AccountData(int Id, string? Address, string AccountType);
 
         private AccountsStructuredResultOutput(IEnumerable<AccountData> data)
             : base("accounts", data)
@@ -60,7 +60,7 @@ namespace Eppie.CLI.Json
 
     internal sealed record ContactsStructuredResultOutput : StructuredResultOutput<IEnumerable<ContactsStructuredResultOutput.ContactData>>
     {
-        internal record ContactData(int Id, string Address, string FullName, int UnreadCount);
+        internal record ContactData(int Id, string? Address, string? FullName, int UnreadCount);
 
         private ContactsStructuredResultOutput(IEnumerable<ContactData> data)
             : base("contacts", data)
@@ -88,7 +88,7 @@ namespace Eppie.CLI.Json
     internal sealed record FoldersStructuredResultOutput : StructuredResultOutput<IEnumerable<FoldersStructuredResultOutput.FolderData>,
                                                                                   FoldersStructuredResultOutput.AccountMeta>
     {
-        internal record FolderData(string FullName, int UnreadCount, int TotalCount, IEnumerable<string> Roles);
+        internal record FolderData(string? FullName, int UnreadCount, int TotalCount, IEnumerable<string> Roles);
         internal record AccountMeta(string Account);
 
         private FoldersStructuredResultOutput(IEnumerable<FolderData> data, AccountMeta meta)
@@ -162,9 +162,9 @@ namespace Eppie.CLI.Json
     internal sealed record MessageStructuredResultOutput : StructuredResultOutput<MessageStructuredResultOutput.MessageData>
     {
         internal record MessageData(uint Id, int Pk, DateTimeOffset Date,
-                                    IEnumerable<string> To, IEnumerable<string> From,
-                                    IEnumerable<string> Cc, IEnumerable<string> Bcc,
-                                    string Folder, string Subject, string TextBody, string HtmlBody,
+                                    IEnumerable<string?> To, IEnumerable<string?> From,
+                                    IEnumerable<string?> Cc, IEnumerable<string?> Bcc,
+                                    string? Folder, string? Subject, string? TextBody, string? HtmlBody,
                                     int AttachmentsCount);
         private MessageStructuredResultOutput(MessageData data)
             : base("message", data)
@@ -199,8 +199,8 @@ namespace Eppie.CLI.Json
     }
 
     internal record CompactMessageData(uint Id, int Pk, DateTimeOffset Date,
-                                       IEnumerable<string> To, IEnumerable<string> From,
-                                       string Folder, string Subject)
+                                       IEnumerable<string?> To, IEnumerable<string?> From,
+                                       string? Folder, string? Subject)
     {
         public static CompactMessageData Create(Message message)
         {
@@ -239,7 +239,7 @@ namespace Eppie.CLI.Json
     internal sealed record MessagesStructuredResultOutput : StructuredResultOutput<IEnumerable<CompactMessageData>,
                                                                                    MessagesStructuredResultOutput.MessagesMeta?>
     {
-        internal record MessagesMeta(string Header, int? Returned, bool? HasMore);
+        internal record MessagesMeta(string? Header, int? Returned, bool? HasMore);
 
         private MessagesStructuredResultOutput(IEnumerable<CompactMessageData> data, MessagesMeta? meta)
             : base("messages", data, meta)

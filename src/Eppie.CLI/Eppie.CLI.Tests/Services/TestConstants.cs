@@ -134,6 +134,10 @@ namespace Eppie.CLI.Tests.Services
         internal const string JsonServiceNameProperty = "serviceName";
         internal const string JsonExceptionTypeProperty = "exceptionType";
         internal const string JsonTextBodyProperty = "textBody";
+        internal const string JsonHtmlBodyProperty = "htmlBody";
+        internal const string JsonCcProperty = "cc";
+        internal const string JsonBccProperty = "bcc";
+        internal const string JsonAttachmentsCountProperty = "attachmentsCount";
         internal const string JsonUnreadCountProperty = "unreadCount";
         internal const string JsonTotalCountProperty = "totalCount";
         internal const string JsonVerificationUriProperty = "verificationUri";

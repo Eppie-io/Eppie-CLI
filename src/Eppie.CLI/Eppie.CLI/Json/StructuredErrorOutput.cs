@@ -148,7 +148,7 @@ namespace Eppie.CLI.Json
             ArgumentNullException.ThrowIfNull(message);
             ArgumentNullException.ThrowIfNull(output);
             return new MissingPropertyStructuredErrorOutput(message, new MissingPropertyData(output.CommandName,
-                                                                                   output.PropertyName));
+                                                                                             output.PropertyName));
         }
     }
 
@@ -162,8 +162,7 @@ namespace Eppie.CLI.Json
         {
             return ErrorJsonContext.Default.UnhandledExceptionStructuredErrorOutput;
         }
-        public static UnhandledExceptionStructuredErrorOutput Create(string message,
-                                                           UnhandledExceptionOutput output)
+        public static UnhandledExceptionStructuredErrorOutput Create(string message, UnhandledExceptionOutput output)
         {
             ArgumentNullException.ThrowIfNull(message);
             ArgumentNullException.ThrowIfNull(output);
